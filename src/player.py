@@ -1,4 +1,6 @@
-from base import Entity, EntityType, Stats, Slider
+from base import Entity
+from enums import EntityType
+from utils import Slider, Stats
 from config.back import (PLAYER_SIZE, PLAYER_MAX_HEALTH, 
                         PLAYER_MAX_ENERGY, PLAYER_STARTING_ENERGY)
 

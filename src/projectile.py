@@ -1,4 +1,5 @@
-from base import Entity, EntityType, ProjectileType
+from base import Entity
+from enums import EntityType, ProjectileType
 from config.back import PROJECTILE_DEFAULT_SIZE
 
 from pygame import Vector2
