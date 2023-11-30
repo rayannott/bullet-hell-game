@@ -23,7 +23,10 @@ class Slider[T: int | float]:
     def get_current(self) -> T:
         return self.current_value
     
-    def __str__(self) -> str:
+    def progress(self) -> float:
+        return self.current_value / self.max_value
+    
+    def __repr__(self) -> str:
         return f'Slider({self.current_value:.1f}/{self.max_value:.1f})'
 
 
@@ -46,6 +49,12 @@ class Timer:
     
     def reset(self) -> None:
         self.current_time = 0.
+
+    def progress(self) -> float:
+        return self.current_time / self.max_time
+
+    # def __bool__(self) -> bool:
+    #     return self.running()
     
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         return f'Timer({self.current_time:.1f}/{self.max_time:.1f})'
