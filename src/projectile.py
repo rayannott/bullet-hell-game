@@ -1,6 +1,8 @@
 from base import Entity
 from enums import EntityType, ProjectileType
-from config.back import PROJECTILE_DEFAULT_SIZE
+from config.back import (PROJECTILE_DEFAULT_SIZE, 
+                        PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME)
+from utils import Timer
 
 from pygame import Vector2
 
@@ -10,23 +12,25 @@ class Projectile(Entity):
             _pos: Vector2, 
             _vel: Vector2,
             _projectile_type: ProjectileType,
-            _level: int
+            _level: int,
+            _speed: float = PROJECTILE_DEFAULT_SPEED,
+            _lifetime: float = PROJECTILE_DEFAULT_LIFETIME
         ):
         super().__init__(
             _pos=_pos,
-            _vel=_vel,
             _type=EntityType.PROJECTILE,
             _size=PROJECTILE_DEFAULT_SIZE,
+            _speed=_speed,
+            _vel=_vel,
         )
         self._projectile_type = _projectile_type
         self._level = _level
-        # self._max_lifetime = 100
-        # self._lifetime = 0
+        self._lifetime = _lifetime
+        self.life_timer = Timer(max_time=self._lifetime)
 
-    def update(self):
-        super().update()
-        # self._lifetime += 1
-
-    def is_alive(self) -> bool:
-        # return super().is_alive() and self._lifetime < self._max_lifetime
-        return True
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        if not self._is_alive: return
+        self.life_timer.tick(time_delta)
+        if not self.life_timer.running():
+            self.kill()

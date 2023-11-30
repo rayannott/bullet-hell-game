@@ -18,22 +18,25 @@ class Entity(ABC):
     Abstract class for all entities in the game.
     """
     _pos: Vector2
-    _vel: Vector2
     _type: EntityType
     _size: float # model's circle's radius
 
+    _speed: float = 0. # velocity magnitude
+    _vel: Vector2 = Vector2(0., 0.) # velocity direction vector
     _is_alive: bool = True
     _render_trail: bool = False
     _trail: deque[Vector2] = deque(maxlen=TRAIL_MAX_LENGTH)
 
     @abstractmethod
-    def update(self):
+    def update(self, time_delta: float):
         """
         Update the entity. This is called every game tick.
         """
-        self._pos += self._vel
-        if self._render_trail:
-            self._trail.append(self._pos)
+        if not self._is_alive: return
+        if self._speed > 0. and self._vel.magnitude_squared() > 0.:
+            self._vel.scale_to_length(self._speed) # TODO: scale speed using time_delta
+            self._pos += self._vel
+        if self._render_trail: self._trail.append(self._pos)
 
     def intersects(self, other: 'Entity') -> bool:
         """
