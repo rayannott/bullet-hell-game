@@ -5,7 +5,7 @@ TRAIL_MAX_LENGTH = 50 # positions
 
 # player
 PLAYER_SIZE = 12.
-PLAYER_DEFAULT_SPEED_RANGE = (50., 800.) # min, max: depends on the distance to the gravity point
+PLAYER_DEFAULT_SPEED_RANGE = (100., 1000.) # min, max: depends on the distance to the gravity point
 PLAYER_DEFAULT_MAX_HEALTH = 100.
 PLAYER_DEFAULT_REGEN_RATE = 1.5 # hp per second
 PLAYER_DEFAULT_MAX_ENERGY = 1000
@@ -20,6 +20,7 @@ PLAYER_STARTING_POSITION = 500., 500.
 PROJECTILE_DEFAULT_SIZE = 6.
 PROJECTILE_DEFAULT_SPEED = 250. # pixels per second
 PROJECTILE_DEFAULT_LIFETIME = 8. # seconds
+PROJECTILE_DEFAULT_DAMAGE = 25.
 
 # energy orb
 ENERGY_ORB_SIZE = 8.
