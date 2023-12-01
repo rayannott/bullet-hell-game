@@ -36,7 +36,7 @@ class Screen(ABC):
         )
 
     @abstractmethod
-    def process_event(self, event):
+    def process_event(self, event: pygame.event.Event):
         ...
     
     @abstractmethod
