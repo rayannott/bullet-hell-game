@@ -5,6 +5,7 @@ class EntityType(Enum):
     """
     Enumeration of all entity types.
     """
+    DUMMY = auto()
     PLAYER = auto()
     PROJECTILE = auto()
     ENERGY_ORB = auto()

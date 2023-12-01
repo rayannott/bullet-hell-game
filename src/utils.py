@@ -1,5 +1,16 @@
 from dataclasses import dataclass
 
+import pygame
+
+
+def color_gradient(start_color: pygame.Color, end_color: pygame.Color, percent: float) -> pygame.Color:
+    return pygame.Color(
+        int(start_color.r + (end_color.r - start_color.r) * percent),
+        int(start_color.g + (end_color.g - start_color.g) * percent),
+        int(start_color.b + (end_color.b - start_color.b) * percent),
+        int(start_color.a + (end_color.a - start_color.a) * percent)
+    )
+
 
 @dataclass
 class Stats:
@@ -20,13 +31,16 @@ class Slider:
     def is_alive(self) -> bool:
         return self.current_value > 0
     
-    def get_current(self) -> float:
+    def get_value(self) -> float:
         return self.current_value
     
     def get_percent_full(self) -> float:
         return self.current_value / self.max_value
+
+    def set_percent_full(self, percent: float) -> None:
+        self.current_value = self.max_value * percent
     
-    def change_by(self, delta: float) -> None:
+    def change(self, delta: float) -> None:
         self.current_value += delta
         self.current_value = min(self.current_value, self.max_value)
         self.current_value = max(self.current_value, 0.)
@@ -55,7 +69,9 @@ class Timer:
     def get_current(self) -> float:
         return self.current_time
     
-    def reset(self) -> None:
+    def reset(self, with_max_time: float | None = None) -> None:
+        if with_max_time is not None:
+            self.max_time = with_max_time
         self.current_time = 0.
 
     def progress(self) -> float:

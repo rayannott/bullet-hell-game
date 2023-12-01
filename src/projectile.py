@@ -1,12 +1,11 @@
-from pygame import Vector2
+from pygame import Vector2, Color
 
 from src import Entity, EntityType, ProjectileType, Timer
-from src import EntityType, ProjectileType
-from config.back import (PROJECTILE_DEFAULT_SIZE, 
+from config import (PROJECTILE_DEFAULT_SIZE, 
                         PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME)
 
 
-class Projectile(Entity):
+class Projectile(Entity): # TODO: change this to EntityLifetime
     def __init__(self, 
             _pos: Vector2, 
             _vel: Vector2,
@@ -25,11 +24,12 @@ class Projectile(Entity):
         self._projectile_type = _projectile_type
         self._level = _level
         self._lifetime = _lifetime
-        self.life_timer = Timer(max_time=self._lifetime)
+        self._color = Color('yellow')
+        self._life_timer = Timer(max_time=self._lifetime)
 
     def update(self, time_delta: float):
         super().update(time_delta)
         if not self._is_alive: return
-        self.life_timer.tick(time_delta)
-        if not self.life_timer.running():
+        self._life_timer.tick(time_delta)
+        if not self._life_timer.running():
             self.kill()
