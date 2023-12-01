@@ -1,0 +1,10 @@
+{
+    "objects": {
+        "#notification": {
+            "colours": {
+                "dark_bg": "#080808",
+                "normal_border": "#080808"
+            }
+        }
+    }
+}

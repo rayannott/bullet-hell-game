@@ -1,3 +1,4 @@
+import math
 from typing import Literal, override
 import logging
 
@@ -7,9 +8,9 @@ import pygame_gui
 
 from screens import Screen
 from config import (setup_logging, SM, BM,
-    MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, 
+    MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, PLAYER_SHOT_COST,
     GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
-from src import Game, Slider, color_gradient, Entity, EntityType, EnemyType, Player, Timer
+from src import Game, Slider, ColorGradient, Entity, EntityType, EnemyType, Player, Timer, Feedback, paint
 from src import OnCooldown, NotEnoughEnergy
 
 setup_logging('DEBUG')
@@ -20,16 +21,13 @@ class ProgressBar(pygame_gui.elements.UIStatusBar):
         self.text_to_render = ''
         super().__init__(**kwargs)
         self.percent_full = 0
-        self.color_gradient_pair = color_gradient_pair
+        self.color_gradient = ColorGradient(*color_gradient_pair)
     
     def status_text(self):
         return self.text_to_render
     
     def update_color(self):
-        self.bar_filled_colour = color_gradient(
-            *self.color_gradient_pair,
-            self.percent_full
-        )
+        self.bar_filled_colour = self.color_gradient(self.percent_full)
     
     def set_slider(self, slider: Slider):
         self.text_to_render = str(slider)
@@ -37,7 +35,7 @@ class ProgressBar(pygame_gui.elements.UIStatusBar):
         self.update_color()
 
 
-class Notification(pygame_gui.elements.UILabel):
+class Notification(pygame_gui.elements.UITextBox):
     def __init__(self,
             text: str,
             position: Vector2,
@@ -46,11 +44,11 @@ class Notification(pygame_gui.elements.UILabel):
             color: Color = Color('white'),
             **kwargs):
         super().__init__(
-            text=text,
-            relative_rect=pygame.Rect(position.x, position.y, 150, 20),
+            html_text=paint(text, color, 8),
+            relative_rect=pygame.Rect(position.x, position.y, len(text) * 12, 40),
             manager=manager,
+            object_id='#notification', #! this doesn't work
             **kwargs)
-        self.text_colour = color
         self.lifetime_timer = Timer(max_time=duration)
         self._is_alive = True
     
@@ -90,13 +88,20 @@ class StatsPanel:
             parent_element=self.panel
         )
 
-    def update(self, player: Player):
+    def update(self, game: Game):
+        player = game.player
         self.health_bar.set_slider(player.get_health())
         self.energy_bar.set_slider(player.get_energy())
-        self.stats_textbox.set_text('') # TODO change from debug mode
+        STATS_LABELS = ['time', 'enemies killed', 'accuracy', 'orbs collected', 'damage dealt', 'damage taken']
+        STATS_VALUES = [game._time, player._stats.ENEMIES_KILLED, player._stats.get_accuracy(), player._stats.ENERGY_ORBS_COLLECTED, player._stats.DAMAGE_DEALT, player._stats.DAMAGE_TAKEN]
+        FORMATS = ['.1f', 'd', '.1%', 'd', '.0f', '.0f']
+        self.stats_textbox.set_text(
+            '<br>'.join((f'{label:<15} {value:{format_}}' for label, value, format_ in zip(STATS_LABELS, STATS_VALUES, FORMATS)))
+        )
 
 
 class RenderManager:
+    HP_COLOR_GRADIENT = (Color('red'), Color('green'))
     def __init__(self, surface: pygame.Surface, manager: pygame_gui.UIManager, debug: bool = False):
         self.surface = surface
         self.debug = debug
@@ -116,23 +121,63 @@ class RenderManager:
             self.debug_text_box.set_text(f'entities drawn: {self.entities_drawn}')
 
     def draw_entity_debug(self, entity: Entity):
-        # TODO: add drawing velocity vector and some other things if debug mode is on
-        pass
+        if entity._speed and entity._vel.magnitude_squared():
+            # print(entity, entity._vel, entity._type)
+            pygame.draw.line(
+                self.surface,
+                Color('white'),
+                entity.get_pos(),
+                entity.get_pos() + entity._vel.normalize() * entity._speed * 0.1,
+                width=2
+            )
+    
+    def draw_entity_circular_status_bar(self, entity: Entity, slider: Slider, 
+                                        radius: float, color: Color = Color('white'),
+                                        draw_full: bool = False):
+        arc_percent = slider.get_percent_full()
+        if draw_full or arc_percent < 1.:
+            angle = math.pi * (2 * arc_percent + 0.5)
+            rect = pygame.Rect(0, 0, radius * 2, radius * 2)
+            rect.center = entity.get_pos()
+            pygame.draw.arc(
+                self.surface,
+                color,
+                rect,
+                math.pi / 2,
+                angle,
+                width=3
+            )
+
+    def draw_player(self, player: Player):
+        self.draw_entity_circular_status_bar(player, player._shoot_cooldown_timer.get_slider(), player.get_size()*2)
+        if player.get_energy().get_value() > PLAYER_SHOT_COST:
+            pygame.draw.circle(
+                self.surface,
+                Color('yellow'),
+                player.get_pos(),
+                player.get_size() + 4,
+                width=2
+            )
 
     def draw_entity(self, entity: Entity):
         _current_color = entity.get_color()
-        pygame.draw.circle(
-            self.surface,
-            _current_color,
-            entity.get_pos(),
-            entity.get_size()
-        )
+        color_gradient = ColorGradient(Color('black'), _current_color)
+        pygame.draw.circle(self.surface, _current_color, entity.get_pos(), entity.get_size())
+        this_ent_type = entity.get_type()
+        if this_ent_type == EntityType.PLAYER:
+            self.draw_player(entity) # type: ignore
+        elif this_ent_type == EntityType.ENEMY:
+            self.draw_entity_circular_status_bar(entity, entity.get_health(), # type: ignore
+                entity.get_size() * 1.5, color=Color('green'), draw_full=True)
+        elif this_ent_type == EntityType.ENERGY_ORB:
+            self.draw_entity_circular_status_bar(entity, entity._life_timer.get_slider(reverse=True), # type: ignore
+                entity.get_size() * 1.5, color=Color('magenta'), draw_full=True)
         if entity._render_trail:
             _trail_len = len(entity._trail)
             for i, pos in enumerate(entity._trail):
                 pygame.draw.circle(
                     self.surface,
-                    color_gradient(Color('black'), _current_color, i / _trail_len),
+                    color_gradient(i / _trail_len),
                     pos,
                     2.,
                     width=1
@@ -147,6 +192,8 @@ class RenderManager:
     def reset(self):
         self.entities_drawn = 0
 
+
+# TODO move everything above this line to other files
 
 class GameScreen(Screen):
     def __init__(self, surface: pygame.Surface):
@@ -171,47 +218,12 @@ class GameScreen(Screen):
             self.game.player.set_gravity_point(pygame.Vector2(mouse_pos))
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                try:
-                    self.game.player_try_shooting()
-                except OnCooldown as e:
-                    self.spawn_notification('on cooldown', 2., color=Color('red'))
-                    print('on cooldown')
-                except NotEnoughEnergy as e:
-                    self.spawn_notification('not enough energy', 2., color=Color('red'))
-                    print('not enough energy')
-                else:
-                    self.spawn_notification('pew', 1., at_pos=self.game.player.get_pos())
-                    print('player shot')
+                self.game.player_try_shooting()
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_b:
-                print('spawned basic enemy')
-                self.game.spawn_enemy(
-                    enemy_type=EnemyType.BASIC,
-                )
-            elif event.key == pygame.K_h:
-                print('spawned tank enemy')
-                self.game.spawn_enemy(
-                    enemy_type=EnemyType.TANK,
-                )
-            elif event.key == pygame.K_f:
-                print('spawned fast enemy')
-                self.game.spawn_enemy(
-                    enemy_type=EnemyType.FAST,
-                )
-            elif event.key == pygame.K_a:
-                print('spawned artillery enemy')
-                self.game.spawn_enemy(
-                    enemy_type=EnemyType.ARTILLERY,
-                )
-            # elif event.key == pygame.K_p:
-            #     self.game.toggle_pause() # TODO: add some label to show that the game is paused
-            #     print(f'changing pause state: now {self.game._paused=}')
-            elif event.key == pygame.K_F1:
+            if event.key == pygame.K_F1:
                 self.debug = not self.debug
                 self.render_manager.set_debug(self.debug)
                 print(f'changing debug mode: now {self.debug=}')
-            elif event.key == pygame.K_l:
-                self.game.new_level()
             elif event.key == pygame.K_d:
                 print('--- debug ---')
                 print(repr(self.game.player))
@@ -222,7 +234,7 @@ class GameScreen(Screen):
         self.game.update(time_delta)
         self.game.reflect_entities_vel()
         self.stats_panel.update(
-            player=self.game.player
+            game=self.game
         )
         self.render()
         if not self.game.is_running() and not self.game_is_over_window_shown:
@@ -232,10 +244,9 @@ class GameScreen(Screen):
         self.process_feedback_buffer()
 
     def process_feedback_buffer(self):
-        if len(self.game.feedback_buffer) > 0:
-            # TODO: make this a class with color, duration, etc. depending on the event
+        if len(self.game.feedback_buffer):
             feedback = self.game.feedback_buffer.popleft()
-            self.spawn_notification(feedback, 1.5, at_pos='player')
+            self.spawn_notification(feedback=feedback)
 
     def render(self):
         for entity in self.game.all_entities_iter():
@@ -244,19 +255,26 @@ class GameScreen(Screen):
 
     def show_game_is_over_window(self):
         self.game_is_over_window = pygame_gui.windows.UIConfirmationDialog(
-            rect=pygame.Rect(0, 0, 300, 200),
+            rect=pygame.Rect(*self.surface.get_rect().center, 300, 200),
             manager=self.manager,
             window_title='Game Over',
             action_long_desc='Ok',
             blocking=True
         )
+        print('game over', repr(self.game.player))
     
-    def spawn_notification(self, 
-            text: str, 
+    def spawn_notification(self,
+            text: str = '', 
             duration: float = 3., 
             at_pos: Literal['player', 'cursor'] | Vector2 = 'cursor',
-            color: Color = Color('white')
+            color: Color = Color('white'),
+            feedback: Feedback | None = None,
         ):
+        if feedback is not None:
+            text = feedback.text
+            duration = feedback.duration
+            at_pos = feedback.at_pos
+            color = feedback.color
         if at_pos == 'player': at_pos = self.game.player.get_pos()
         elif at_pos == 'cursor': at_pos = Vector2(pygame.mouse.get_pos())
         self.notifications.append(

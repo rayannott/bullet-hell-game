@@ -19,7 +19,7 @@ class Screen(ABC):
         self.window_size = self.surface.get_rect().size
         self.background = pygame.Surface(self.window_size)
         self.background.fill(pygame.Color(bg_color))
-        self.manager = pygame_gui.UIManager(self.window_size)
+        self.manager = pygame_gui.UIManager(self.window_size, 'theme.json')
         self.is_running = True
 
         # adding the quit button
