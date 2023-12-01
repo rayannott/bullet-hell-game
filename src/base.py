@@ -28,6 +28,7 @@ class Entity(ABC):
         _vel: Vector2 | None = None, # velocity vector
         _is_alive: bool = True,
         _render_trail: bool = False,
+        _can_spawn_entities: bool = False,
         _color: pygame.Color | None = None,
     ):
         self._pos = _pos
@@ -37,7 +38,9 @@ class Entity(ABC):
         self._vel = _vel if _vel is not None else Vector2(0., 0.)
         self._is_alive = _is_alive
         self._render_trail = _render_trail
+        self._can_spawn_entities = _can_spawn_entities
         self._trail = deque(maxlen=TRAIL_MAX_LENGTH)
+        self._entities_buffer: list[Entity] = []
         self._color = _color if _color is not None else Color('white')
     
     @abstractmethod
@@ -55,7 +58,7 @@ class Entity(ABC):
         """
         Check if this entity intersects with another entity.
         """
-        return (self._pos - other._pos).magnitude_squared() < (self._size + other._size) ** 2
+        return self.is_alive() and other.is_alive() and (self._pos - other._pos).magnitude_squared() < (self._size + other._size) ** 2
     
     def get_pos(self) -> Vector2: return self._pos
     
@@ -99,19 +102,21 @@ class HomingEntity(Entity):
         _size: float,
         _speed: float, 
         _color: Color,
-        _target: Entity | None = None
+        _target: Entity | None = None,
+        _can_spawn_entities: bool = False,
     ):
         super().__init__(
             _pos=_pos,
             _type=_type,
             _size=_size,
             _speed=_speed,
-            _color=_color
+            _color=_color,
+            _can_spawn_entities=_can_spawn_entities,
         )
         self._target = _target
     
     def update(self, time_delta: float):
         if not self.is_alive(): return
         if self._target is not None:
-            self._vel = (self._target.get_pos() - self._pos).normalize() * self._speed
+            self._vel = (self._target.get_pos() - self._pos).normalize()
         return super().update(time_delta)

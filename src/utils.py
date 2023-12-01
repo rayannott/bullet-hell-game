@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+import math
+import random
 
 import pygame
 
@@ -12,13 +14,20 @@ def color_gradient(start_color: pygame.Color, end_color: pygame.Color, percent: 
     )
 
 
+def random_unit_vector() -> pygame.Vector2:
+    alpha = random.uniform(0, 2 * math.pi)
+    return pygame.Vector2(math.cos(alpha), math.sin(alpha))
+
+
 @dataclass
 class Stats:
     ENERGY_ORBS_COLLECTED: int = 0
     PROJECTILES_FIRED: int = 0
     ENEMIES_KILLED: int = 0
     BULLETS_CAUGHT: int = 0
+    ACCURATE_SHOTS: int = 0
     DAMAGE_TAKEN: float = 0.
+    DAMAGE_DEALT: float = 0.
     ENERGY_COLLECTED: float = 0.
     # TODO: add more stats
 
