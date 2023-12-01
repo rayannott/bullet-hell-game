@@ -13,10 +13,22 @@ class EntityType(Enum):
     SPAWNER = auto()
 
 
+class EnemyType(Enum):
+    """
+    Enumeration of all enemy types.
+    """
+    BASIC = auto()
+    FAST = auto()
+    TANK = auto()
+    ARTILLERY = auto()
+    BOSS = auto()
+
+
 class ProjectileType(Enum):
     """
     Enumeration of all projectile types.
     """
+    PLAYER_BULLET = auto()
     NORMAL = auto()
     HOMING = auto()
     EXPLOSIVE = auto()

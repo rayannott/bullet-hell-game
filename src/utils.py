@@ -19,6 +19,7 @@ class Stats:
     ENEMIES_KILLED: int = 0
     BULLETS_CAUGHT: int = 0
     DAMAGE_TAKEN: float = 0.
+    ENERGY_COLLECTED: float = 0.
     # TODO: add more stats
 
     def get_as_dict(self) -> dict:
@@ -79,8 +80,5 @@ class Timer:
     def progress(self) -> float:
         return self.current_time / self.max_time
 
-    # def __bool__(self) -> bool:
-    #     return self.running()
-    
     def __repr__(self) -> str:
         return f'Timer({self.current_time:.1f}/{self.max_time:.1f})'

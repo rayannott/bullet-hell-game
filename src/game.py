@@ -5,9 +5,10 @@ from typing import Generator
 import pygame
 from pygame import Vector2
 
-from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY_ORB_DEFAULT_ENERGY,
+from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE)
-from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb
+from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType
+from src.enemy import Enemy, ENEMY_STATS_MAP
 
 
 class Game:
@@ -26,8 +27,8 @@ class Game:
         self.increase_level_timer = Timer(max_time=INCREASE_LEVEL_EVERY)
         self.new_energy_orb_timer = Timer(max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
     
-    def all_entities_iter(self) -> Generator[Entity, None, None]:
-        yield self.player
+    def all_entities_iter(self, with_player: bool = True) -> Generator[Entity, None, None]:
+        if with_player: yield self.player
         for _, entities in self.entities.items():
             for entity in entities:
                 if entity.is_alive():
@@ -48,8 +49,18 @@ class Game:
         self.add_entity(
             EnergyOrb(
                 _pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
-                _lifetime=8.,
+                _lifetime=random.uniform(*ENERGY_ORB_LIFETIME_RANGE),
                 _energy=ENERGY_ORB_DEFAULT_ENERGY + 10 * (self._level - 1)
+            )
+        )
+
+    def spawn_enemy(self, enemy_type: EnemyType):
+        position = self.get_random_screen_position_for_entity(entity_size=ENEMY_STATS_MAP[enemy_type][0])
+        self.add_entity(
+            Enemy(
+                _pos=position,
+                _enemy_type=enemy_type,
+                _player=self.player,
             )
         )
 
@@ -108,14 +119,13 @@ class Game:
                 self.reflect_entity_vel(entity)
     
     def process_collisions(self) -> None:
-        # player colldes with anything:
-        # add energy if energy orb
-        # deal damage if anything else
-        for entity in self.all_entities_iter():
+        for entity in self.all_entities_iter(with_player=False):
             if entity.intersects(self.player):
                 if entity.get_type() == EntityType.ENERGY_ORB:
                     energy_collected: float = entity.energy_left() # type: ignore
-                    self.player._energy.change(energy_collected) # type: ignore
+                    self.player._energy.change(energy_collected)
+                    self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
+                    self.player.get_stats().ENERGY_COLLECTED += energy_collected
                     entity.kill()
                     self.feedback_buffer.append(f'+{energy_collected:.0f}e')
                 elif entity.get_type() == EntityType.PROJECTILE:
@@ -123,13 +133,12 @@ class Game:
                     self.player._health.change(-damage_taken) # type: ignore
                     self.player.get_stats().BULLETS_CAUGHT += 1
                     self.player.get_stats().DAMAGE_TAKEN += damage_taken
-
                     entity.kill()
-                    self.feedback_buffer.append(f'-{damage_taken}hp')
+                    self.feedback_buffer.append(f'-{damage_taken:.0f}hp')
                 else:
                     print('player collided with something else:', entity)
 
-        # bullets collide with enemies -> enemies die, player gets energy:
+        # player bullets collide with enemies -> enemies die, player gets energy:
 
         ...
 
@@ -156,7 +165,7 @@ class Game:
         """
         while True:
             pos_candidate = self.get_random_screen_position()
-            if not any(entity.intersects(DummyEntity(pos_candidate)) for entity in self.all_entities_iter()):
+            if not any(entity.intersects(DummyEntity(pos_candidate, entity_size)) for entity in self.all_entities_iter()):
                 return pos_candidate
     
     def get_random_screen_position(self) -> Vector2:

@@ -50,7 +50,7 @@ class Player(Entity):
         return Projectile(
             _pos=self._pos.copy() + direction * self._size * 1.5,
             _vel=direction,
-            _projectile_type=ProjectileType.NORMAL,
+            _projectile_type=ProjectileType.PLAYER_BULLET,
             _speed=self._speed + PROJECTILE_DEFAULT_SPEED,
         )
     

@@ -3,45 +3,49 @@ Abstract classes and enumerators for the game.
 """
 from abc import ABC, abstractmethod
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import field
 from enum import Enum, auto
 import logging
 import pygame
 
-from pygame.math import Vector2
+from pygame import Vector2, Color
 
 from config import TRAIL_MAX_LENGTH, setup_logging
 from src import EntityType, Timer
 
 setup_logging('DEBUG')
 
-def deque_factory() -> deque[Vector2]: return deque(maxlen=TRAIL_MAX_LENGTH)
 
-def color_factory() -> pygame.Color: return pygame.Color('white')
-
-
-@dataclass
 class Entity(ABC):
     """
     Abstract class for all entities in the game.
     """
-    _pos: Vector2
-    _type: EntityType
-    _size: float # model's circle's radius
-
-    _speed: float = 0. # velocity magnitude
-    _vel: Vector2 = field(default_factory=Vector2) # velocity vector
-    _is_alive: bool = True
-    _render_trail: bool = False
-    _trail: deque[Vector2] = field(default_factory=deque_factory)
-    _color: pygame.Color = field(default_factory=color_factory)
-
+    def __init__(self,
+        _pos: Vector2,
+        _type: EntityType,
+        _size: float, # model's circle's radius
+        _speed: float = 0., # velocity magnitude
+        _vel: Vector2 | None = None, # velocity vector
+        _is_alive: bool = True,
+        _render_trail: bool = False,
+        _color: pygame.Color | None = None,
+    ):
+        self._pos = _pos
+        self._type = _type
+        self._size = _size
+        self._speed = _speed
+        self._vel = _vel if _vel is not None else Vector2(0., 0.)
+        self._is_alive = _is_alive
+        self._render_trail = _render_trail
+        self._trail = deque(maxlen=TRAIL_MAX_LENGTH)
+        self._color = _color if _color is not None else Color('white')
+    
     @abstractmethod
     def update(self, time_delta: float):
         """
         Update the entity. This is called every game tick.
         """
-        if not self._is_alive: return
+        if not self.is_alive(): return
         if self._speed > 0. and self._vel.magnitude_squared() > 0.:
             self._vel.scale_to_length(self._speed * time_delta)
             self._pos += self._vel
@@ -89,4 +93,25 @@ class HomingEntity(Entity):
     """
     An entity that chases another entity.
     """
+    def __init__(self,
+        _pos: Vector2,
+        _type: EntityType,
+        _size: float,
+        _speed: float, 
+        _color: Color,
+        _target: Entity | None = None
+    ):
+        super().__init__(
+            _pos=_pos,
+            _type=_type,
+            _size=_size,
+            _speed=_speed,
+            _color=_color
+        )
+        self._target = _target
     
+    def update(self, time_delta: float):
+        if not self.is_alive(): return
+        if self._target is not None:
+            self._vel = (self._target.get_pos() - self._pos).normalize() * self._speed
+        return super().update(time_delta)
