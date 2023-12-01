@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 import random
 from typing import Generator
 
@@ -16,8 +16,12 @@ class Game:
         self._time = 0.
         self._paused = False
         self.screen_rectangle = screen_rectangle
+        
+        self.feedback_buffer: deque[str] = deque()
+
         self.player = Player(Vector2(*PLAYER_STARTING_POSITION))
         self.entities: defaultdict[EntityType, list[Entity]] = defaultdict(list)
+
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
         self.increase_level_timer = Timer(max_time=INCREASE_LEVEL_EVERY)
         self.new_energy_orb_timer = Timer(max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
@@ -26,7 +30,8 @@ class Game:
         yield self.player
         for _, entities in self.entities.items():
             for entity in entities:
-                yield entity
+                if entity.is_alive():
+                    yield entity
 
     def is_running(self) -> bool:
         return self.player.is_alive()
@@ -43,7 +48,7 @@ class Game:
         self.add_entity(
             EnergyOrb(
                 _pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
-                _lifetime=10.,
+                _lifetime=8.,
                 _energy=ENERGY_ORB_DEFAULT_ENERGY + 10 * (self._level - 1)
             )
         )
@@ -72,6 +77,7 @@ class Game:
         for entity in self.all_entities_iter():
             entity.update(time_delta)
         self.process_timers(time_delta)
+        self.process_collisions()
     
     def player_try_shooting(self) -> bool:
         new_projectile = self.player.shoot()
@@ -102,7 +108,29 @@ class Game:
                 self.reflect_entity_vel(entity)
     
     def process_collisions(self) -> None:
-        # TODO
+        # player colldes with anything:
+        # add energy if energy orb
+        # deal damage if anything else
+        for entity in self.all_entities_iter():
+            if entity.intersects(self.player):
+                if entity.get_type() == EntityType.ENERGY_ORB:
+                    energy_collected: float = entity.energy_left() # type: ignore
+                    self.player._energy.change(energy_collected) # type: ignore
+                    entity.kill()
+                    self.feedback_buffer.append(f'+{energy_collected:.0f}e')
+                elif entity.get_type() == EntityType.PROJECTILE:
+                    damage_taken: float = entity._damage # type: ignore
+                    self.player._health.change(-damage_taken) # type: ignore
+                    self.player.get_stats().BULLETS_CAUGHT += 1
+                    self.player.get_stats().DAMAGE_TAKEN += damage_taken
+
+                    entity.kill()
+                    self.feedback_buffer.append(f'-{damage_taken}hp')
+                else:
+                    print('player collided with something else:', entity)
+
+        # bullets collide with enemies -> enemies die, player gets energy:
+
         ...
 
     def add_entity(self, entity: Entity) -> None:

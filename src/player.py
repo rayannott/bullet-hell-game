@@ -5,7 +5,7 @@ from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED
     PLAYER_ENERGY_DECAY_RATE, setup_logging,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
 
-from pygame import Vector2
+from pygame import Color, Vector2
 
 setup_logging('DEBUG')
 
@@ -34,29 +34,31 @@ class Player(Entity):
 
         # this t is a parameter that controls the speed of the player based on the distance from the gravity point
         # it is non-linear so that it's the player is not too slow when close to the gravity point
-        t = math.sqrt(((self._pos - self._gravity_point).magnitude() + 10.) / 1800.)
-        self._speed = self._speed_range[0] + (self._speed_range[1] - self._speed_range[0]) * t
+        t = math.sqrt(((self._pos - self._gravity_point).magnitude() + 10.) / 1500.)
+        e_percent = self._energy.get_percent_full()
+        coef_energy = 0.8 if e_percent < 0.2 else 1.
+        self._speed = self._speed_range[0] + (self._speed_range[1] - self._speed_range[0]) * t * coef_energy
 
         self._vel = (self._gravity_point - self._pos).normalize() * self._speed
-        self._health.change(self._regeneration_rate * time_delta)
+        if e_percent > 0.: self._health.change(self._regeneration_rate * time_delta) # regenerate only if energy is not empty
         self._energy.change(-PLAYER_ENERGY_DECAY_RATE * time_delta)
 
     def shoot(self) -> Projectile | None:
         if self._energy.get_value() < PLAYER_SHOT_COST: return None
         self._energy.change(-PLAYER_SHOT_COST)
+        direction = self._vel.normalize()
         return Projectile(
-            _pos=self._pos.copy(),
-            _vel=self._vel.copy(),
+            _pos=self._pos.copy() + direction * self._size * 1.5,
+            _vel=direction,
             _projectile_type=ProjectileType.NORMAL,
             _speed=self._speed + PROJECTILE_DEFAULT_SPEED,
-            _level=self._level
         )
     
     def new_level(self):
         self._level += 1
         print('new level:', self._level)
         logging.info(f'new level: {self._level}')
-        self._speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 110. * (self._level - 1))
+        self._speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 80. * (self._level - 1))
         old_percentage = self._health.get_percent_full()
         self._health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self._level - 1)) # health keeps percentage full
         self._health.set_percent_full(old_percentage)

@@ -13,7 +13,7 @@ class Screen(ABC):
     """Abstract class for all screens in the game."""
     def __init__(self,
             surface: pygame.Surface,
-            bg_color: str = '#101010'
+            bg_color: str = '#080808'
         ):
         self.surface = surface
         self.window_size = self.surface.get_rect().size

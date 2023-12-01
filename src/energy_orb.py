@@ -24,6 +24,9 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
         self._lifetime = _lifetime
         self._life_timer = Timer(max_time=self._lifetime)
 
+    def energy_left(self) -> float:
+        return self._energy * (1. - self._life_timer.progress())
+
     def update(self, time_delta: float) -> None:
         super().update(time_delta)
         if not self._is_alive: return

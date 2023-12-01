@@ -17,6 +17,8 @@ class Stats:
     ENERGY_ORBS_COLLECTED: int = 0
     PROJECTILES_FIRED: int = 0
     ENEMIES_KILLED: int = 0
+    BULLETS_CAUGHT: int = 0
+    DAMAGE_TAKEN: float = 0.
     # TODO: add more stats
 
     def get_as_dict(self) -> dict:

@@ -45,7 +45,7 @@ class Entity(ABC):
         if self._speed > 0. and self._vel.magnitude_squared() > 0.:
             self._vel.scale_to_length(self._speed * time_delta)
             self._pos += self._vel
-        if self._render_trail: self._trail.append(self._pos)
+        if self._render_trail: self._trail.append(self._pos.copy())
 
     def intersects(self, other: 'Entity') -> bool:
         """
@@ -83,3 +83,10 @@ class DummyEntity(Entity):
         )
 
     def update(self, time_delta: float): return super().update(time_delta)
+
+
+class HomingEntity(Entity):
+    """
+    An entity that chases another entity.
+    """
+    
