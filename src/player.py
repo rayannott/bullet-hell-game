@@ -1,8 +1,10 @@
 import logging
 import math
-from src import Entity, EntityType, Slider, Stats, Projectile, ProjectileType
+from typing import Literal
+from src import Entity, EntityType, Slider, Stats, Projectile, ProjectileType, Timer
+from src import NotEnoughEnergy, OnCooldown
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    PLAYER_ENERGY_DECAY_RATE, setup_logging,
+    PLAYER_ENERGY_DECAY_RATE, setup_logging, PLAYER_DEFAULT_SHOOT_COOLDOWN,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
 
 from pygame import Color, Vector2
@@ -26,6 +28,7 @@ class Player(Entity):
         self._level = 1
         self._energy = Slider(PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY)
         self._stats = Stats()
+        self._shoot_cooldown_timer = Timer(max_time=PLAYER_DEFAULT_SHOOT_COOLDOWN)
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -42,11 +45,17 @@ class Player(Entity):
         self._vel = (self._gravity_point - self._pos).normalize() * self._speed
         if e_percent > 0.: self._health.change(self._regeneration_rate * time_delta) # regenerate only if energy is not empty
         self._energy.change(-PLAYER_ENERGY_DECAY_RATE * time_delta)
+        self._shoot_cooldown_timer.tick(time_delta)
 
-    def shoot(self) -> Projectile | None:
-        if self._energy.get_value() < PLAYER_SHOT_COST: return None
+    def shoot(self) -> Projectile:
+        if self._shoot_cooldown_timer.running():
+            raise OnCooldown('on cooldown')
+        if self._energy.get_value() < PLAYER_SHOT_COST:
+            raise NotEnoughEnergy('not enough energy')
         self._energy.change(-PLAYER_SHOT_COST)
         direction = self._vel.normalize()
+        self._stats.PROJECTILES_FIRED += 1
+        self._shoot_cooldown_timer.reset()
         return Projectile(
             _pos=self._pos.copy() + direction * self._size * 1.5,
             _vel=direction,

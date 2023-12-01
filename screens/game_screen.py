@@ -10,7 +10,7 @@ from config import (setup_logging, SM, BM,
     MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, 
     GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
 from src import Game, Slider, color_gradient, Entity, EntityType, EnemyType, Player, Timer
-
+from src import OnCooldown, NotEnoughEnergy
 
 setup_logging('DEBUG')
 
@@ -168,18 +168,37 @@ class GameScreen(Screen):
             self.game.player.set_gravity_point(pygame.Vector2(mouse_pos))
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                is_succesful = self.game.player_try_shooting()
-                if not is_succesful:
+                try:
+                    self.game.player_try_shooting()
+                except OnCooldown as e:
+                    self.spawn_notification('on cooldown', 2., color=Color('red'))
+                    print('on cooldown')
+                except NotEnoughEnergy as e:
                     self.spawn_notification('not enough energy', 2., color=Color('red'))
                     print('not enough energy')
                 else:
                     self.spawn_notification('pew', 1., at_pos=self.game.player.get_pos())
                     print('player shot')
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_s:
-                print('spawned enemy')
+            if event.key == pygame.K_b:
+                print('spawned basic enemy')
                 self.game.spawn_enemy(
-                    enemy_type=EnemyType.BOSS,
+                    enemy_type=EnemyType.BASIC,
+                )
+            elif event.key == pygame.K_h:
+                print('spawned tank enemy')
+                self.game.spawn_enemy(
+                    enemy_type=EnemyType.TANK,
+                )
+            elif event.key == pygame.K_f:
+                print('spawned fast enemy')
+                self.game.spawn_enemy(
+                    enemy_type=EnemyType.FAST,
+                )
+            elif event.key == pygame.K_a:
+                print('spawned artillery enemy')
+                self.game.spawn_enemy(
+                    enemy_type=EnemyType.ARTILLERY,
                 )
             elif event.key == pygame.K_p:
                 self.game.toggle_pause() # TODO: add some label to show that the game is paused
@@ -192,7 +211,7 @@ class GameScreen(Screen):
                 self.game.new_level()
             elif event.key == pygame.K_d:
                 print('--- debug ---')
-                print(self.game.player)
+                print(repr(self.game.player))
                 print('-'*10)
     
     @override

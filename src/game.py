@@ -7,7 +7,8 @@ from pygame import Vector2
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE)
-from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType
+from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType, ProjectileType
+from src import OnCooldown, NotEnoughEnergy
 from src.enemy import Enemy, ENEMY_STATS_MAP
 
 
@@ -22,6 +23,7 @@ class Game:
 
         self.player = Player(Vector2(*PLAYER_STARTING_POSITION))
         self.entities: defaultdict[EntityType, list[Entity]] = defaultdict(list)
+        # TODO: split entity types into different lists
 
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
         self.increase_level_timer = Timer(max_time=INCREASE_LEVEL_EVERY)
@@ -55,7 +57,7 @@ class Game:
         )
 
     def spawn_enemy(self, enemy_type: EnemyType):
-        position = self.get_random_screen_position_for_entity(entity_size=ENEMY_STATS_MAP[enemy_type][0])
+        position = self.get_random_screen_position_for_entity(entity_size=ENEMY_STATS_MAP[enemy_type].size)
         self.add_entity(
             Enemy(
                 _pos=position,
@@ -89,34 +91,41 @@ class Game:
             entity.update(time_delta)
         self.process_timers(time_delta)
         self.process_collisions()
+        self.spawn_buffered_entities()
     
-    def player_try_shooting(self) -> bool:
-        new_projectile = self.player.shoot()
-        if new_projectile is not None:
-            self.add_entity(new_projectile)
-            return True
+    def player_try_shooting(self):
+        try:
+            new_projectile = self.player.shoot()
+        except OnCooldown as e:
+            raise e
+        except NotEnoughEnergy as e:
+            raise e
         else:
-            return False
+            self.add_entity(new_projectile)
 
-    def reflect_entity_vel(self, entity: Entity) -> None:
+    def spawn_buffered_entities(self) -> None:
         """
-        Reflect the velocity of all entities that are outside of the screen.
+        Spawn all entities that are in the buffer of the other entities.
         """
-        pos_ = entity.get_pos()
-        if entity.is_alive() and not self.screen_rectangle.collidepoint(pos_):
-            if pos_.x < self.screen_rectangle.left or pos_.x > self.screen_rectangle.right:
-                entity._vel.x *= -1.
-            if pos_.y < self.screen_rectangle.top or pos_.y > self.screen_rectangle.bottom:
-                entity._vel.y *= -1.
+        new_ent = []
+        for entity in self.all_entities_iter():
+            if entity._can_spawn_entities:
+                new_ent.extend(entity._entities_buffer)
+                entity._entities_buffer.clear()
+        for ent in new_ent:
+            self.add_entity(ent)
 
     def reflect_entities_vel(self,) -> None:
         """
         Reflect the velocity of all entities that are outside of the screen.
         """
-        self.reflect_entity_vel(self.player)
-        for entity_type, entities in self.entities.items():
-            for entity in entities:
-                self.reflect_entity_vel(entity)
+        for entity in self.all_entities_iter():
+            pos_ = entity.get_pos()
+            if entity.is_alive() and not self.screen_rectangle.collidepoint(pos_):
+                if pos_.x < self.screen_rectangle.left or pos_.x > self.screen_rectangle.right:
+                    entity._vel.x *= -1.
+                if pos_.y < self.screen_rectangle.top or pos_.y > self.screen_rectangle.bottom:
+                    entity._vel.y *= -1.
     
     def process_collisions(self) -> None:
         for entity in self.all_entities_iter(with_player=False):
@@ -138,8 +147,27 @@ class Game:
                 else:
                     print('player collided with something else:', entity)
 
-        # player bullets collide with enemies -> enemies die, player gets energy:
-
+        # player bullets collide with enemies -> enemies get damage, player gets energy:
+        player_bullets = [el for el in self.entities[EntityType.PROJECTILE] if el._projectile_type == ProjectileType.PLAYER_BULLET] # type: ignore
+        for bullet in player_bullets:
+            for enemy in self.entities[EntityType.ENEMY]:
+                if bullet.intersects(enemy):
+                    bullet.kill()
+                    self.player.get_stats().ACCURATE_SHOTS += 1
+                    print('accurate shot')
+                    damage_dealt = bullet._damage # type: ignore
+                    enemy.get_health().change(-damage_dealt) # type: ignore
+                    self.player.get_stats().DAMAGE_DEALT += damage_dealt
+                    # self.feedback_buffer.append(f'-{damage_dealt}hp', at enemy position) # TODO when we can specify position
+                    enemy.update(0.)
+                    if not enemy.is_alive():
+                        enemy.kill()
+                        reward = enemy.get_reward() # type: ignore
+                        self.player._energy.change(reward)
+                        self.player.get_stats().ENEMIES_KILLED += 1
+                        self.player.get_stats().ENERGY_COLLECTED += reward
+                        print('enemy killed')
+                        self.feedback_buffer.append(f'+{reward}e')
         ...
 
     def add_entity(self, entity: Entity) -> None:
