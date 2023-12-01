@@ -95,7 +95,7 @@ class Timer:
     def running(self) -> bool:
         return self.current_time < self.max_time
     
-    def get_current(self) -> float:
+    def get_value(self) -> float:
         return self.current_time
     
     def reset(self, with_max_time: float | None = None) -> None:
@@ -103,7 +103,7 @@ class Timer:
             self.max_time = with_max_time
         self.current_time = 0.
 
-    def progress(self) -> float:
+    def get_percent_full(self) -> float:
         return self.current_time / self.max_time
     
     def get_slider(self, reverse=False) -> Slider:

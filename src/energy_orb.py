@@ -26,13 +26,13 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
         self._color_less_than_half_life = Color('#5e1666')
 
     def energy_left(self) -> float:
-        return self._energy * (1. - self._life_timer.progress())
+        return self._energy * (1. - self._life_timer.get_percent_full())
 
     def update(self, time_delta: float) -> None:
         super().update(time_delta)
         if not self._is_alive: return
         self._life_timer.tick(time_delta)
-        if self._life_timer.progress() > 0.5:
+        if self._life_timer.get_percent_full() > 0.5:
             self._color = self._color_less_than_half_life
         if not self._life_timer.running():
             self.kill()
