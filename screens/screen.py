@@ -10,10 +10,7 @@ setup_logging('DEBUG')
 
 
 class Screen(ABC):
-    """Abstract class for all screens in the game.
-    Inspired by
-    https://github.com/MrChuse/orbits-clone/tree/main/screens"""
-
+    """Abstract class for all screens in the game."""
     def __init__(self,
             surface: pygame.Surface,
             bg_color: str = '#101010'
@@ -58,8 +55,8 @@ class Screen(ABC):
                     if event.ui_element == self.quit_button:
                         self.is_running = False
                         logging.debug('Quit button pressed')
-                self.process_event(event)
                 self.manager.process_events(event)
+                self.process_event(event)
             self.surface.blit(self.background, (0, 0))
             self.manager.update(time_delta)
             self.update(time_delta)
