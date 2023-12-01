@@ -1,10 +1,9 @@
-from base import Entity
-from enums import EntityType, ProjectileType
+from pygame import Vector2
+
+from src import Entity, EntityType, ProjectileType, Timer
+from src import EntityType, ProjectileType
 from config.back import (PROJECTILE_DEFAULT_SIZE, 
                         PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME)
-from utils import Timer
-
-from pygame import Vector2
 
 
 class Projectile(Entity):

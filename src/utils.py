@@ -12,22 +12,30 @@ class Stats:
         return self.__dict__
 
 
-class Slider[T: int | float]:
-    def __init__(self, _max_value: T, _current_value: T | None = None):
+class Slider:
+    def __init__(self, _max_value: float, _current_value: float | None = None):
         self.max_value = _max_value
         self.current_value = _current_value if _current_value is not None else _max_value
     
     def is_alive(self) -> bool:
         return self.current_value > 0
     
-    def get_current(self) -> T:
+    def get_current(self) -> float:
         return self.current_value
     
-    def progress(self) -> float:
+    def get_percent_full(self) -> float:
         return self.current_value / self.max_value
     
+    def change_by(self, delta: float) -> None:
+        self.current_value += delta
+        self.current_value = min(self.current_value, self.max_value)
+        self.current_value = max(self.current_value, 0.)
+    
     def __repr__(self) -> str:
-        return f'Slider({self.current_value:.1f}/{self.max_value:.1f})'
+        return f'Slider({self})'
+    
+    def __str__(self) -> str:
+        return f'{self.current_value:.1f}/{self.max_value:.1f}'
 
 
 class Timer:

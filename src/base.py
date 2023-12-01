@@ -3,13 +3,16 @@ Abstract classes and enumerators for the game.
 """
 from abc import ABC, abstractmethod
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum, auto
 
 from pygame.math import Vector2
 
-from config.back import TRAIL_MAX_LENGTH
-from enums import EntityType
+from config import TRAIL_MAX_LENGTH
+from src.enums import EntityType
+
+
+def deque_factory() -> deque[Vector2]: return deque(maxlen=TRAIL_MAX_LENGTH)
 
 
 @dataclass
@@ -22,10 +25,11 @@ class Entity(ABC):
     _size: float # model's circle's radius
 
     _speed: float = 0. # velocity magnitude
-    _vel: Vector2 = Vector2(0., 0.) # velocity direction vector
+    _vel: Vector2 = field(default_factory=Vector2) # velocity vector
     _is_alive: bool = True
     _render_trail: bool = False
-    _trail: deque[Vector2] = deque(maxlen=TRAIL_MAX_LENGTH)
+    # add the max_length parameter to the deque constructor:
+    _trail: deque[Vector2] = field(default_factory=deque_factory)
 
     @abstractmethod
     def update(self, time_delta: float):

@@ -1,6 +1,4 @@
-from base import Entity
-from enums import EntityType
-from utils import Slider, Stats
+from src import Entity, EntityType, Slider, Stats
 from config.back import (PLAYER_SIZE, PLAYER_MAX_HEALTH, PLAYER_SPEED_RANGE,
                         PLAYER_MAX_ENERGY, PLAYER_STARTING_ENERGY)
 
@@ -29,4 +27,7 @@ class Player(Entity):
 
     def set_gravity_point(self, gravity_point: Vector2):
         self._gravity_point = gravity_point
+    
+    def get_health(self) -> Slider:
+        return self._health
     
