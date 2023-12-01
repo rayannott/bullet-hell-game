@@ -6,6 +6,7 @@ from collections import deque
 from dataclasses import field
 from enum import Enum, auto
 import logging
+from typing import Optional
 import pygame
 
 from pygame import Vector2, Color
@@ -30,6 +31,7 @@ class Entity(ABC):
         _render_trail: bool = False,
         _can_spawn_entities: bool = False,
         _color: pygame.Color | None = None,
+        _homing_target: Optional['Entity'] = None,
     ):
         self._pos = _pos
         self._type = _type
@@ -42,6 +44,7 @@ class Entity(ABC):
         self._trail = deque(maxlen=TRAIL_MAX_LENGTH)
         self._entities_buffer: list[Entity] = []
         self._color = _color if _color is not None else Color('white')
+        self._homing_target = _homing_target
     
     @abstractmethod
     def update(self, time_delta: float):
@@ -49,6 +52,8 @@ class Entity(ABC):
         Update the entity. This is called every game tick.
         """
         if not self.is_alive(): return
+        if self._homing_target is not None:
+            self._vel = (self._homing_target.get_pos() - self._pos)
         if self._speed > 0. and self._vel.magnitude_squared() > 0.:
             self._vel.scale_to_length(self._speed * time_delta)
             self._pos += self._vel
@@ -90,33 +95,3 @@ class DummyEntity(Entity):
         )
 
     def update(self, time_delta: float): return super().update(time_delta)
-
-
-class HomingEntity(Entity):
-    """
-    An entity that chases another entity.
-    """
-    def __init__(self,
-        _pos: Vector2,
-        _type: EntityType,
-        _size: float,
-        _speed: float, 
-        _color: Color,
-        _target: Entity | None = None,
-        _can_spawn_entities: bool = False,
-    ):
-        super().__init__(
-            _pos=_pos,
-            _type=_type,
-            _size=_size,
-            _speed=_speed,
-            _color=_color,
-            _can_spawn_entities=_can_spawn_entities,
-        )
-        self._target = _target
-    
-    def update(self, time_delta: float):
-        if not self.is_alive(): return
-        if self._target is not None:
-            self._vel = (self._target.get_pos() - self._pos).normalize()
-        return super().update(time_delta)

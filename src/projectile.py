@@ -20,7 +20,8 @@ class Projectile(Entity): # TODO: change this to EntityLifetime
             _projectile_type: ProjectileType,
             _damage: float = PROJECTILE_DEFAULT_DAMAGE,
             _speed: float = PROJECTILE_DEFAULT_SPEED,
-            _lifetime: float = PROJECTILE_DEFAULT_LIFETIME
+            _lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
+            _homing_target: Entity | None = None,
         ):
         super().__init__(
             _pos=_pos,
@@ -28,6 +29,7 @@ class Projectile(Entity): # TODO: change this to EntityLifetime
             _size=PROJECTILE_DEFAULT_SIZE,
             _speed=_speed,
             _vel=_vel,
+            _homing_target=_homing_target,
         )
         self._projectile_type = _projectile_type
         self._damage = _damage

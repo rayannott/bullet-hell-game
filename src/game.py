@@ -76,6 +76,7 @@ class Game:
         self.increase_level_timer.tick(time_delta)
         if not self.increase_level_timer.running():
             self.new_level()
+            self.spawn_enemy(EnemyType.BOSS)
             self.increase_level_timer.reset()
             print('Increased level')
         self.new_energy_orb_timer.tick(time_delta)
@@ -129,23 +130,25 @@ class Game:
     
     def process_collisions(self) -> None:
         for entity in self.all_entities_iter(with_player=False):
-            if entity.intersects(self.player):
-                if entity.get_type() == EntityType.ENERGY_ORB:
-                    energy_collected: float = entity.energy_left() # type: ignore
-                    self.player._energy.change(energy_collected)
-                    self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
-                    self.player.get_stats().ENERGY_COLLECTED += energy_collected
-                    entity.kill()
-                    self.feedback_buffer.append(f'+{energy_collected:.0f}e')
-                elif entity.get_type() == EntityType.PROJECTILE:
-                    damage_taken: float = entity._damage # type: ignore
-                    self.player._health.change(-damage_taken) # type: ignore
-                    self.player.get_stats().BULLETS_CAUGHT += 1
-                    self.player.get_stats().DAMAGE_TAKEN += damage_taken
-                    entity.kill()
-                    self.feedback_buffer.append(f'-{damage_taken:.0f}hp')
-                else:
-                    print('player collided with something else:', entity)
+            if not entity.intersects(self.player):
+                continue
+            if entity.get_type() == EntityType.ENERGY_ORB:
+                energy_collected: float = entity.energy_left() # type: ignore
+                self.player._energy.change(energy_collected)
+                self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
+                self.player.get_stats().ENERGY_COLLECTED += energy_collected
+                entity.kill()
+                self.feedback_buffer.append(f'+{energy_collected:.0f}e')
+            elif entity.get_type() == EntityType.PROJECTILE:
+                damage_taken: float = entity._damage # type: ignore
+                self.player._health.change(-damage_taken) # type: ignore
+                self.player.get_stats().BULLETS_CAUGHT += 1
+                self.player.get_stats().DAMAGE_TAKEN += damage_taken
+                entity.kill()
+                self.feedback_buffer.append(f'-{damage_taken:.0f}hp')
+            elif entity.get_type() == EntityType.ENEMY:
+                self.player.kill()
+                self.feedback_buffer.append('player collided with enemy (and died)')
 
         # player bullets collide with enemies -> enemies get damage, player gets energy:
         player_bullets = [el for el in self.entities[EntityType.PROJECTILE] if el._projectile_type == ProjectileType.PLAYER_BULLET] # type: ignore

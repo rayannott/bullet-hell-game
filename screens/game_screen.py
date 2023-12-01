@@ -163,6 +163,9 @@ class GameScreen(Screen):
 
     @override
     def process_event(self, event: pygame.event.Event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_p: self.game.toggle_pause()
+        if self.game._paused: return
+        if not self.game.is_running(): return
         mouse_pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEMOTION:
             self.game.player.set_gravity_point(pygame.Vector2(mouse_pos))
@@ -200,9 +203,9 @@ class GameScreen(Screen):
                 self.game.spawn_enemy(
                     enemy_type=EnemyType.ARTILLERY,
                 )
-            elif event.key == pygame.K_p:
-                self.game.toggle_pause() # TODO: add some label to show that the game is paused
-                print(f'changing pause state: now {self.game._paused=}')
+            # elif event.key == pygame.K_p:
+            #     self.game.toggle_pause() # TODO: add some label to show that the game is paused
+            #     print(f'changing pause state: now {self.game._paused=}')
             elif event.key == pygame.K_F1:
                 self.debug = not self.debug
                 self.render_manager.set_debug(self.debug)

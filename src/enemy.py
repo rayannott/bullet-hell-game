@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import random
 from pygame import Vector2, Color
 
-from src import HomingEntity, EntityType, EnemyType, Slider, Player, Timer, Projectile, ProjectileType
+from src import Entity, EntityType, EnemyType, Slider, Player, Timer, Projectile, ProjectileType
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, 
     ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD)
 
@@ -24,7 +24,7 @@ ENEMY_STATS_MAP = {
         size=ENEMY_DEFAULT_SIZE, color=Color('red'), speed=ENEMY_DEFAULT_SPEED, 
         health=ENEMY_DEFAULT_MAX_HEALTH, shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD),
     EnemyType.FAST: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE * 0.9, color=Color('#912644'), speed=ENEMY_DEFAULT_SPEED * 2.2, 
+        size=ENEMY_DEFAULT_SIZE * 0.9, color=Color('#912644'), speed=ENEMY_DEFAULT_SPEED * 1.8, 
         health=ENEMY_DEFAULT_MAX_HEALTH * 0.8, shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD * 1.2),
     EnemyType.TANK: EnemyStats(
         size=ENEMY_DEFAULT_SIZE * 1.8, color=Color('#9e401e'), speed=ENEMY_DEFAULT_SPEED * 0.8, 
@@ -39,7 +39,7 @@ ENEMY_STATS_MAP = {
 # TODO: split these types into different classes (they have different behaviors)
 
 
-class Enemy(HomingEntity):
+class Enemy(Entity):
     def __init__(self, 
             _pos: Vector2,
             _enemy_type: EnemyType,
@@ -52,12 +52,13 @@ class Enemy(HomingEntity):
             _size=stats.size,
             _speed=stats.speed, 
             _color=stats.color,
-            _target=_player,
             _can_spawn_entities=True,
+            _homing_target=_player,
         )
         self._health = Slider(stats.health)
         self._cooldown = Timer(max_time=stats.shoot_cooldown)
         self._reward = stats.reward
+        self._enemy_type = _enemy_type
     
     def shoot(self):
         direction = (self._vel.rotate(random.uniform(-.1, .1))).normalize()
@@ -70,7 +71,7 @@ class Enemy(HomingEntity):
     
     def update(self, time_delta: float):
         if not self._health.is_alive(): self.kill()
-        if not self._is_alive: return
+        if not self.is_alive(): return
         super().update(time_delta)
         self._cooldown.tick(time_delta)
         if not self._cooldown.running():
