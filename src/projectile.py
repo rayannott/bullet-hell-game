@@ -43,3 +43,32 @@ class Projectile(Entity): # TODO: change this to EntityLifetime
         self._life_timer.tick(time_delta)
         if not self._life_timer.running():
             self.kill()
+
+
+class HomingProjectile(Projectile):
+    def __init__(self, 
+            _pos: Vector2, 
+            _vel: Vector2,
+            _damage: float = PROJECTILE_DEFAULT_DAMAGE,
+            _speed: float = PROJECTILE_DEFAULT_SPEED,
+            _lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
+            _homing_target: Entity | None = None,
+        ):
+        super().__init__(
+            _pos=_pos,
+            _vel=_vel,
+            _projectile_type=ProjectileType.HOMING,
+            _damage=_damage,
+            _speed=_speed,
+            _lifetime=_lifetime,
+            _homing_target=_homing_target,
+        )
+        self._homing_target = _homing_target
+        self._render_trail = True
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        if not self._is_alive: return
+        self._life_timer.tick(time_delta)
+        if not self._life_timer.running():
+            self.kill()

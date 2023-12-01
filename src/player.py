@@ -28,7 +28,8 @@ class Player(Entity):
         self._level = 1
         self._energy = Slider(PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY)
         self._stats = Stats()
-        self._shoot_cooldown_timer = Timer(max_time=PLAYER_DEFAULT_SHOOT_COOLDOWN)
+        self._shoot_cooldown = PLAYER_DEFAULT_SHOOT_COOLDOWN
+        self._shoot_cooldown_timer = Timer(max_time=self._shoot_cooldown)
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -47,15 +48,18 @@ class Player(Entity):
         self._energy.change(-PLAYER_ENERGY_DECAY_RATE * time_delta)
         self._shoot_cooldown_timer.tick(time_delta)
 
+    def is_on_cooldown(self) -> bool:
+        return self._shoot_cooldown_timer.running()
+
     def shoot(self) -> Projectile:
-        if self._shoot_cooldown_timer.running():
+        if self.is_on_cooldown():
             raise OnCooldown('on cooldown')
         if self._energy.get_value() < PLAYER_SHOT_COST:
             raise NotEnoughEnergy('not enough energy')
         self._energy.change(-PLAYER_SHOT_COST)
         direction = self._vel.normalize()
         self._stats.PROJECTILES_FIRED += 1
-        self._shoot_cooldown_timer.reset()
+        self._shoot_cooldown_timer.reset(with_max_time=self._shoot_cooldown)
         return Projectile(
             _pos=self._pos.copy() + direction * self._size * 1.5,
             _vel=direction,
@@ -72,6 +76,7 @@ class Player(Entity):
         self._health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self._level - 1)) # health keeps percentage full
         self._health.set_percent_full(old_percentage)
         self._energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self._level - 1)) # energy resets to full
+        self._shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self._level - 1), 0.35)
 
     def set_gravity_point(self, gravity_point: Vector2):
         self._gravity_point = gravity_point
@@ -87,5 +92,5 @@ class Player(Entity):
     def __repr__(self) -> str:
         def pretty_vector2(v: Vector2) -> str:
             return f'({v.x:.2f}, {v.y:.2f})'
-        return f'Player(level={self._level}; pos={pretty_vector2(self._pos)}; vel={pretty_vector2(self._vel)}; speed={self._speed:.2f}; speed_range={self._speed_range}; gravity_point={pretty_vector2(self._gravity_point)}; stats={self._stats})'
+        return f'Player(level={self._level}; pos={pretty_vector2(self._pos)}; vel={pretty_vector2(self._vel)}; speed={self._speed:.2f}; health={self._health}; cooldown={self._shoot_cooldown}; speed_range={self._speed_range}; gravity_point={pretty_vector2(self._gravity_point)}; stats={self._stats})'
     

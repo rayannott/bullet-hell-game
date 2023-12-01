@@ -1,22 +1,33 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
 import random
+from typing import Literal
 
-import pygame
+from pygame import Color, Vector2
 
 
-def color_gradient(start_color: pygame.Color, end_color: pygame.Color, percent: float) -> pygame.Color:
-    return pygame.Color(
-        int(start_color.r + (end_color.r - start_color.r) * percent),
-        int(start_color.g + (end_color.g - start_color.g) * percent),
-        int(start_color.b + (end_color.b - start_color.b) * percent),
-        int(start_color.a + (end_color.a - start_color.a) * percent)
+def paint(text: str, color: Color, size: int = 4) -> str:
+    hex_color = "#{:02x}{:02x}{:02x}".format(color.r, color.g, color.b)
+    return f'<font color={hex_color} size={size}>{text}</font>'
+
+
+class ColorGradient:
+    def __init__(self, start_color: Color, end_color: Color):
+        self.start_color = start_color
+        self.end_color = end_color
+
+    def __call__(self, percent: float) -> Color:
+        return Color(
+        int(self.start_color.r + (self.end_color.r - self.start_color.r) * percent),
+        int(self.start_color.g + (self.end_color.g - self.start_color.g) * percent),
+        int(self.start_color.b + (self.end_color.b - self.start_color.b) * percent),
+        int(self.start_color.a + (self.end_color.a - self.start_color.a) * percent)
     )
 
 
-def random_unit_vector() -> pygame.Vector2:
+def random_unit_vector() -> Vector2:
     alpha = random.uniform(0, 2 * math.pi)
-    return pygame.Vector2(math.cos(alpha), math.sin(alpha))
+    return Vector2(math.cos(alpha), math.sin(alpha))
 
 
 @dataclass
@@ -30,6 +41,9 @@ class Stats:
     DAMAGE_DEALT: float = 0.
     ENERGY_COLLECTED: float = 0.
     # TODO: add more stats
+
+    def get_accuracy(self) -> float:
+        return self.ACCURATE_SHOTS / self.PROJECTILES_FIRED if self.PROJECTILES_FIRED > 0 else 0.
 
     def get_as_dict(self) -> dict:
         return self.__dict__
@@ -52,10 +66,13 @@ class Slider:
     def set_percent_full(self, percent: float) -> None:
         self.current_value = self.max_value * percent
     
-    def change(self, delta: float) -> None:
+    def change(self, delta: float) -> float:
+        """Change the current value by delta. Return by how much it actually changed."""
+        cache_current_value = self.current_value
         self.current_value += delta
         self.current_value = min(self.current_value, self.max_value)
         self.current_value = max(self.current_value, 0.)
+        return self.current_value - cache_current_value
     
     def __repr__(self) -> str:
         return f'Slider({self})'
@@ -88,6 +105,22 @@ class Timer:
 
     def progress(self) -> float:
         return self.current_time / self.max_time
+    
+    def get_slider(self, reverse=False) -> Slider:
+        if reverse:
+            return Slider(self.max_time, self.max_time - self.current_time)
+        return Slider(self.max_time, self.current_time)
 
     def __repr__(self) -> str:
         return f'Timer({self.current_time:.1f}/{self.max_time:.1f})'
+
+
+def default_color() -> Color:
+    return Color('white')
+
+@dataclass
+class Feedback:
+    text: str
+    duration: float = 1.5
+    at_pos: Literal['player', 'cursor'] | Vector2 = 'player'
+    color: Color = field(default_factory=default_color)

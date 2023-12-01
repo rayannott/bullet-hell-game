@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import random
 from pygame import Vector2, Color
 
-from src import Entity, EntityType, EnemyType, Slider, Player, Timer, Projectile, ProjectileType
+from src import Entity, EntityType, EnemyType, Slider, Player, Timer, Projectile, HomingProjectile, ProjectileType
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, 
     ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD)
 
@@ -62,6 +62,13 @@ class Enemy(Entity):
     
     def shoot(self):
         direction = (self._vel.rotate(random.uniform(-.1, .1))).normalize()
+        if self._enemy_type == EnemyType.ARTILLERY:
+            return HomingProjectile(
+                _pos=self._pos.copy() + direction * self._size * 1.5,
+                _vel=direction,
+                _speed=PROJECTILE_DEFAULT_SPEED,
+                _homing_target=self._homing_target,
+            )
         return Projectile(
             _pos=self._pos.copy() + direction * self._size * 1.5,
             _vel=direction,
