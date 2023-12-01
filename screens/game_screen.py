@@ -9,7 +9,7 @@ from screens import Screen
 from config import (setup_logging, SM, BM,
     MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, 
     GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
-from src import Game, Slider, color_gradient, Entity, EntityType, Player, Timer
+from src import Game, Slider, color_gradient, Entity, EntityType, EnemyType, Player, Timer
 
 
 setup_logging('DEBUG')
@@ -93,7 +93,7 @@ class StatsPanel:
     def update(self, player: Player):
         self.health_bar.set_slider(player.get_health())
         self.energy_bar.set_slider(player.get_energy())
-        self.stats_textbox.set_text(repr(player).replace(';', '<br>')) # TODO change from debug mode
+        self.stats_textbox.set_text('') # TODO change from debug mode
 
 
 class RenderManager:
@@ -167,16 +167,20 @@ class GameScreen(Screen):
         if event.type == pygame.MOUSEMOTION:
             self.game.player.set_gravity_point(pygame.Vector2(mouse_pos))
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            is_succesful = self.game.player_try_shooting()
-            if not is_succesful:
-                self.spawn_notification('not enough energy', 2., color=Color('red'))
-                print('not enough energy')
-            else:
-                self.spawn_notification('pew', 1., at_pos=self.game.player.get_pos())
-                print('player shot')
+            if event.button == 1:
+                is_succesful = self.game.player_try_shooting()
+                if not is_succesful:
+                    self.spawn_notification('not enough energy', 2., color=Color('red'))
+                    print('not enough energy')
+                else:
+                    self.spawn_notification('pew', 1., at_pos=self.game.player.get_pos())
+                    print('player shot')
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                self.game.player._health.change(-10.)
+            if event.key == pygame.K_s:
+                print('spawned enemy')
+                self.game.spawn_enemy(
+                    enemy_type=EnemyType.BOSS,
+                )
             elif event.key == pygame.K_p:
                 self.game.toggle_pause() # TODO: add some label to show that the game is paused
                 print(f'changing pause state: now {self.game._paused=}')
@@ -188,6 +192,7 @@ class GameScreen(Screen):
                 self.game.new_level()
             elif event.key == pygame.K_d:
                 print('--- debug ---')
+                print(self.game.player)
                 print('-'*10)
     
     @override
@@ -206,7 +211,9 @@ class GameScreen(Screen):
 
     def process_feedback_buffer(self):
         if len(self.game.feedback_buffer) > 0:
-            self.spawn_notification(self.game.feedback_buffer.popleft(), 1.5, at_pos='player')
+            # TODO: make this a class with color, duration, etc. depending on the event
+            feedback = self.game.feedback_buffer.popleft()
+            self.spawn_notification(feedback, 1.5, at_pos='player')
 
     def render(self):
         for entity in self.game.all_entities_iter():
