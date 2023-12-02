@@ -6,11 +6,12 @@ class EntityType(Enum):
     Enumeration of all entity types.
     """
     DUMMY = auto()
+    OIL_SPILL = auto()
+    CORPSE = auto()
     PLAYER = auto()
     PROJECTILE = auto()
     ENERGY_ORB = auto()
     ENEMY = auto()
-    CORPSE = auto()
 
 
 class EnemyType(Enum):

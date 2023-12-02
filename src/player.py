@@ -1,11 +1,26 @@
+from dataclasses import dataclass
 import random
 from pygame import Vector2
 
-from src import Entity, EntityType, Slider, Stats, Projectile, ProjectileType, Timer
+from src import Entity, EntityType, Slider, Stats, Timer
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined
+from src.enums import ProjectileType
+from src.projectile import Projectile
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
+    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
+
+
+@dataclass
+class EffectFlags:
+    """
+    Flags for effects that can be applied to the player.
+    """
+    OIL_SPILL: bool = False    
+
+    def reset(self):
+        self.OIL_SPILL = False
 
 
 class Player(Entity):
@@ -29,18 +44,20 @@ class Player(Entity):
         self._shoot_cooldown_timer = Timer(max_time=self._shoot_cooldown)
         self._damage = PLAYER_DEFAULT_DAMAGE_AVG
         self._damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
+        self.effect_flags = EffectFlags()
 
     def update(self, time_delta: float):
         super().update(time_delta)
-        if not self._health.is_alive(): self.kill()
         if not self._is_alive: return
+        if not self._health.is_alive(): self.kill()
 
         # this t is a parameter that controls the speed of the player based on the distance from the gravity point
         # it is non-linear so that it's the player is not too slow when close to the gravity point
         towards_gravity_point = (self._gravity_point - self._pos)
         dist_to_gravity_point = towards_gravity_point.magnitude()
         t = (dist_to_gravity_point / 1500.) ** 0.4
-        self._speed = self._speed_range[0] + (self._speed_range[1] - self._speed_range[0]) * t
+        self._speed = self._speed_range[0] + (self._speed_range[1] - self._speed_range[0]) * t *\
+            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.)
 
         # this code sets the velocity of the player towards the gravity point;
         # the closer the player is to the gravity point, the slower it moves to avoid dancing
@@ -49,6 +66,7 @@ class Player(Entity):
         else:
             self._vel = Vector2()
         self.health_energy_evolution(time_delta)
+        self.effect_flags.reset()
 
     def health_energy_evolution(self, time_delta: float):
         # TODO decay enery when moving or regenerating health
@@ -59,6 +77,8 @@ class Player(Entity):
         # decay energy and regenerate health faster when health is low
         if e_percent > 0.: self._health.change(self._regeneration_rate * low_health_multiplier * time_delta) 
         self._energy.change(-self._energy_decay_rate * low_health_multiplier * time_delta)
+        if self.effect_flags.OIL_SPILL:
+            self._health.change(-OIL_SPILL_DAMAGE_PER_SECOND * time_delta)
         self._shoot_cooldown_timer.tick(time_delta)
 
     def is_on_cooldown(self) -> bool:

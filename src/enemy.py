@@ -5,7 +5,8 @@ from pygame import Vector2, Color
 from front.utils import random_unit_vector
 
 from src import Entity, Corpse, EntityType, EnemyType, Slider, Player, Timer, Projectile, HomingProjectile, ProjectileType
-from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_LIFETIME,
+from src.oil_spill import OilSpill
+from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE,
     ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD)
 
 
@@ -88,12 +89,13 @@ class Enemy(Entity):
         self.shoot_normal()
     
     def update(self, time_delta: float):
-        if not self._health.is_alive(): self.kill()
         if not self.is_alive(): return
+        if not self._health.is_alive(): self.kill()
         super().update(time_delta)
         self._cooldown.tick(time_delta)
         self._lifetime_cooldown.tick(time_delta)
         if not self._lifetime_cooldown.running():
+            self.kill()
             self.on_natural_death()
         if not self._shoots_player: return
         if not self._cooldown.running():
@@ -125,8 +127,6 @@ class Enemy(Entity):
         )
     
     def on_natural_death(self):
-        # default: die and spawn corpse
-        self.kill()
         self._entities_buffer.append(Corpse(self))
 
     def get_health(self): return self._health
@@ -225,7 +225,18 @@ class BossEnemy(Enemy):
             _enemy_type=EnemyType.BOSS,
             _player=_player,
         )
-    
+        self._player_level = _player.get_level()
+        self._player_pos = _player.get_pos()
+        spawn_oil_spills_cooldown = 18. - 1.3 * self._player_level
+        self._spawn_oil_spills_cooldown = Timer(max_time=spawn_oil_spills_cooldown)
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self._spawn_oil_spills_cooldown.tick(time_delta)
+        if not self._spawn_oil_spills_cooldown.running():
+            self.spawn_oil_spills()
+            self._spawn_oil_spills_cooldown.reset()
+
     def shoot(self):
         if random.random() < 0.3:
             self.shoot_homing()
@@ -234,6 +245,13 @@ class BossEnemy(Enemy):
     
     def on_natural_death(self):
         raise ValueError('Bosses should not die naturally.')
+
+    def spawn_oil_spills(self):
+        towards_player = self._player_pos - self._pos
+        self._entities_buffer.append(
+            OilSpill(_pos=self._pos + towards_player * random.uniform(0.5, 1.5), 
+                     _size=OIL_SPILL_SIZE * random.uniform(0.5, 1.7))
+        )
 
 
 ENEMY_TYPE_TO_CLASS = {
