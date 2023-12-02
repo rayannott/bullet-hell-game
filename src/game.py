@@ -12,7 +12,7 @@ from src.projectile import ProjectileType
 from src.utils import Timer, Feedback
 from src.energy_orb import EnergyOrb
 from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined
-from src.enemy import ENEMY_STATS_MAP, ENEMY_TYPE_TO_CLASS
+from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
@@ -91,7 +91,7 @@ class Game:
         )
 
     def spawn_enemy(self, enemy_type: EnemyType):
-        position = self.get_random_screen_position_for_entity(entity_size=ENEMY_STATS_MAP[enemy_type].size)
+        position = self.get_random_screen_position_for_entity(entity_size=ENEMY_SIZE_MAP[enemy_type])
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
                 _pos=position,

@@ -11,8 +11,9 @@ from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile
 from src.oil_spill import OilSpill
 from front.utils import random_unit_vector
 
-from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE,
-    ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD)
+from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, 
+    ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
+    ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE)
 
 
 @dataclass
@@ -27,33 +28,12 @@ class EnemyStats:
     damage_on_collision: float
 
 
-ENEMY_STATS_MAP = {
-    # size, color, speed, health, shoot_cooldown, reward
-    EnemyType.BASIC: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE, color=Color('red'), speed=ENEMY_DEFAULT_SPEED, 
-        health=ENEMY_DEFAULT_MAX_HEALTH, 
-        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
-        reward=ENEMY_DEFAULT_REWARD, lifetime=ENEMY_DEFAULT_LIFETIME, damage_on_collision=60.),
-    EnemyType.FAST: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE * 0.85, color=Color('#ad2f52'), speed=ENEMY_DEFAULT_SPEED * 1.7, 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 0.8, 
-        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
-        reward=ENEMY_DEFAULT_REWARD * 1.2, lifetime=ENEMY_DEFAULT_LIFETIME, damage_on_collision=70),
-    EnemyType.TANK: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE * 1.8, color=Color('#9e401e'), speed=ENEMY_DEFAULT_SPEED * 0.7, 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 4., 
-        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0,
-        reward=ENEMY_DEFAULT_REWARD * 1.8, lifetime=ENEMY_DEFAULT_LIFETIME, damage_on_collision=80),
-    EnemyType.ARTILLERY: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE * 2, color=Color('#005c22'), speed=0., 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 2.5, 
-        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4,
-        reward=ENEMY_DEFAULT_REWARD * 2.5, lifetime=ENEMY_DEFAULT_LIFETIME, damage_on_collision=80.),
-    EnemyType.BOSS: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE * 2.7, color=Color('#510e78'), speed=ENEMY_DEFAULT_SPEED, 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 5., 
-        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
-        reward=ENEMY_DEFAULT_REWARD * 5., lifetime=math.inf, damage_on_collision=math.inf),
+ENEMY_SIZE_MAP = {
+    EnemyType.BASIC: ENEMY_DEFAULT_SIZE,
+    EnemyType.FAST: ENEMY_DEFAULT_SIZE * 0.85,
+    EnemyType.TANK: ENEMY_DEFAULT_SIZE * 1.8,
+    EnemyType.ARTILLERY: ENEMY_DEFAULT_SIZE * 2,
+    EnemyType.BOSS: ENEMY_DEFAULT_SIZE * 2.7,
 }
 
 
@@ -61,29 +41,35 @@ class Enemy(Entity):
     def __init__(self, 
             _pos: Vector2,
             _enemy_type: EnemyType,
-            _player: Player,
+            _color: Color,
+            _speed: float,
+            _health: float,
+            _shoot_cooldown: float,
+            _reward: float,
+            _lifetime: float,
+            _damage_on_collision: float,
+            _player: Player,     
         ):
-        stats = ENEMY_STATS_MAP[_enemy_type]
         super().__init__(
             _pos=_pos,
             _type=EntityType.ENEMY,
-            _size=stats.size,
-            _speed=stats.speed, 
-            _color=stats.color,
+            _size=ENEMY_SIZE_MAP[_enemy_type],
+            _speed=_speed, 
+            _color=_color,
             _can_spawn_entities=True,
             _homing_target=_player,
         )
-        # TODO move stats to classes below
-        self._health = Slider(stats.health)
-        self._cooldown = Timer(max_time=stats.shoot_cooldown)
-        self._lifetime_cooldown = Timer(max_time=stats.lifetime)
-        self._reward = stats.reward
+        # TODO move _to classes below
+        self._health = Slider(_health)
+        self._cooldown = Timer(max_time=_shoot_cooldown)
+        self._lifetime_cooldown = Timer(max_time=_lifetime)
+        self._reward = _reward
         self._enemy_type = _enemy_type
         self._spread = 0.5 # in radians
         self._damage = ENEMY_DEFAULT_DAMAGE
         self._damage_spread = ENEMY_DEFAULT_DAMAGE_SPREAD
 
-        self._damage_on_collision = stats.damage_on_collision
+        self._damage_on_collision = _damage_on_collision
         self._shoots_player = True
         
     
@@ -163,6 +149,13 @@ class BasicEnemy(Enemy):
             _pos=_pos,
             _enemy_type=EnemyType.BASIC,
             _player=_player,
+            _color=Color('red'),
+            _speed=ENEMY_DEFAULT_SPEED,
+            _health=ENEMY_DEFAULT_MAX_HEALTH,
+            _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
+            _reward=ENEMY_DEFAULT_REWARD,
+            _lifetime=ENEMY_DEFAULT_LIFETIME,
+            _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE,
         )
 
 
@@ -176,6 +169,13 @@ class FastEnemy(Enemy):
             _pos=_pos,
             _enemy_type=EnemyType.FAST,
             _player=_player,
+            _color=Color('#ad2f52'),
+            _speed=ENEMY_DEFAULT_SPEED * 1.7,
+            _health=ENEMY_DEFAULT_MAX_HEALTH * 0.8,
+            _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
+            _reward=ENEMY_DEFAULT_REWARD * 1.2,
+            _lifetime=ENEMY_DEFAULT_LIFETIME,
+            _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.15,
         )
         self._shoots_player = False
 
@@ -190,6 +190,13 @@ class TankEnemy(Enemy):
             _pos=_pos,
             _enemy_type=EnemyType.TANK,
             _player=_player,
+            _color=Color('#9e401e'),
+            _speed=ENEMY_DEFAULT_SPEED * 0.6,
+            _health=ENEMY_DEFAULT_MAX_HEALTH * 3.5,
+            _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0,
+            _reward=ENEMY_DEFAULT_REWARD * 1.8,
+            _lifetime=ENEMY_DEFAULT_LIFETIME,
+            _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.4,
         )
         self._player_level = _player.get_level()
         self._spread = 1.4
@@ -225,6 +232,13 @@ class ArtilleryEnemy(Enemy):
             _pos=_pos,
             _enemy_type=EnemyType.ARTILLERY,
             _player=_player,
+            _color=Color('#005c22'),
+            _speed=0.,
+            _health=ENEMY_DEFAULT_MAX_HEALTH * 2.5,
+            _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4,
+            _reward=ENEMY_DEFAULT_REWARD * 2.5,
+            _lifetime=ENEMY_DEFAULT_LIFETIME,
+            _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.3,
         )
     
     def shoot(self):
@@ -248,6 +262,13 @@ class BossEnemy(Enemy):
             _pos=_pos,
             _enemy_type=EnemyType.BOSS,
             _player=_player,
+            _color=Color('#510e78'),
+            _speed=ENEMY_DEFAULT_SPEED,
+            _health=ENEMY_DEFAULT_MAX_HEALTH * 5.,
+            _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
+            _reward=ENEMY_DEFAULT_REWARD * 5.,
+            _lifetime=math.inf,
+            _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
         )
         self._player_level = _player.get_level()
         self._player_pos = _player.get_pos()
