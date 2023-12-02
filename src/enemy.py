@@ -6,7 +6,7 @@ from front.utils import random_unit_vector
 
 from src import Entity, Corpse, EntityType, EnemyType, Slider, Player, Timer, Projectile, HomingProjectile, ProjectileType
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_LIFETIME,
-    ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD)
+    ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD)
 
 
 @dataclass
@@ -29,7 +29,7 @@ ENEMY_STATS_MAP = {
         shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
         reward=ENEMY_DEFAULT_REWARD, lifetime=ENEMY_DEFAULT_LIFETIME, damage_on_collision=60.),
     EnemyType.FAST: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE * 0.8, color=Color('#912644'), speed=ENEMY_DEFAULT_SPEED * 1.8, 
+        size=ENEMY_DEFAULT_SIZE * 0.85, color=Color('#ad2f52'), speed=ENEMY_DEFAULT_SPEED * 1.7, 
         health=ENEMY_DEFAULT_MAX_HEALTH * 0.8, 
         shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
         reward=ENEMY_DEFAULT_REWARD * 1.2, lifetime=ENEMY_DEFAULT_LIFETIME, damage_on_collision=70),
@@ -72,9 +72,12 @@ class Enemy(Entity):
         self._cooldown = Timer(max_time=stats.shoot_cooldown)
         self._lifetime_cooldown = Timer(max_time=stats.lifetime)
         self._reward = stats.reward
-        self._damage_on_collision = stats.damage_on_collision
         self._enemy_type = _enemy_type
         self._spread = 0.5 # in radians
+        self._damage = ENEMY_DEFAULT_DAMAGE
+        self._damage_spread = ENEMY_DEFAULT_DAMAGE_SPREAD
+
+        self._damage_on_collision = stats.damage_on_collision
         self._shoots_player = True
     
     def get_shoot_direction(self) -> Vector2:
@@ -101,10 +104,11 @@ class Enemy(Entity):
         direction = self.get_shoot_direction()
         self._entities_buffer.append(
             Projectile(
-                _pos=self._pos.copy() + direction * self._size * 1.5,
+                _pos=self._pos.copy() + direction * (self._size * random.uniform(1.5, 2.5)),
                 _vel=direction,
+                _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
                 _projectile_type=ProjectileType.NORMAL,
-                _speed=self._speed + PROJECTILE_DEFAULT_SPEED,
+                _speed=self._speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
             )
         )
     
@@ -112,9 +116,10 @@ class Enemy(Entity):
         direction = self.get_shoot_direction()
         self._entities_buffer.append(
             HomingProjectile(
-                _pos=self._pos.copy() + direction * self._size * 1.5,
+                _pos=self._pos.copy() + direction * (self._size * random.uniform(1.5, 2.5)),
                 _vel=direction,
-                _speed=self._speed + PROJECTILE_DEFAULT_SPEED,
+                _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
+                _speed=self._speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
                 _homing_target=self._homing_target,
             )
         )
@@ -173,6 +178,17 @@ class TankEnemy(Enemy):
         num_shots = random.randint(2, 5)
         for _ in range(num_shots):
             self.shoot_normal()
+    
+    def on_natural_death(self):
+        super().on_natural_death()
+        # spawn some basic enemies
+        for _ in range(random.randint(1, 3)):
+            self._entities_buffer.append(
+                BasicEnemy(
+                    _pos=self._pos + random_unit_vector() * self._size * 1.5,
+                    _player=self._homing_target, # type: ignore
+                )
+            )
 
 
 class ArtilleryEnemy(Enemy):
@@ -189,6 +205,12 @@ class ArtilleryEnemy(Enemy):
     
     def shoot(self):
         self.shoot_homing()
+    
+    def on_natural_death(self):
+        super().on_natural_death()
+        # spawn some homing projectiles
+        for _ in range(random.randint(1, 3)):
+            self.shoot_homing()
 
 
 class BossEnemy(Enemy):
