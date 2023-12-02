@@ -22,9 +22,9 @@ class RenderManager:
         self.entities_drawn = 0
     
     def render(self):
-        self.draw_player()
         for entity in self.game.all_entities_iter(with_player=False):
             self.draw_entity(entity)
+        self.draw_player()
         if self.debug:
             font.render_to(self.surface, self.rel_rect, 
                 f'[fps {self.game.get_last_fps():.1f}] [entd {self.entities_drawn}]',
