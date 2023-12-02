@@ -5,11 +5,21 @@ from typing import Generator
 import pygame
 from pygame import Vector2, Color
 
-from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
+from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType, ProjectileType, Feedback
 from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined
-from src.enemy import ENEMY_STATS_MAP, BasicEnemy, TankEnemy, ArtilleryEnemy, BossEnemy, FastEnemy, ENEMY_TYPE_TO_CLASS
+from src.enemy import ENEMY_STATS_MAP, ENEMY_TYPE_TO_CLASS
+
+
+def get_enemy_type_prob_weights(level: int) -> dict[EnemyType, float]:
+    return {
+        EnemyType.BASIC: 200,
+        EnemyType.FAST: (level - 1) * 10,
+        EnemyType.ARTILLERY: level * 8,
+        EnemyType.TANK: 10 + level * 5,
+        EnemyType.BOSS: 0.,
+    }
 
 
 class Game:
@@ -51,7 +61,7 @@ class Game:
         self._level += 1
         self.player.new_level()
         self.spawn_enemy(EnemyType.BOSS)
-        self.current_spawn_enemy_cooldown *= 0.92
+        self.current_spawn_enemy_cooldown *= 0.93
         return True
     
     def spawn_energy_orb(self):
@@ -74,16 +84,10 @@ class Game:
     
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
-        TYPE_WEIGHTS = {
-            EnemyType.BASIC: 150,
-            EnemyType.FAST: 20,
-            EnemyType.ARTILLERY: 10,
-            EnemyType.TANK: 20,
-            EnemyType.BOSS: 0.,
-        }
+        type_weights = get_enemy_type_prob_weights(level=self._level)
         enemy_type = random.choices(
-            list(TYPE_WEIGHTS.keys()), 
-            list(TYPE_WEIGHTS.values()), 
+            list(type_weights.keys()), 
+            list(type_weights.values()), 
         k=1)[0]
         self.spawn_enemy(enemy_type)
 
@@ -185,6 +189,7 @@ class Game:
                 self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
                 entity.kill()
                 self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
+                self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
                 self.reason_of_death = f'collided with {ent_type.name.title()}'
                 if ent_type == EntityType.ENEMY:
                     self.reason_of_death += f'::{entity._enemy_type.name.title()}' # type: ignore
