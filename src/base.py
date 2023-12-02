@@ -103,5 +103,6 @@ class Corpse(Entity):
             _size=_of_entity.get_size() * 1.5, # make the corpse a bit bigger than the entity
             _color=Color('gray'),
         )
+        self._damage_on_collision = 70.
 
     def update(self, time_delta: float): return super().update(time_delta)
