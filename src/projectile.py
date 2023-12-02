@@ -46,6 +46,54 @@ class Projectile(Entity):
             self.kill()
 
 
+class ExplosiveProjectile(Projectile):
+    def __init__(self, 
+            _pos: Vector2,
+            _vel: Vector2,
+            _num_subprojectiles: int = 6,
+            _damage: float = PROJECTILE_DEFAULT_DAMAGE,
+            _speed: float = PROJECTILE_DEFAULT_SPEED * 0.8,
+            _lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
+            _homing_target: Entity | None = None,
+        ):
+        super().__init__(
+            _pos=_pos,
+            _vel=_vel,
+            _projectile_type=ProjectileType.EXPLOSIVE,
+            _damage=_damage,
+            _speed=_speed,
+            _lifetime=_lifetime,
+            _homing_target=_homing_target,
+        )
+        self._num_subprojectiles = _num_subprojectiles
+        self._can_spawn_entities = True
+        self._homing_target = _homing_target
+        self._render_trail = False
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        if not self._is_alive: return
+        self._life_timer.tick(time_delta)
+        if not self._life_timer.running():
+            self.kill()
+            self.on_natural_death()
+    
+    def on_natural_death(self):
+        N = self._num_subprojectiles
+        for i in range(N):
+            direction = Vector2(1., 0.).rotate(i * 360. / N)
+            self._entities_buffer.append(
+                Projectile(
+                    _pos=self._pos.copy() + direction * (self._size * 1.5),
+                    _vel=direction,
+                    _damage=self._damage,
+                    _projectile_type=ProjectileType.NORMAL,
+                    _speed=self._speed,
+                    _lifetime=self._lifetime * 0.8,
+                )
+            )
+
+
 class HomingProjectile(Projectile):
     def __init__(self, 
             _pos: Vector2, 

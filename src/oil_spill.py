@@ -14,7 +14,7 @@ class OilSpill(Entity):
             _speed=0.,
             _render_trail=False,
             _can_spawn_entities=False,
-            _color=Color('#403412'),
+            _color=Color('#453820'),
         )
         self._lifetime_timer = Timer(max_time=OIL_SPILL_LIFETIME)
 

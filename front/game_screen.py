@@ -10,6 +10,7 @@ from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
 from src.enums import EnemyType
+from src.oil_spill import OilSpill
 
 
 class GameScreen(Screen):
@@ -34,6 +35,11 @@ class GameScreen(Screen):
                 print('--- debug ---')
                 print(repr(self.game.player))
                 self.game.spawn_enemy(enemy_type=EnemyType.BOSS)
+                # self.game.add_entity(
+                #     OilSpill(
+                #         _pos=Vector2(400, 400)
+                #     )
+                # )
                 print('-'*10)
         super().process_ui_event(event)
 

@@ -4,7 +4,8 @@ import random
 from pygame import Vector2, Color
 from front.utils import random_unit_vector
 
-from src import Entity, Corpse, EntityType, EnemyType, Slider, Player, Timer, Projectile, HomingProjectile, ProjectileType
+from src import Entity, Corpse, EntityType, EnemyType, Slider, Player, Timer, ProjectileType
+from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile
 from src.oil_spill import OilSpill
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE,
     ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD)
@@ -80,6 +81,7 @@ class Enemy(Entity):
 
         self._damage_on_collision = stats.damage_on_collision
         self._shoots_player = True
+        
     
     def get_shoot_direction(self) -> Vector2:
         rot_angle = random.uniform(-self._spread, self._spread) if self._spread else 0.
@@ -123,6 +125,19 @@ class Enemy(Entity):
                 _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
                 _speed=self._speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
                 _homing_target=self._homing_target,
+            )
+        )
+
+    def shoot_explosive(self, num_of_subprojectiles: int = 6):
+        direction = self.get_shoot_direction()
+        self._entities_buffer.append(
+            ExplosiveProjectile(
+                _pos=self._pos.copy() + direction * (self._size * random.uniform(1.5, 2.5)),
+                _vel=direction,
+                _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
+                _speed=self._speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
+                _num_subprojectiles=num_of_subprojectiles,
+                # _homing_target=self._homing_target,
             )
         )
     
@@ -172,16 +187,21 @@ class TankEnemy(Enemy):
             _enemy_type=EnemyType.TANK,
             _player=_player,
         )
+        self._player_level = _player.get_level()
         self._spread = 1.4
     
     def shoot(self):
+        """Shoots in bursts with probability 0.5 and explosive projectiles with probability 0.5."""
+        if random.random() < 0.5:
+            num_shots = 3 + self._player_level
+            self.shoot_explosive(num_of_subprojectiles=num_shots)
+            return
         num_shots = random.randint(2, 5)
         for _ in range(num_shots):
             self.shoot_normal()
     
     def on_natural_death(self):
         super().on_natural_death()
-        # spawn some basic enemies
         for _ in range(random.randint(1, 3)):
             self._entities_buffer.append(
                 BasicEnemy(
