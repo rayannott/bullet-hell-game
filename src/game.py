@@ -5,11 +5,17 @@ from typing import Generator
 import pygame
 from pygame import Vector2, Color
 
-from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
-    INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
-from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType, ProjectileType, Feedback
+from src.entity import Entity, DummyEntity
+from src.player import Player
+from src.enums import EntityType, EnemyType, ProjectileType
+from src.projectile import ProjectileType
+from src.utils import Timer, Feedback
+from src.energy_orb import EnergyOrb
 from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined
 from src.enemy import ENEMY_STATS_MAP, ENEMY_TYPE_TO_CLASS
+
+from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
+    INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 
 
 def get_enemy_type_prob_weights(level: int) -> dict[EnemyType, float]:
@@ -229,6 +235,8 @@ class Game:
                         self.player.get_stats().ENERGY_COLLECTED += reward
                         print('enemy killed')
                         self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
+        
+        # TODO enemy-enemy collisions: enemies should not collide with each other
 
     def add_entity(self, entity: Entity) -> None:
         self.entities[entity.get_type()].append(entity)

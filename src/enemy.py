@@ -2,11 +2,15 @@ from dataclasses import dataclass
 import math
 import random
 from pygame import Vector2, Color
-from front.utils import random_unit_vector
 
-from src import Entity, Corpse, EntityType, EnemyType, Slider, Player, Timer, ProjectileType
+from src.entity import Entity, Corpse
+from src.enums import EntityType, EnemyType, ProjectileType
+from src.player import Player
+from src.utils import Slider, Timer
 from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile
 from src.oil_spill import OilSpill
+from front.utils import random_unit_vector
+
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE,
     ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN, ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD)
 

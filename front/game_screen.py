@@ -4,13 +4,14 @@ import pygame
 from pygame import Color, Vector2
 import pygame_gui
 
-from src import Game, Feedback
+from src.utils import Feedback
+from src.game import Game
+from src.enums import EnemyType
+
 from front.screen import Screen
 from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
-from src.enums import EnemyType
-from src.oil_spill import OilSpill
 
 
 class GameScreen(Screen):

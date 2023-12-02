@@ -3,14 +3,13 @@ Abstract classes and enumerators for the game.
 """
 from abc import ABC, abstractmethod
 from collections import deque
-from dataclasses import field
 from typing import Optional
 import pygame
 
 from pygame import Vector2, Color
 
+from src.enums import EntityType
 from config import TRAIL_MAX_LENGTH
-from src import EntityType
 
 
 class Entity(ABC):

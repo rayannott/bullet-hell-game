@@ -3,12 +3,16 @@ import math
 import pygame, pygame_gui
 from pygame import Color, freetype
 
+from src.game import Game
+from src.entity import Entity
+from src.utils import Slider
+from src.enums import EntityType
+from front.utils import ColorGradient
+from config import PLAYER_SHOT_COST
+
 freetype.init()
 font = freetype.SysFont('Arial', 20)
 
-from src import Entity, Slider, PLAYER_SHOT_COST, Game
-from front.utils import ColorGradient
-from src.enums import EntityType, EnemyType
 
 
 class RenderManager:

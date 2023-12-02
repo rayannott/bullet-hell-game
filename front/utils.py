@@ -4,7 +4,7 @@ import random
 import pygame, pygame_gui
 from pygame import Color, Vector2
 
-from src import Slider, Timer
+from src.utils import Slider, Timer
 
 
 def paint(text: str, color: Color, size: int = 4) -> str:

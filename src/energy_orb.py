@@ -1,7 +1,8 @@
 from pygame import Color, Vector2
 
+from src.entity import Entity, EntityType
+from src.utils import Timer
 from config import ENERGY_ORB_SIZE
-from src import Entity, EntityType, Timer
 
 
 class EnergyOrb(Entity): # TODO: change this to EntityLifetime

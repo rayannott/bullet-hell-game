@@ -1,6 +1,8 @@
 from pygame import Vector2, Color
 
-from src import Entity, EntityType, ProjectileType, Timer
+from src.entity import Entity
+from src.enums import EntityType, ProjectileType
+from src.utils import Timer
 from config import (PROJECTILE_DEFAULT_SIZE, PROJECTILE_DEFAULT_DAMAGE,
                         PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME)
 

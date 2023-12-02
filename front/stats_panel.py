@@ -1,9 +1,9 @@
 import pygame, pygame_gui
 from pygame import Color
 
-from config import SM, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE
+from src.game import Game
 from front.utils import ProgressBar
-from src import Game
+from config import SM, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE
 
 
 class StatsPanel:

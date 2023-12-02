@@ -1,9 +1,10 @@
-from src.base import Entity
+from pygame import Vector2, Color
+
+from src.entity import Entity
 from src.enums import EntityType
 from src.utils import Timer
 from config import OIL_SPILL_SIZE, OIL_SPILL_LIFETIME, OIL_SPILL_SIZE_GROWTH_RATE
 
-from pygame import Vector2, Color
 
 class OilSpill(Entity):
     def __init__(self, _pos: Vector2, _size: float = OIL_SPILL_SIZE):

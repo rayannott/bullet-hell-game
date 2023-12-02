@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 import random
+
 from pygame import Vector2
 
-from src import Entity, EntityType, Slider, Stats, Timer
+from src.entity import Entity
+from src.enums import EntityType, ProjectileType
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined
-from src.enums import ProjectileType
 from src.projectile import Projectile
+from src.utils import Stats, Slider, Timer
+
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,

@@ -1,7 +1,7 @@
 import pygame
 import pygame_gui
 
-from front import Screen
+from front.screen import Screen
 from front.game_screen import GameScreen
 from config import MENU_BUTTONS_SIZE
 

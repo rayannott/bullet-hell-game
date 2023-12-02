@@ -1,6 +1,6 @@
 import pygame
 
-from front import MenuScreen
+from front.menu_screen import MenuScreen
 
 
 def main():
