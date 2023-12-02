@@ -1,6 +1,7 @@
 from collections import defaultdict, deque
 import random
 from typing import Generator
+import itertools
 
 import pygame
 from pygame import Vector2, Color
@@ -74,10 +75,15 @@ class Game:
     def toggle_pause(self) -> None: self._paused = not self._paused
 
     def new_level(self):
+        print('new wave!')
+        if any(ent._enemy_type == EnemyType.BOSS for ent in self.entities[EntityType.ENEMY]): # type: ignore
+            print('OOPS: boss still alive')
+            return
+        self.spawn_enemy(EnemyType.BOSS)
         if self._level >= GAME_MAX_LEVEL: return False
+        print('new level:', self._level)
         self._level += 1
         self.player.new_level()
-        self.spawn_enemy(EnemyType.BOSS)
         self.current_spawn_enemy_cooldown *= 0.93
         return True
     
@@ -237,6 +243,14 @@ class Game:
                         self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
         
         # TODO enemy-enemy collisions: enemies should not collide with each other
+        MULT = 0.4
+        for enem1, enem2 in itertools.combinations(self.entities[EntityType.ENEMY], 2):
+            if enem1.intersects(enem2):
+                if enem1.intersects(enem2):
+                    vec_between = enem2.get_pos() - enem1.get_pos() # 1 -> 2
+                    # delta = (enem1.get_size() + enem2.get_size()) - vec_between.magnitude()
+                    # vec_between.scale_to_length(delta / 2. * 1.3)
+                    enem1._pos -= vec_between * MULT; enem2._pos += vec_between * MULT
 
     def add_entity(self, entity: Entity) -> None:
         self.entities[entity.get_type()].append(entity)
