@@ -25,6 +25,8 @@ class StatsPanel:
             manager=manager,
             parent_element=self.panel
         )
+        # TODO: replace this with just text like in drawing debug
+        # TODO  or make it transparent
         self.stats_textbox = pygame_gui.elements.UITextBox(
             html_text='',
             relative_rect=pygame.Rect(SM, 2*SM + GAME_HEALTH_BAR_SIZE[1] + GAME_ENERGY_BAR_SIZE[1], *GAME_STATS_TEXTBOX_SIZE),
@@ -36,6 +38,7 @@ class StatsPanel:
         player = game.player
         self.health_bar.set_slider(player.get_health())
         self.energy_bar.set_slider(player.get_energy())
+        # TODO: choose more interesting stats
         STATS_LABELS = ['time', 'level', 'enemies killed', 'accuracy', 'orbs collected', 'damage dealt', 'damage taken']
         STATS_VALUES = [game._time, game._level, player._stats.ENEMIES_KILLED, player._stats.get_accuracy(), player._stats.ENERGY_ORBS_COLLECTED, player._stats.DAMAGE_DEALT, player._stats.DAMAGE_TAKEN]
         FORMATS = ['.1f', 'd', 'd', '.1%', 'd', '.0f', '.0f']

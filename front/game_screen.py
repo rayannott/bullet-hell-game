@@ -54,6 +54,9 @@ class GameScreen(Screen):
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 self.game.player_try_shooting()
+            elif event.button == 3:
+                # TODO: come up with an extra ability
+                ...
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
