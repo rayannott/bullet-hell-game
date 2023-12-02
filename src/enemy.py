@@ -59,7 +59,6 @@ class Enemy(Entity):
             _can_spawn_entities=True,
             _homing_target=_player,
         )
-        # TODO move _to classes below
         self._health = Slider(_health)
         self._cooldown = Timer(max_time=_shoot_cooldown)
         self._lifetime_cooldown = Timer(max_time=_lifetime)
@@ -173,7 +172,7 @@ class FastEnemy(Enemy):
             _speed=ENEMY_DEFAULT_SPEED * 1.7,
             _health=ENEMY_DEFAULT_MAX_HEALTH * 0.8,
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
-            _reward=ENEMY_DEFAULT_REWARD * 1.2,
+            _reward=ENEMY_DEFAULT_REWARD * 1.5,
             _lifetime=ENEMY_DEFAULT_LIFETIME,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.15,
         )
@@ -194,7 +193,7 @@ class TankEnemy(Enemy):
             _speed=ENEMY_DEFAULT_SPEED * 0.6,
             _health=ENEMY_DEFAULT_MAX_HEALTH * 3.5,
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0,
-            _reward=ENEMY_DEFAULT_REWARD * 1.8,
+            _reward=ENEMY_DEFAULT_REWARD * 2.5,
             _lifetime=ENEMY_DEFAULT_LIFETIME,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.4,
         )
@@ -236,7 +235,7 @@ class ArtilleryEnemy(Enemy):
             _speed=0.,
             _health=ENEMY_DEFAULT_MAX_HEALTH * 2.5,
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4,
-            _reward=ENEMY_DEFAULT_REWARD * 2.5,
+            _reward=ENEMY_DEFAULT_REWARD * 2.,
             _lifetime=ENEMY_DEFAULT_LIFETIME,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.3,
         )
@@ -258,20 +257,20 @@ class BossEnemy(Enemy):
             _pos: Vector2,
             _player: Player,
         ):
+        self._player_level = _player.get_level()
+        self._player_pos = _player.get_pos()
         super().__init__(
             _pos=_pos,
             _enemy_type=EnemyType.BOSS,
             _player=_player,
             _color=Color('#510e78'),
             _speed=ENEMY_DEFAULT_SPEED,
-            _health=ENEMY_DEFAULT_MAX_HEALTH * 5.,
+            _health=(ENEMY_DEFAULT_MAX_HEALTH) * 5. + 30. * self._player_level,
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
-            _reward=ENEMY_DEFAULT_REWARD * 5.,
+            _reward=ENEMY_DEFAULT_REWARD * 3.7,
             _lifetime=math.inf,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
         )
-        self._player_level = _player.get_level()
-        self._player_pos = _player.get_pos()
         spawn_oil_spills_cooldown = 18. - 1.3 * self._player_level
         self._spawn_oil_spills_cooldown = Timer(max_time=spawn_oil_spills_cooldown)
 
