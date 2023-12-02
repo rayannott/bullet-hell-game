@@ -24,7 +24,7 @@ ENEMY_STATS_MAP = {
         size=ENEMY_DEFAULT_SIZE, color=Color('red'), speed=ENEMY_DEFAULT_SPEED, 
         health=ENEMY_DEFAULT_MAX_HEALTH, shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD),
     EnemyType.FAST: EnemyStats(
-        size=ENEMY_DEFAULT_SIZE * 0.9, color=Color('#912644'), speed=ENEMY_DEFAULT_SPEED * 1.8, 
+        size=ENEMY_DEFAULT_SIZE * 1.2, color=Color('#912644'), speed=ENEMY_DEFAULT_SPEED * 1.8, 
         health=ENEMY_DEFAULT_MAX_HEALTH * 0.8, shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD * 1.2),
     EnemyType.TANK: EnemyStats(
         size=ENEMY_DEFAULT_SIZE * 1.8, color=Color('#9e401e'), speed=ENEMY_DEFAULT_SPEED * 0.8, 

@@ -4,8 +4,8 @@ import logging
 import pygame
 import pygame_gui
 
-from screens import Screen
-from screens.game_screen import GameScreen
+from front import Screen
+from front.game_screen import GameScreen
 from config import setup_logging, MENU_BUTTONS_SIZE
 setup_logging('DEBUG')
 

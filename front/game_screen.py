@@ -7,8 +7,8 @@ from pygame import Color, Vector2
 import pygame_gui
 
 from src import Game, Slider, ColorGradient, Entity, EntityType, EnemyType, Player, Timer, Feedback, paint
-from screens.screen import Screen
-from screens.render_manager import RenderManager
+from front.screen import Screen
+from front.render_manager import RenderManager
 from config import (setup_logging, SM, BM,
     MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, PLAYER_SHOT_COST,
     GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
