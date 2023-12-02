@@ -51,6 +51,8 @@ class Screen(ABC):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.is_running = False
+                if event.type == pygame.QUIT:
+                    self.is_running = False
                 self.process_ui_event(event)
                 if not self.manager.process_events(event):
                     self.process_event(event)
