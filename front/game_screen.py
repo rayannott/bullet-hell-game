@@ -1,4 +1,4 @@
-from typing import Literal, override
+from typing import Literal
 
 import pygame
 from pygame import Color, Vector2

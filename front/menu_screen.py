@@ -1,5 +1,3 @@
-from typing import override
-
 import pygame
 import pygame_gui
 
