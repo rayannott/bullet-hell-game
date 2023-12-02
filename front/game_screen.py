@@ -17,6 +17,9 @@ from front.stats_panel import StatsPanel
 class GameScreen(Screen):
     def __init__(self, surface: pygame.Surface):
         super().__init__(surface)
+        self.setup_game(surface)
+    
+    def setup_game(self, surface: pygame.Surface):
         self.screen_rectangle = self.surface.get_rect()
         self.game = Game(self.screen_rectangle)
         self.stats_panel = StatsPanel(surface, self.manager)
@@ -32,15 +35,12 @@ class GameScreen(Screen):
             if event.key == pygame.K_p: self.game.toggle_pause()
             elif event.key == pygame.K_F1:
                 self.toggle_debug()
+            elif event.key == pygame.K_F5:
+                self.setup_game(self.surface)
             elif event.key == pygame.K_d:
                 print('--- debug ---')
                 print(repr(self.game.player))
                 self.game.spawn_enemy(enemy_type=EnemyType.BOSS)
-                # self.game.add_entity(
-                #     OilSpill(
-                #         _pos=Vector2(400, 400)
-                #     )
-                # )
                 print('-'*10)
         super().process_ui_event(event)
 
