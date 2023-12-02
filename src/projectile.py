@@ -12,8 +12,9 @@ PROJECTILE_COLOR_MAP = {
     ProjectileType.EXPLOSIVE: Color('#598c15'),
 }
 
-
-class Projectile(Entity): # TODO: change this to EntityLifetime
+# TODO: add a projectile type that does something 
+# TODO  on a natural death (e.g. explosive, oil spill, etc.)
+class Projectile(Entity):
     def __init__(self, 
             _pos: Vector2, 
             _vel: Vector2,

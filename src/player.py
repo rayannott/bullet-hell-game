@@ -38,6 +38,7 @@ class Player(Entity):
 
         # this t is a parameter that controls the speed of the player based on the distance from the gravity point
         # it is non-linear so that it's the player is not too slow when close to the gravity point
+        # TODO: fix this to be similar to the old version
         t = math.sqrt(((self._pos - self._gravity_point).magnitude() + 10.) / 1500.)
         e_percent = self._energy.get_percent_full()
         coef_energy = 0.8 if e_percent < 0.2 else 1.
