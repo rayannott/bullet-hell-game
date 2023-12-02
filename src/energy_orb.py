@@ -17,7 +17,7 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
             _pos=_pos,
             _type=EntityType.ENERGY_ORB,
             _size=ENERGY_ORB_SIZE,
-            _color=Color('magenta'),
+            _color=Color('#f014a0'),
             _render_trail=False
         )
         self._energy = _energy
