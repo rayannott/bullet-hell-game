@@ -14,7 +14,6 @@ class Stats:
     DAMAGE_TAKEN: float = 0.
     DAMAGE_DEALT: float = 0.
     ENERGY_COLLECTED: float = 0.
-    # TODO: add more stats
 
     def get_accuracy(self) -> float:
         return self.ACCURATE_SHOTS / self.PROJECTILES_FIRED if self.PROJECTILES_FIRED > 0 else 0.
