@@ -102,6 +102,7 @@ class Player(Entity):
         # other effects
         if self.effect_flags.OIL_SPILL:
             self._health.change(-OIL_SPILL_DAMAGE_PER_SECOND * time_delta)
+            self.get_stats().OIL_SPILL_TIME_SPENT += time_delta
         self._shoot_cooldown_timer.tick(time_delta)
 
     def is_on_cooldown(self) -> bool:

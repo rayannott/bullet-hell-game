@@ -14,7 +14,6 @@ freetype.init()
 font = freetype.SysFont('Arial', 20)
 
 
-
 class RenderManager:
     HP_COLOR_GRADIENT = (Color('red'), Color('green'))
     def __init__(self, surface: pygame.Surface, manager: pygame_gui.UIManager, game: Game, debug: bool = False):
@@ -26,8 +25,20 @@ class RenderManager:
         self.entities_drawn = 0
     
     def render(self):
-        for entity in self.game.all_entities_iter(with_player=False):
-            self.draw_entity(entity)
+        for oil_spill in self.game.oil_spills():
+            self.draw_entity_basics(oil_spill)
+        for projectile in self.game.projectiles():
+            self.draw_entity_basics(projectile)
+        for enemy in self.game.enemies():
+            self.draw_entity_basics(enemy)
+            self.draw_entity_circular_status_bar(enemy, enemy.get_health(),
+                enemy.get_size() * 1.5, color=Color('green'), draw_full=True, width=2)
+        for energy_orb in self.game.energy_orbs():
+            self.draw_entity_basics(energy_orb)
+            self.draw_entity_circular_status_bar(energy_orb, energy_orb._life_timer.get_slider(reverse=True),
+                energy_orb.get_size() * 2., color=Color('magenta'), draw_full=True, width=1)
+        for corpse in self.game.corpses():
+            self.draw_entity_basics(corpse)
         self.draw_player()
         if self.debug:
             font.render_to(self.surface, self.rel_rect, 
@@ -66,7 +77,7 @@ class RenderManager:
 
     def draw_player(self):
         player = self.game.player
-        self.draw_entity(player)
+        self.draw_entity_basics(player)
         self.draw_entity_circular_status_bar(player, player._shoot_cooldown_timer.get_slider(), player.get_size()*2)
         if player.get_energy().get_value() > PLAYER_SHOT_COST:
             pygame.draw.circle(
@@ -77,28 +88,24 @@ class RenderManager:
                 width=2
             )
 
-    def draw_entity(self, entity: Entity):
+    def draw_entity_trail(self, entity: Entity):
+        _trail_len = len(entity._trail)
+        color_gradient = ColorGradient(Color('black'), entity.get_color())
+        for i, pos in enumerate(entity._trail):
+            pygame.draw.circle(
+                self.surface,
+                color_gradient(i / _trail_len),
+                pos,
+                2.,
+                width=1
+            )
+
+    def draw_entity_basics(self, entity: Entity):
         _current_color = entity.get_color()
-        color_gradient = ColorGradient(Color('black'), _current_color)
         pygame.draw.circle(self.surface, _current_color, entity.get_pos(), entity.get_size())
-        this_ent_type = entity.get_type()
-        if this_ent_type == EntityType.ENEMY: # type: ignore
-            self.draw_entity_circular_status_bar(entity, entity.get_health(), # type: ignore
-                entity.get_size() * 1.5, color=Color('green'), draw_full=True, width=2)
-        elif this_ent_type == EntityType.ENERGY_ORB:
-            self.draw_entity_circular_status_bar(entity, entity._life_timer.get_slider(reverse=True), # type: ignore
-                entity.get_size() * 2., color=Color('magenta'), draw_full=True, width=1)
-        if entity._render_trail:
-            _trail_len = len(entity._trail)
-            for i, pos in enumerate(entity._trail):
-                pygame.draw.circle(
-                    self.surface,
-                    color_gradient(i / _trail_len),
-                    pos,
-                    2.,
-                    width=1
-                )
         self.entities_drawn += 1
+        if entity._render_trail:
+            self.draw_entity_trail(entity)
         if self.debug: self.draw_entity_debug(entity)
 
     def set_debug(self, debug: bool):

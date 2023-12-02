@@ -6,14 +6,15 @@ import itertools
 import pygame
 from pygame import Vector2, Color
 
-from src.entity import Entity, DummyEntity
+from src.entity import Corpse, Entity, DummyEntity
+from src.oil_spill import OilSpill
 from src.player import Player
 from src.enums import EntityType, EnemyType, ProjectileType
-from src.projectile import ProjectileType
+from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback
 from src.energy_orb import EnergyOrb
 from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined
-from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS
+from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
@@ -39,10 +40,14 @@ class Game:
         self.feedback_buffer: deque[Feedback] = deque()
         self._last_fps: float = 0.
 
+        # entities:
         self.player = Player(Vector2(*self.screen_rectangle.center))
-        self.entities: defaultdict[EntityType, list[Entity]] = defaultdict(list)
-        # TODO: split entity types into different lists;
-        # TODO  then split the draw methods into different methods for each entity type
+        self.e_dummies: list[DummyEntity] = []
+        self.e_oil_spills: list[OilSpill] = []
+        self.e_corpses: list[Corpse] = []
+        self.e_projectiles: list[Projectile] = []
+        self.e_energy_orbs: list[EnergyOrb] = []
+        self.e_enemies: list[Enemy] = []
 
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
         self.increase_level_timer = Timer(max_time=INCREASE_LEVEL_EVERY)
@@ -51,23 +56,30 @@ class Game:
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
         self.reason_of_death = ''
 
-    @staticmethod
-    def iter_entities(entities: list[Entity], include_dead: bool = False) -> Generator[Entity, None, None]:
-        for ent in entities:
-            if include_dead or ent.is_alive():
-                yield ent
-
     def all_entities_iter(self, 
             with_player: bool = True,
             include_dead: bool = False
         ) -> Generator[Entity, None, None]:
+        yield from self.oil_spills(include_dead)
+        yield from self.corpses(include_dead)
+        yield from self.projectiles(include_dead)
+        yield from self.energy_orbs(include_dead)
+        yield from self.enemies(include_dead)
+        yield from self.dummies(include_dead)
         if with_player: yield self.player
-        yield from self.iter_entities(self.entities[EntityType.OIL_SPILL], include_dead)
-        yield from self.iter_entities(self.entities[EntityType.DUMMY], include_dead)
-        yield from self.iter_entities(self.entities[EntityType.CORPSE], include_dead)
-        yield from self.iter_entities(self.entities[EntityType.PROJECTILE], include_dead)
-        yield from self.iter_entities(self.entities[EntityType.ENERGY_ORB], include_dead)
-        yield from self.iter_entities(self.entities[EntityType.ENEMY], include_dead)
+
+    def oil_spills(self, include_dead: bool = False) -> Generator[OilSpill, None, None]:
+        yield from (ent for ent in self.e_oil_spills if include_dead or ent.is_alive())
+    def corpses(self, include_dead: bool = False) -> Generator[Corpse, None, None]:
+        yield from (ent for ent in self.e_corpses if include_dead or ent.is_alive())
+    def projectiles(self, include_dead: bool = False) -> Generator[Projectile, None, None]:
+        yield from (ent for ent in self.e_projectiles if include_dead or ent.is_alive())
+    def energy_orbs(self, include_dead: bool = False) -> Generator[EnergyOrb, None, None]:
+        yield from (ent for ent in self.e_energy_orbs if include_dead or ent.is_alive())
+    def enemies(self, include_dead: bool = False) -> Generator[Enemy, None, None]:
+        yield from (ent for ent in self.e_enemies if include_dead or ent.is_alive())
+    def dummies(self, include_dead: bool = False) -> Generator[DummyEntity, None, None]:
+        yield from (ent for ent in self.e_dummies if include_dead or ent.is_alive())
 
     def is_running(self) -> bool:
         return self.player.is_alive()
@@ -76,7 +88,7 @@ class Game:
 
     def new_level(self):
         print('new wave!')
-        if any(ent._enemy_type == EnemyType.BOSS for ent in self.entities[EntityType.ENEMY]): # type: ignore
+        if any(ent._enemy_type == EnemyType.BOSS for ent in self.enemies()):
             print('OOPS: boss still alive')
             return
         self.spawn_enemy(EnemyType.BOSS)
@@ -187,86 +199,103 @@ class Game:
     
     def process_collisions(self) -> None:
         # player collides with anything:
-        for entity in self.all_entities_iter(with_player=False):
-            if not entity.intersects(self.player):
-                continue
-            ent_type = entity.get_type()
-            if ent_type == EntityType.ENERGY_ORB:
-                energy_collected: float = entity.energy_left() # type: ignore
-                self.player._energy.change(energy_collected)
-                self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
-                self.player.get_stats().ENERGY_COLLECTED += energy_collected
-                entity.kill()
-                self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color('magenta')))
-            elif ent_type == EntityType.PROJECTILE:
-                damage_taken: float = entity._damage # type: ignore
-                damage_taken_actual = -self.player._health.change(-damage_taken) # type: ignore
-                self.player.get_stats().BULLETS_CAUGHT += 1
-                self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
-                entity.kill()
-                self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2.5, color=pygame.Color('red')))
-                self.reason_of_death = f'caught Bullet::{entity._projectile_type.name.title()}' # type: ignore
-            elif ent_type in {EntityType.ENEMY, EntityType.CORPSE}:
-                damage_on_collision = entity._damage_on_collision # type: ignore
-                damage_taken_actual = -self.player._health.change(-damage_on_collision)
-                self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
-                entity.kill()
-                self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
-                self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
-                self.reason_of_death = f'collided with {ent_type.name.title()}'
-                if ent_type == EntityType.ENEMY:
-                    self.reason_of_death += f'::{entity._enemy_type.name.title()}' # type: ignore
-            elif ent_type == EntityType.OIL_SPILL:
-                self.player.effect_flags.OIL_SPILL = True
-                self.reason_of_death = 'slipped on oil'
+        for eo in self.energy_orbs():
+            if not eo.intersects(self.player): continue
+            energy_collected: float = eo.energy_left()
+            self.player._energy.change(energy_collected)
+            self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
+            self.player.get_stats().ENERGY_COLLECTED += energy_collected
+            eo.kill()
+            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color('magenta')))
+        for projectile in self.projectiles():
+            if not projectile.intersects(self.player): continue
+            damage_taken_actual = -self.player._health.change(-projectile._damage)
+            self.player.get_stats().BULLETS_CAUGHT += 1
+            self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
+            projectile.kill()
+            self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2.5, color=pygame.Color('red')))
+            self.reason_of_death = f'caught Bullet::{projectile._projectile_type.name.title()}'
+        for enemy in self.enemies():
+            if not enemy.intersects(self.player): continue
+            damage_taken_actual = -self.player._health.change(-enemy._damage_on_collision)
+            self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
+            self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
+            enemy.kill()
+            self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
+            self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
+            self.reason_of_death = f'collided with Enemy::{enemy._enemy_type.name.title()}'
+        for corpse in self.corpses():
+            if not corpse.intersects(self.player): continue
+            damage_taken_actual = -self.player._health.change(-corpse._damage_on_collision)
+            self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
+            self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
+            corpse.kill()
+            self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
+            self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
+            self.reason_of_death = f'collided with Corpse'
+        for oil_spill in self.oil_spills():
+            if not oil_spill.intersects(self.player): continue
+            self.player.effect_flags.OIL_SPILL = True
+            self.reason_of_death = 'slipped on oil to death'
 
         # player bullets collide with enemies -> enemies get damage, player gets energy:
-        player_bullets = [el for el in self.entities[EntityType.PROJECTILE] if el._projectile_type == ProjectileType.PLAYER_BULLET] # type: ignore
+        player_bullets = [el for el in self.projectiles() if el._projectile_type == ProjectileType.PLAYER_BULLET]
         for bullet in player_bullets:
-            for enemy in self.entities[EntityType.ENEMY]:
+            for enemy in self.enemies():
                 if bullet.intersects(enemy):
                     bullet.kill()
                     self.player.get_stats().ACCURATE_SHOTS += 1
                     print('accurate shot')
-                    damage_dealt = bullet._damage # type: ignore
-                    damage_dealt_actual = -enemy.get_health().change(-damage_dealt) # type: ignore
+                    damage_dealt = bullet._damage
+                    damage_dealt_actual = -enemy.get_health().change(-damage_dealt)
                     self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
                     self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
                     enemy.update(0.)
                     if not enemy.is_alive():
                         enemy.kill()
-                        reward = enemy.get_reward() # type: ignore
+                        reward = enemy.get_reward()
                         self.player._energy.change(reward)
                         self.player.get_stats().ENEMIES_KILLED += 1
                         self.player.get_stats().ENERGY_COLLECTED += reward
                         print('enemy killed')
                         self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
         
-        # TODO enemy-enemy collisions: enemies should not collide with each other
+        # enemy-enemy collisions
         MULT = 0.4
-        for enem1, enem2 in itertools.combinations(self.entities[EntityType.ENEMY], 2):
+        for enem1, enem2 in itertools.combinations(self.enemies(), 2):
             if enem1.intersects(enem2):
                 if enem1.intersects(enem2):
                     vec_between = enem2.get_pos() - enem1.get_pos() # 1 -> 2
-                    # delta = (enem1.get_size() + enem2.get_size()) - vec_between.magnitude()
-                    # vec_between.scale_to_length(delta / 2. * 1.3)
                     enem1._pos -= vec_between * MULT; enem2._pos += vec_between * MULT
 
     def add_entity(self, entity: Entity) -> None:
-        self.entities[entity.get_type()].append(entity)
+        ent_type = entity.get_type()
+        if ent_type == EntityType.ENERGY_ORB:
+            self.e_energy_orbs.append(entity) # type: ignore
+        elif ent_type == EntityType.ENEMY:
+            self.e_enemies.append(entity) # type: ignore
+        elif ent_type == EntityType.PROJECTILE:
+            self.e_projectiles.append(entity) # type: ignore
+        elif ent_type == EntityType.CORPSE:
+            self.e_corpses.append(entity) # type: ignore
+        elif ent_type == EntityType.DUMMY:
+            self.e_dummies.append(entity) # type: ignore
+        elif ent_type == EntityType.OIL_SPILL:
+            self.e_oil_spills.append(entity) # type: ignore
+        else:
+            raise ValueError(f'Unknown entity type {ent_type}')
 
     def remove_dead_entities(self):
         """
         Remove all dead entities.
         This function is called every REMOVE_DEAD_ENTITIES_EVERY seconds.
         """
-        new_entities = defaultdict(list)
-        for entity_type, entities in self.entities.items():
-            for entity in entities:
-                if entity.is_alive():
-                    new_entities[entity_type].append(entity)
-        self.entities = new_entities
-        # print('Removed dead entities')
+        self.e_dummies: list[DummyEntity] = list(self.dummies())
+        self.e_oil_spills: list[OilSpill] = list(self.oil_spills())
+        self.e_corpses: list[Corpse] = list(self.corpses())
+        self.e_projectiles: list[Projectile] = list(self.projectiles())
+        self.e_energy_orbs: list[EnergyOrb] = list(self.energy_orbs())
+        self.e_enemies: list[Enemy] = list(self.enemies())
 
     def get_random_screen_position_for_entity(self, entity_size: float) -> Vector2:
         """
@@ -275,10 +304,12 @@ class Game:
         """
         while True:
             pos_candidate = self.get_random_screen_position()
+            dummy = DummyEntity(pos_candidate, entity_size)
             if (pos_candidate - self.player.get_pos()).magnitude_squared() > 400.**2 and\
-                not any(entity.intersects(DummyEntity(pos_candidate, entity_size)) for entity in self.all_entities_iter()):
+                not any(entity.intersects(dummy) for entity in self.all_entities_iter()):
                     return pos_candidate
     
+
     def get_random_screen_position(self) -> Vector2:
         x = random.uniform(self.screen_rectangle.left + BM * 10, self.screen_rectangle.right - BM * 10)
         y = random.uniform(self.screen_rectangle.top + BM * 10, self.screen_rectangle.bottom - BM * 10)

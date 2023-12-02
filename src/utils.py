@@ -11,9 +11,11 @@ class Stats:
     ENEMIES_KILLED: int = 0
     BULLETS_CAUGHT: int = 0
     ACCURATE_SHOTS: int = 0
+    ENEMIES_COLLIDED_WITH: int = 0
     DAMAGE_TAKEN: float = 0.
     DAMAGE_DEALT: float = 0.
     ENERGY_COLLECTED: float = 0.
+    OIL_SPILL_TIME_SPENT: float = 0.
 
     def get_accuracy(self) -> float:
         return self.ACCURATE_SHOTS / self.PROJECTILES_FIRED if self.PROJECTILES_FIRED > 0 else 0.
