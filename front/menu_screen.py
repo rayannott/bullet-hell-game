@@ -1,5 +1,4 @@
 from typing import override
-import logging
 
 import pygame
 import pygame_gui
@@ -27,20 +26,21 @@ class MenuScreen(Screen):
         settings_btn_rect.topleft = stats_btn_rect.bottomleft
         self.settings_btn = pygame_gui.elements.UIButton(settings_btn_rect, 'SETTINGS', self.manager)
 
-    @override
-    def process_event(self, event: pygame.event.Event):
+    def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.start_game_btn:
                 print('Game started')
-                logging.debug('GAME STARTED')
                 self.game_screen = GameScreen(self.surface)
                 self.game_screen.run()
             elif event.ui_element == self.stats_btn:
                 print('Stats opened')
-                logging.debug('Stats opened')
             elif event.ui_element == self.settings_btn:
                 print('Settings opened')
-                logging.debug('Settings opened')
+        super().process_ui_event(event)
+
+    @override
+    def process_event(self, event: pygame.event.Event):
+        ...
 
     @override
     def update(self, time_delta: float):

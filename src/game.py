@@ -9,10 +9,11 @@ from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY)
 from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType, ProjectileType, Feedback
 from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingWhileStationary
-from src.enemy import ENEMY_STATS_MAP, BasicEnemy, TankEnemy, ArtilleryEnemy, BossEnemy, FastEnemy
+from src.enemy import ENEMY_STATS_MAP, BasicEnemy, TankEnemy, ArtilleryEnemy, BossEnemy, FastEnemy, ENEMY_TYPE_TO_CLASS
 
 
 class Game:
+
     def __init__(self, screen_rectangle: pygame.Rect) -> None:
         self._level = 1
         self._time = 0.
@@ -65,34 +66,12 @@ class Game:
 
     def spawn_enemy(self, enemy_type: EnemyType):
         position = self.get_random_screen_position_for_entity(entity_size=ENEMY_STATS_MAP[enemy_type].size)
-        if enemy_type == EnemyType.BASIC:
-            to_spawn = BasicEnemy(
+        self.add_entity(
+            ENEMY_TYPE_TO_CLASS[enemy_type](
                 _pos=position,
                 _player=self.player,
             )
-        elif enemy_type == EnemyType.FAST:
-            to_spawn = FastEnemy(
-                _pos=position,
-                _player=self.player,
-            )
-        elif enemy_type == EnemyType.ARTILLERY:
-            to_spawn = ArtilleryEnemy(
-                _pos=position,
-                _player=self.player,
-            )
-        elif enemy_type == EnemyType.TANK:
-            to_spawn = TankEnemy(
-                _pos=position,
-                _player=self.player,
-            )
-        elif enemy_type == EnemyType.BOSS:
-            to_spawn = BossEnemy(
-                _pos=position,
-                _player=self.player,
-            )
-        else:
-            raise NotImplementedError(f'spawning enemy type {enemy_type} not implemented')
-        self.add_entity(to_spawn)
+        )
     
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
@@ -254,8 +233,9 @@ class Game:
         """
         while True:
             pos_candidate = self.get_random_screen_position()
-            if not any(entity.intersects(DummyEntity(pos_candidate, entity_size)) for entity in self.all_entities_iter()):
-                return pos_candidate
+            if (pos_candidate - self.player.get_pos()).magnitude_squared() > 400.**2 and\
+                not any(entity.intersects(DummyEntity(pos_candidate, entity_size)) for entity in self.all_entities_iter()):
+                    return pos_candidate
     
     def get_random_screen_position(self) -> Vector2:
         x = random.uniform(self.screen_rectangle.left, self.screen_rectangle.right)

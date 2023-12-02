@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+import math
 import random
 from pygame import Vector2, Color
+from front.utils import random_unit_vector
 
 from src import Entity, Corpse, EntityType, EnemyType, Slider, Player, Timer, Projectile, HomingProjectile, ProjectileType
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_LIFETIME,
@@ -15,28 +17,32 @@ class EnemyStats:
     health: float
     shoot_cooldown: float
     reward: float
+    lifetime: float
 
 
 ENEMY_STATS_MAP = {
     # size, color, speed, health, shoot_cooldown, reward
     EnemyType.BASIC: EnemyStats(
         size=ENEMY_DEFAULT_SIZE, color=Color('red'), speed=ENEMY_DEFAULT_SPEED, 
-        health=ENEMY_DEFAULT_MAX_HEALTH, shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD),
+        health=ENEMY_DEFAULT_MAX_HEALTH, 
+        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD, lifetime=ENEMY_DEFAULT_LIFETIME,),
     EnemyType.FAST: EnemyStats(
         size=ENEMY_DEFAULT_SIZE * 0.8, color=Color('#912644'), speed=ENEMY_DEFAULT_SPEED * 1.8, 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 0.8, shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD * 1.2),
+        health=ENEMY_DEFAULT_MAX_HEALTH * 0.8, 
+        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN, reward=ENEMY_DEFAULT_REWARD * 1.2, lifetime=ENEMY_DEFAULT_LIFETIME),
     EnemyType.TANK: EnemyStats(
         size=ENEMY_DEFAULT_SIZE * 1.8, color=Color('#9e401e'), speed=ENEMY_DEFAULT_SPEED * 0.7, 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 4., shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0, reward=ENEMY_DEFAULT_REWARD * 1.8),
+        health=ENEMY_DEFAULT_MAX_HEALTH * 4., 
+        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0, reward=ENEMY_DEFAULT_REWARD * 1.8, lifetime=ENEMY_DEFAULT_LIFETIME),
     EnemyType.ARTILLERY: EnemyStats(
         size=ENEMY_DEFAULT_SIZE * 2, color=Color('#005c22'), speed=0., 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 2.5, shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.3, reward=ENEMY_DEFAULT_REWARD * 2.5),
+        health=ENEMY_DEFAULT_MAX_HEALTH * 2.5, 
+        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4, reward=ENEMY_DEFAULT_REWARD * 2.5, lifetime=ENEMY_DEFAULT_LIFETIME),
     EnemyType.BOSS: EnemyStats(
         size=ENEMY_DEFAULT_SIZE * 2.7, color=Color('#510e78'), speed=ENEMY_DEFAULT_SPEED, 
-        health=ENEMY_DEFAULT_MAX_HEALTH * 5., shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5, reward=ENEMY_DEFAULT_REWARD * 5.),
+        health=ENEMY_DEFAULT_MAX_HEALTH * 5., 
+        shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5, reward=ENEMY_DEFAULT_REWARD * 5., lifetime=math.inf),
 }
-# TODO: split these types into different classes 
-# TODO  (make them have different behaviors like dogging bullets, dashes, etc.)
 
 
 class Enemy(Entity):
@@ -57,7 +63,7 @@ class Enemy(Entity):
         )
         self._health = Slider(stats.health)
         self._cooldown = Timer(max_time=stats.shoot_cooldown)
-        self._lifetime_cooldown = Timer(max_time=ENEMY_DEFAULT_LIFETIME)
+        self._lifetime_cooldown = Timer(max_time=stats.lifetime)
         self._reward = stats.reward
         self._enemy_type = _enemy_type
         self._spread = 0.5 # in radians
@@ -195,3 +201,15 @@ class BossEnemy(Enemy):
             self.shoot_homing()
         else:
             self.shoot_normal()
+    
+    def on_natural_death(self):
+        raise ValueError('Bosses should not die naturally.')
+
+
+ENEMY_TYPE_TO_CLASS = {
+    EnemyType.BASIC: BasicEnemy,
+    EnemyType.FAST: FastEnemy,
+    EnemyType.ARTILLERY: ArtilleryEnemy,
+    EnemyType.TANK: TankEnemy,
+    EnemyType.BOSS: BossEnemy,
+}

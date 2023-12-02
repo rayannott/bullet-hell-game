@@ -9,8 +9,7 @@ from front.screen import Screen
 from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
-from config import (SM, BM, MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, 
-    PLAYER_SHOT_COST, GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
+from src.enums import EnemyType
 
 
 class GameScreen(Screen):
@@ -26,26 +25,29 @@ class GameScreen(Screen):
         self.notifications: list[Notification] = []
         self.trail_cache = None
 
+    def process_ui_event(self, event: pygame.event.Event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p: self.game.toggle_pause()
+            elif event.key == pygame.K_F1:
+                self.toggle_debug()
+            elif event.key == pygame.K_d:
+                print('--- debug ---')
+                print(repr(self.game.player))
+                self.game.spawn_enemy(enemy_type=EnemyType.BOSS)
+                print('-'*10)
+        super().process_ui_event(event)
+
     @override
     def process_event(self, event: pygame.event.Event):
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_p: self.game.toggle_pause()
         if self.game._paused: return
         if not self.game.is_running(): return
+
         mouse_pos = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEMOTION:
             self.game.player.set_gravity_point(pygame.Vector2(mouse_pos))
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 self.game.player_try_shooting()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_F1:
-                self.debug = not self.debug
-                self.render_manager.set_debug(self.debug)
-                print(f'changing debug mode: now {self.debug=}')
-            elif event.key == pygame.K_d:
-                print('--- debug ---')
-                print(repr(self.game.player))
-                print('-'*10)
     
     @override
     def update(self, time_delta: float):
@@ -69,6 +71,11 @@ class GameScreen(Screen):
 
     def render(self):
         self.render_manager.render()
+    
+    def toggle_debug(self):
+        self.debug = not self.debug
+        self.render_manager.set_debug(self.debug)
+        print(f'changing debug mode: now {self.debug=}')
 
     def show_game_is_over_window(self, death_message: str):
         self.game_is_over_window = pygame_gui.windows.UIConfirmationDialog(

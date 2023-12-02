@@ -1,11 +1,9 @@
 import pygame
 
 from front import MenuScreen
-# setup_logging('DEBUG')
 
 
 def main():
-    # logging.debug('Starting the game')
     pygame.init()
     surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     menu_screen = MenuScreen(surface)

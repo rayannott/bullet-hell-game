@@ -3,7 +3,7 @@ from pygame import Vector2
 from src import Entity, EntityType, Slider, Stats, Projectile, ProjectileType, Timer
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingWhileStationary
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN,
+    PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
 
 
@@ -27,6 +27,7 @@ class Player(Entity):
         self._shoot_cooldown = PLAYER_DEFAULT_SHOOT_COOLDOWN
         self._shoot_cooldown_timer = Timer(max_time=self._shoot_cooldown)
         self.debug = {}
+        self._damage = PLAYER_DEFAULT_DAMAGE
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -75,6 +76,7 @@ class Player(Entity):
         return Projectile(
             _pos=self._pos.copy() + direction * self._size * 1.5,
             _vel=direction,
+            _damage=self._damage,
             _projectile_type=ProjectileType.PLAYER_BULLET,
             _speed=self._speed + PROJECTILE_DEFAULT_SPEED,
         )

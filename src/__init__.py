@@ -7,4 +7,3 @@ from .projectile import *
 from .player import *
 from .game import *
 from .enemy import *
-from .spawner import *

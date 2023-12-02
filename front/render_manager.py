@@ -1,10 +1,14 @@
 import math
 
 import pygame, pygame_gui
-from pygame import Color
+from pygame import Color, freetype
 
-from src import Entity, EntityType, Slider, PLAYER_SHOT_COST, Game
+freetype.init()
+font = freetype.SysFont('Arial', 20)
+
+from src import Entity, Slider, PLAYER_SHOT_COST, Game
 from front.utils import ColorGradient
+from src.enums import EntityType, EnemyType
 
 
 class RenderManager:
@@ -13,28 +17,20 @@ class RenderManager:
         self.surface = surface
         self.debug = debug
         self.game = game
-        rel_rect = pygame.Rect(0, 0, 200, 100)
-        rel_rect.bottomright = surface.get_rect().bottomright
-        self.debug_text_box = pygame_gui.elements.UITextBox(
-            html_text='',
-            relative_rect=rel_rect,
-            manager=manager
-        )
+        self.rel_rect = pygame.Rect(0, 0, 220, 80)
+        self.rel_rect.topright = surface.get_rect().topright
         self.entities_drawn = 0
-        self.update()
     
     def render(self):
         self.draw_player()
         for entity in self.game.all_entities_iter(with_player=False):
             self.draw_entity(entity)
-
-    def update(self):
-        self.debug_text_box.visible = self.debug
         if self.debug:
-            self.debug_text_box.set_text(
-                f'[fps]: {self.game.get_last_fps():.1f}<br>'
-                f'[entities drawn]: {self.entities_drawn}'
+            font.render_to(self.surface, self.rel_rect, 
+                f'[fps {self.game.get_last_fps():.1f}] [entd {self.entities_drawn}]',
+                Color('white')
             )
+        self.reset()
 
     def draw_entity_debug(self, entity: Entity):
         if entity._speed and entity._vel.magnitude_squared():
@@ -82,7 +78,7 @@ class RenderManager:
         color_gradient = ColorGradient(Color('black'), _current_color)
         pygame.draw.circle(self.surface, _current_color, entity.get_pos(), entity.get_size())
         this_ent_type = entity.get_type()
-        if this_ent_type == EntityType.ENEMY:
+        if this_ent_type == EntityType.ENEMY and entity._health.max_value > self.game.player._damage: # type: ignore
             self.draw_entity_circular_status_bar(entity, entity.get_health(), # type: ignore
                 entity.get_size() * 1.5, color=Color('green'), draw_full=True)
         elif this_ent_type == EntityType.ENERGY_ORB:
@@ -99,7 +95,6 @@ class RenderManager:
                     width=1
                 )
         self.entities_drawn += 1
-        self.update()
         if self.debug: self.draw_entity_debug(entity)
 
     def set_debug(self, debug: bool):

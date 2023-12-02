@@ -38,21 +38,22 @@ class Screen(ABC):
     def update(self, time_delta: float):
         ...
 
+    def process_ui_event(self, event: pygame.event.Event):
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.quit_button:
+                self.is_running = False
+        ...
+    
     def run(self):
         while self.is_running:
             time_delta = self.clock.tick(FRAMERATE)/1000.0
-
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.is_running = False
-                elif event.type == pygame.KEYDOWN:
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.is_running = False
-                elif event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == self.quit_button:
-                        self.is_running = False
-                self.manager.process_events(event)
-                self.process_event(event)
+                self.process_ui_event(event)
+                if not self.manager.process_events(event):
+                    self.process_event(event)
             self.surface.blit(self.background, (0, 0))
             self.manager.update(time_delta)
             self.update(time_delta)
