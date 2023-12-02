@@ -37,7 +37,6 @@ class GameScreen(Screen):
                 print('-'*10)
         super().process_ui_event(event)
 
-    @override
     def process_event(self, event: pygame.event.Event):
         if self.game._paused: return
         if not self.game.is_running(): return
@@ -49,7 +48,6 @@ class GameScreen(Screen):
             if event.button == 1:
                 self.game.player_try_shooting()
     
-    @override
     def update(self, time_delta: float):
         self.game.update(time_delta)
         self.game.reflect_entities_vel()

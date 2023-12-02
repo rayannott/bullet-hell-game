@@ -38,10 +38,8 @@ class MenuScreen(Screen):
                 print('Settings opened')
         super().process_ui_event(event)
 
-    @override
     def process_event(self, event: pygame.event.Event):
         ...
 
-    @override
     def update(self, time_delta: float):
         ...
