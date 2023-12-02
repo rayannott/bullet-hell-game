@@ -4,5 +4,5 @@ class OnCooldown(Exception):
 class NotEnoughEnergy(Exception):
     pass
 
-class ShootingWhileStationary(Exception):
+class ShootingDirectionUndefined(Exception):
     pass
