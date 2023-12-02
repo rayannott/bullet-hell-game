@@ -43,13 +43,24 @@ class Game:
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
         self.reason_of_death = ''
-    
-    def all_entities_iter(self, with_player: bool = True, include_dead: bool = False) -> Generator[Entity, None, None]:
+
+    @staticmethod
+    def iter_entities(entities: list[Entity], include_dead: bool = False) -> Generator[Entity, None, None]:
+        for ent in entities:
+            if include_dead or ent.is_alive():
+                yield ent
+
+    def all_entities_iter(self, 
+            with_player: bool = True,
+            include_dead: bool = False
+        ) -> Generator[Entity, None, None]:
         if with_player: yield self.player
-        for _, entities in self.entities.items():
-            for entity in entities:
-                if include_dead or entity.is_alive():
-                    yield entity
+        yield from self.iter_entities(self.entities[EntityType.OIL_SPILL], include_dead)
+        yield from self.iter_entities(self.entities[EntityType.DUMMY], include_dead)
+        yield from self.iter_entities(self.entities[EntityType.CORPSE], include_dead)
+        yield from self.iter_entities(self.entities[EntityType.PROJECTILE], include_dead)
+        yield from self.iter_entities(self.entities[EntityType.ENERGY_ORB], include_dead)
+        yield from self.iter_entities(self.entities[EntityType.ENEMY], include_dead)
 
     def is_running(self) -> bool:
         return self.player.is_alive()
@@ -69,7 +80,7 @@ class Game:
             EnergyOrb(
                 _pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
                 _lifetime=random.uniform(*ENERGY_ORB_LIFETIME_RANGE),
-                _energy=ENERGY_ORB_DEFAULT_ENERGY + 10 * (self._level - 1)
+                _energy=ENERGY_ORB_DEFAULT_ENERGY + 15. * (self._level - 1)
             )
         )
 
@@ -193,6 +204,9 @@ class Game:
                 self.reason_of_death = f'collided with {ent_type.name.title()}'
                 if ent_type == EntityType.ENEMY:
                     self.reason_of_death += f'::{entity._enemy_type.name.title()}' # type: ignore
+            elif ent_type == EntityType.OIL_SPILL:
+                self.player.effect_flags.OIL_SPILL = True
+                self.reason_of_death = 'slipped on oil'
 
         # player bullets collide with enemies -> enemies get damage, player gets energy:
         player_bullets = [el for el in self.entities[EntityType.PROJECTILE] if el._projectile_type == ProjectileType.PLAYER_BULLET] # type: ignore
