@@ -1,15 +1,10 @@
-import logging
-import math
-from typing import Literal
+from pygame import Vector2
+
 from src import Entity, EntityType, Slider, Stats, Projectile, ProjectileType, Timer
-from src import NotEnoughEnergy, OnCooldown, ShootingWhileStationary
+from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingWhileStationary
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    PLAYER_DEFAULT_ENERGY_DECAY_RATE, setup_logging, PLAYER_DEFAULT_SHOOT_COOLDOWN,
+    PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
-
-from pygame import Color, Vector2
-
-setup_logging('DEBUG')
 
 
 class Player(Entity):

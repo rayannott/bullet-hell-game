@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
-import logging
 
 import pygame
 import pygame_gui
 
 from config import QUIT_BUTTON_SIZE, FRAMERATE
-from config import setup_logging
-setup_logging('DEBUG')
 
 
 class Screen(ABC):

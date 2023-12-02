@@ -6,8 +6,7 @@ import pygame_gui
 
 from front import Screen
 from front.game_screen import GameScreen
-from config import setup_logging, MENU_BUTTONS_SIZE
-setup_logging('DEBUG')
+from config import MENU_BUTTONS_SIZE
 
 
 class MenuScreen(Screen):

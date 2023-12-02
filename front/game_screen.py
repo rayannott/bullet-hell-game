@@ -1,21 +1,16 @@
-import math
 from typing import Literal, override
-import logging
 
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
 
-from src import Game, Slider, Entity, EntityType, EnemyType, Player, Timer, Feedback
+from src import Game, Feedback
 from front.screen import Screen
 from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
-from config import (setup_logging, SM, BM,
-    MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, PLAYER_SHOT_COST,
-    GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
-
-# setup_logging('DEBUG')
+from config import (SM, BM, MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, 
+    PLAYER_SHOT_COST, GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
 
 
 class GameScreen(Screen):

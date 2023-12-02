@@ -1,7 +1,7 @@
 import math
 
 import pygame, pygame_gui
-from pygame import Color, Vector2
+from pygame import Color
 
 from src import Entity, EntityType, Slider, PLAYER_SHOT_COST, Game
 from front.utils import ColorGradient

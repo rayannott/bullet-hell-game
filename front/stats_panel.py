@@ -1,5 +1,5 @@
 import pygame, pygame_gui
-from pygame import Color, Vector2
+from pygame import Color
 
 from config import SM, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE
 from front.utils import ProgressBar

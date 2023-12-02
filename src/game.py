@@ -8,7 +8,7 @@ from pygame import Vector2, Color
 from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY)
 from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType, ProjectileType, Feedback
-from src import OnCooldown, NotEnoughEnergy, ShootingWhileStationary
+from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingWhileStationary
 from src.enemy import ENEMY_STATS_MAP, BasicEnemy, TankEnemy, ArtilleryEnemy, BossEnemy, FastEnemy
 
 
@@ -267,4 +267,3 @@ class Game:
 
     def get_last_fps(self) -> float:
         return self._last_fps
-    

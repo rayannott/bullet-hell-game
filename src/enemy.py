@@ -1,4 +1,3 @@
-from collections import deque
 from dataclasses import dataclass
 import random
 from pygame import Vector2, Color

@@ -1,6 +1,4 @@
 from dataclasses import dataclass, field
-import math
-import random
 from typing import Literal
 
 from pygame import Color, Vector2
