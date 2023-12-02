@@ -18,10 +18,6 @@ from config import (setup_logging, SM, BM,
 setup_logging('DEBUG')
 
 
-
-
-# TODO move everything above this line to other files
-
 class GameScreen(Screen):
     def __init__(self, surface: pygame.Surface):
         super().__init__(surface)

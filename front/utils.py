@@ -59,9 +59,11 @@ class Notification(pygame_gui.elements.UITextBox):
             duration: float = 3.,
             color: Color = Color('white'),
             **kwargs):
+        rect = pygame.Rect(0., 0., len(text) * 12, 40)
+        rect.center = position
         super().__init__(
             html_text=paint(text, color, 8),
-            relative_rect=pygame.Rect(position.x, position.y, len(text) * 12, 40),
+            relative_rect=rect,
             manager=manager,
             object_id='#notification', #! this doesn't work
             **kwargs)
