@@ -19,7 +19,7 @@ class Screen(ABC):
         self.window_size = self.surface.get_rect().size
         self.background = pygame.Surface(self.window_size)
         self.background.fill(pygame.Color(bg_color))
-        self.manager = pygame_gui.UIManager(self.window_size, 'theme.json')
+        self.manager = pygame_gui.UIManager(self.window_size)
         self.is_running = True
 
         # adding the quit button
@@ -31,6 +31,7 @@ class Screen(ABC):
             text='x',
             manager=self.manager
         )
+        self.clock = pygame.time.Clock()
 
     @abstractmethod
     def process_event(self, event: pygame.event.Event):
@@ -41,9 +42,8 @@ class Screen(ABC):
         ...
 
     def run(self):
-        clock = pygame.time.Clock()
         while self.is_running:
-            time_delta = clock.tick(FRAMERATE)/1000.0
+            time_delta = self.clock.tick(FRAMERATE)/1000.0
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -54,7 +54,6 @@ class Screen(ABC):
                 elif event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == self.quit_button:
                         self.is_running = False
-                        logging.debug('Quit button pressed')
                 self.manager.process_events(event)
                 self.process_event(event)
             self.surface.blit(self.background, (0, 0))

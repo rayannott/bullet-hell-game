@@ -15,7 +15,7 @@ from config import (setup_logging, SM, BM,
     MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, PLAYER_SHOT_COST,
     GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
 
-setup_logging('DEBUG')
+# setup_logging('DEBUG')
 
 
 class GameScreen(Screen):
@@ -25,7 +25,7 @@ class GameScreen(Screen):
         self.game = Game(self.screen_rectangle)
         self.stats_panel = StatsPanel(surface, self.manager)
         self.debug = False
-        self.render_manager = RenderManager(surface=surface, manager=self.manager, debug=self.debug)
+        self.render_manager = RenderManager(surface=surface, manager=self.manager, debug=self.debug, game=self.game)
 
         self.game_is_over_window_shown = False
         self.notifications: list[Notification] = []
@@ -61,10 +61,11 @@ class GameScreen(Screen):
         )
         self.render()
         if not self.game.is_running() and not self.game_is_over_window_shown:
-            self.show_game_is_over_window()
+            self.show_game_is_over_window(self.game.reason_of_death)
             self.game_is_over_window_shown = True
         self.render_manager.reset()
         self.process_feedback_buffer()
+        self.game.set_last_fps(self.clock.get_fps())
 
     def process_feedback_buffer(self):
         if len(self.game.feedback_buffer):
@@ -72,16 +73,14 @@ class GameScreen(Screen):
             self.spawn_notification(feedback=feedback)
 
     def render(self):
-        for entity in self.game.all_entities_iter():
-            if entity.is_alive():
-                self.render_manager.draw_entity(entity)
+        self.render_manager.render()
 
-    def show_game_is_over_window(self):
+    def show_game_is_over_window(self, death_message: str):
         self.game_is_over_window = pygame_gui.windows.UIConfirmationDialog(
             rect=pygame.Rect(*self.surface.get_rect().center, 300, 200),
             manager=self.manager,
             window_title='Game Over',
-            action_long_desc='Ok',
+            action_long_desc=death_message,
             blocking=True
         )
         print('game over', repr(self.game.player))

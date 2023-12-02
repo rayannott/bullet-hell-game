@@ -8,8 +8,8 @@ from pygame import Vector2, Color
 from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
     INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY)
 from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType, ProjectileType, Feedback
-from src import OnCooldown, NotEnoughEnergy
-from src.enemy import Enemy, ENEMY_STATS_MAP
+from src import OnCooldown, NotEnoughEnergy, ShootingWhileStationary
+from src.enemy import ENEMY_STATS_MAP, BasicEnemy, TankEnemy, ArtilleryEnemy, BossEnemy, FastEnemy
 
 
 class Game:
@@ -20,6 +20,7 @@ class Game:
         self.screen_rectangle = screen_rectangle
         
         self.feedback_buffer: deque[Feedback] = deque()
+        self._last_fps: float = 0.
 
         self.player = Player(Vector2(*PLAYER_STARTING_POSITION))
         self.entities: defaultdict[EntityType, list[Entity]] = defaultdict(list)
@@ -31,12 +32,13 @@ class Game:
         self.new_energy_orb_timer = Timer(max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
+        self.reason_of_death = ''
     
-    def all_entities_iter(self, with_player: bool = True) -> Generator[Entity, None, None]:
+    def all_entities_iter(self, with_player: bool = True, include_dead: bool = False) -> Generator[Entity, None, None]:
         if with_player: yield self.player
         for _, entities in self.entities.items():
             for entity in entities:
-                if entity.is_alive():
+                if include_dead or entity.is_alive():
                     yield entity
 
     def is_running(self) -> bool:
@@ -63,17 +65,48 @@ class Game:
 
     def spawn_enemy(self, enemy_type: EnemyType):
         position = self.get_random_screen_position_for_entity(entity_size=ENEMY_STATS_MAP[enemy_type].size)
-        self.add_entity(
-            Enemy(
+        if enemy_type == EnemyType.BASIC:
+            to_spawn = BasicEnemy(
                 _pos=position,
-                _enemy_type=enemy_type,
                 _player=self.player,
             )
-        )
+        elif enemy_type == EnemyType.FAST:
+            to_spawn = FastEnemy(
+                _pos=position,
+                _player=self.player,
+            )
+        elif enemy_type == EnemyType.ARTILLERY:
+            to_spawn = ArtilleryEnemy(
+                _pos=position,
+                _player=self.player,
+            )
+        elif enemy_type == EnemyType.TANK:
+            to_spawn = TankEnemy(
+                _pos=position,
+                _player=self.player,
+            )
+        elif enemy_type == EnemyType.BOSS:
+            to_spawn = BossEnemy(
+                _pos=position,
+                _player=self.player,
+            )
+        else:
+            raise NotImplementedError(f'spawning enemy type {enemy_type} not implemented')
+        self.add_entity(to_spawn)
     
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
-        enemy_type = random.choices(list(EnemyType), [150, 20, 10, 20, 0], k=1)[0]
+        TYPE_WEIGHTS = {
+            EnemyType.BASIC: 150,
+            EnemyType.FAST: 20,
+            EnemyType.ARTILLERY: 10,
+            EnemyType.TANK: 20,
+            EnemyType.BOSS: 0.,
+        }
+        enemy_type = random.choices(
+            list(TYPE_WEIGHTS.keys()), 
+            list(TYPE_WEIGHTS.values()), 
+        k=1)[0]
         self.spawn_enemy(enemy_type)
 
     def process_timers(self, time_delta: float) -> None:
@@ -112,11 +145,14 @@ class Game:
         try:
             new_projectile = self.player.shoot()
         except OnCooldown as e:
-            self.feedback_buffer.append(Feedback('on cooldown', 2., color=Color('red')))
-            print('on cooldown')
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
         except NotEnoughEnergy as e:
-            self.feedback_buffer.append(Feedback('not enough energy', 2., color=Color('red')))
-            print('not enough energy')
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
+        except ShootingWhileStationary as e:
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
         else:
             self.add_entity(new_projectile)
 
@@ -125,7 +161,7 @@ class Game:
         Spawn all entities that are in the buffer of the other entities.
         """
         new_ent = []
-        for entity in self.all_entities_iter():
+        for entity in self.all_entities_iter(with_player=False, include_dead=True):
             if entity._can_spawn_entities:
                 new_ent.extend(entity._entities_buffer)
                 entity._entities_buffer.clear()
@@ -145,26 +181,33 @@ class Game:
                     entity._vel.y *= -1.
     
     def process_collisions(self) -> None:
+        # player collides with anything:
         for entity in self.all_entities_iter(with_player=False):
             if not entity.intersects(self.player):
                 continue
-            if entity.get_type() == EntityType.ENERGY_ORB:
+            ent_type = entity.get_type()
+            if ent_type == EntityType.ENERGY_ORB:
                 energy_collected: float = entity.energy_left() # type: ignore
                 self.player._energy.change(energy_collected)
                 self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
                 self.player.get_stats().ENERGY_COLLECTED += energy_collected
                 entity.kill()
                 self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color('magenta')))
-            elif entity.get_type() == EntityType.PROJECTILE:
+            elif ent_type == EntityType.PROJECTILE:
                 damage_taken: float = entity._damage # type: ignore
                 damage_taken_actual = -self.player._health.change(-damage_taken) # type: ignore
                 self.player.get_stats().BULLETS_CAUGHT += 1
                 self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
                 entity.kill()
                 self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2.5, color=pygame.Color('red')))
-            elif entity.get_type() == EntityType.ENEMY:
+                self.reason_of_death = f'caught Bullet::{entity._projectile_type.name.title()}' # type: ignore
+            elif ent_type in {EntityType.ENEMY, EntityType.CORPSE}:
+                self.player._health.set_percent_full(0.)
                 self.player.kill()
                 self.feedback_buffer.append(Feedback('you died', 3., color=pygame.Color('red')))
+                self.reason_of_death = f'collided with {ent_type.name.title()}'
+                if ent_type == EntityType.ENEMY:
+                    self.reason_of_death += f'::{entity._enemy_type.name.title()}' # type: ignore
 
         # player bullets collide with enemies -> enemies get damage, player gets energy:
         player_bullets = [el for el in self.entities[EntityType.PROJECTILE] if el._projectile_type == ProjectileType.PLAYER_BULLET] # type: ignore
@@ -187,7 +230,6 @@ class Game:
                         self.player.get_stats().ENERGY_COLLECTED += reward
                         print('enemy killed')
                         self.feedback_buffer.append(Feedback(f'+{reward}e', 2., color=pygame.Color('magenta')))
-        ...
 
     def add_entity(self, entity: Entity) -> None:
         self.entities[entity.get_type()].append(entity)
@@ -219,4 +261,10 @@ class Game:
         x = random.uniform(self.screen_rectangle.left, self.screen_rectangle.right)
         y = random.uniform(self.screen_rectangle.top, self.screen_rectangle.bottom)
         return Vector2(x, y)
-        
+    
+    def set_last_fps(self, fps: float):
+        self._last_fps = fps
+
+    def get_last_fps(self) -> float:
+        return self._last_fps
+    

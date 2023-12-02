@@ -3,3 +3,6 @@ class OnCooldown(Exception):
 
 class NotEnoughEnergy(Exception):
     pass
+
+class ShootingWhileStationary(Exception):
+    pass

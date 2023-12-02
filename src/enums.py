@@ -10,7 +10,7 @@ class EntityType(Enum):
     PROJECTILE = auto()
     ENERGY_ORB = auto()
     ENEMY = auto()
-    SPAWNER = auto()
+    CORPSE = auto()
 
 
 class EnemyType(Enum):

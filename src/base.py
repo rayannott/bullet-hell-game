@@ -79,7 +79,7 @@ class Entity(ABC):
 
     def kill(self):
         self._is_alive = False
-        logging.debug(f'Killed {self}')
+        # logging.debug(f'Killed {self}')
         print(f'Killed {self}')
 
     def __str__(self) -> str:
@@ -92,6 +92,20 @@ class DummyEntity(Entity):
             _pos=_pos,
             _type=EntityType.DUMMY,
             _size=_size
+        )
+
+    def update(self, time_delta: float): return super().update(time_delta)
+
+
+class Corpse(Entity):
+    def __init__(self,
+        _of_entity: Entity,
+    ):
+        super().__init__(
+            _pos=_of_entity.get_pos(),
+            _type=EntityType.CORPSE,
+            _size=_of_entity.get_size() * 1.5, # make the corpse a bit bigger than the entity
+            _color=Color('gray'),
         )
 
     def update(self, time_delta: float): return super().update(time_delta)
