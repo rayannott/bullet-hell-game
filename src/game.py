@@ -6,14 +6,13 @@ import pygame
 from pygame import Vector2, Color
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, PLAYER_STARTING_POSITION, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
-    INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY)
+    INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from src import DummyEntity, Player, Timer, Entity, EntityType, EnergyOrb, EnemyType, ProjectileType, Feedback
-from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingWhileStationary
+from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined
 from src.enemy import ENEMY_STATS_MAP, BasicEnemy, TankEnemy, ArtilleryEnemy, BossEnemy, FastEnemy, ENEMY_TYPE_TO_CLASS
 
 
 class Game:
-
     def __init__(self, screen_rectangle: pygame.Rect) -> None:
         self._level = 1
         self._time = 0.
@@ -23,7 +22,7 @@ class Game:
         self.feedback_buffer: deque[Feedback] = deque()
         self._last_fps: float = 0.
 
-        self.player = Player(Vector2(*PLAYER_STARTING_POSITION))
+        self.player = Player(Vector2(*self.screen_rectangle.center))
         self.entities: defaultdict[EntityType, list[Entity]] = defaultdict(list)
         # TODO: split entity types into different lists;
         # TODO  then split the draw methods into different methods for each entity type
@@ -129,7 +128,7 @@ class Game:
         except NotEnoughEnergy as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             print(e)
-        except ShootingWhileStationary as e:
+        except ShootingDirectionUndefined as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             print(e)
         else:
@@ -201,7 +200,7 @@ class Game:
                     damage_dealt = bullet._damage # type: ignore
                     damage_dealt_actual = -enemy.get_health().change(-damage_dealt) # type: ignore
                     self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
-                    self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
+                    self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
                     enemy.update(0.)
                     if not enemy.is_alive():
                         enemy.kill()
@@ -210,7 +209,7 @@ class Game:
                         self.player.get_stats().ENEMIES_KILLED += 1
                         self.player.get_stats().ENERGY_COLLECTED += reward
                         print('enemy killed')
-                        self.feedback_buffer.append(Feedback(f'+{reward}e', 2., color=pygame.Color('magenta')))
+                        self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
 
     def add_entity(self, entity: Entity) -> None:
         self.entities[entity.get_type()].append(entity)
@@ -240,8 +239,8 @@ class Game:
                     return pos_candidate
     
     def get_random_screen_position(self) -> Vector2:
-        x = random.uniform(self.screen_rectangle.left, self.screen_rectangle.right)
-        y = random.uniform(self.screen_rectangle.top, self.screen_rectangle.bottom)
+        x = random.uniform(self.screen_rectangle.left + BM * 10, self.screen_rectangle.right - BM * 10)
+        y = random.uniform(self.screen_rectangle.top + BM * 10, self.screen_rectangle.bottom - BM * 10)
         return Vector2(x, y)
     
     def set_last_fps(self, fps: float):

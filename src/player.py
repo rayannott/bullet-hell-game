@@ -2,7 +2,7 @@ import random
 from pygame import Vector2
 
 from src import Entity, EntityType, Slider, Stats, Projectile, ProjectileType, Timer
-from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingWhileStationary
+from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_RANGE,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
@@ -17,7 +17,7 @@ class Player(Entity):
             _speed=PLAYER_DEFAULT_SPEED_RANGE[0],
             _render_trail=True
         )
-        self._gravity_point: Vector2 = Vector2()
+        self._gravity_point: Vector2 = _pos
         self._health = Slider(PLAYER_DEFAULT_MAX_HEALTH)
         self._regeneration_rate = PLAYER_DEFAULT_REGEN_RATE
         self._energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE
@@ -69,7 +69,9 @@ class Player(Entity):
         if self._energy.get_value() < PLAYER_SHOT_COST:
             raise NotEnoughEnergy('not enough energy')
         if self._vel == Vector2():
-            raise ShootingWhileStationary('player velocity is zero')
+            self._vel = self._gravity_point - self._pos
+            if self._vel.magnitude_squared() == 0.:
+                raise ShootingDirectionUndefined('direction undefined')
         self._energy.change(-PLAYER_SHOT_COST)
         direction = self._vel.normalize()
         self._stats.PROJECTILES_FIRED += 1
