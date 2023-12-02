@@ -6,30 +6,6 @@ from typing import Literal
 from pygame import Color, Vector2
 
 
-def paint(text: str, color: Color, size: int = 4) -> str:
-    hex_color = "#{:02x}{:02x}{:02x}".format(color.r, color.g, color.b)
-    return f'<font color={hex_color} size={size}>{text}</font>'
-
-
-class ColorGradient:
-    def __init__(self, start_color: Color, end_color: Color):
-        self.start_color = start_color
-        self.end_color = end_color
-
-    def __call__(self, percent: float) -> Color:
-        return Color(
-        int(self.start_color.r + (self.end_color.r - self.start_color.r) * percent),
-        int(self.start_color.g + (self.end_color.g - self.start_color.g) * percent),
-        int(self.start_color.b + (self.end_color.b - self.start_color.b) * percent),
-        int(self.start_color.a + (self.end_color.a - self.start_color.a) * percent)
-    )
-
-
-def random_unit_vector() -> Vector2:
-    alpha = random.uniform(0, 2 * math.pi)
-    return Vector2(math.cos(alpha), math.sin(alpha))
-
-
 @dataclass
 class Stats:
     ENERGY_ORBS_COLLECTED: int = 0

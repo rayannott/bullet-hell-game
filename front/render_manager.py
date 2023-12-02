@@ -3,7 +3,8 @@ import math
 import pygame, pygame_gui
 from pygame import Color, Vector2
 
-from src import Entity, EntityType, Player, Slider, ColorGradient, PLAYER_SHOT_COST
+from src import Entity, EntityType, Player, Slider, PLAYER_SHOT_COST
+from front.utils import ColorGradient
 
 
 class RenderManager:

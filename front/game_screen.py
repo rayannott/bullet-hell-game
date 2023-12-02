@@ -6,9 +6,11 @@ import pygame
 from pygame import Color, Vector2
 import pygame_gui
 
-from src import Game, Slider, ColorGradient, Entity, EntityType, EnemyType, Player, Timer, Feedback, paint
+from src import Game, Slider, Entity, EntityType, EnemyType, Player, Timer, Feedback
 from front.screen import Screen
 from front.render_manager import RenderManager
+from front.utils import Notification
+from front.stats_panel import StatsPanel
 from config import (setup_logging, SM, BM,
     MENU_BUTTONS_SIZE, GAME_STATS_PANEL_SIZE, GAME_HEALTH_BAR_SIZE, PLAYER_SHOT_COST,
     GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
@@ -16,88 +18,6 @@ from config import (setup_logging, SM, BM,
 setup_logging('DEBUG')
 
 
-class ProgressBar(pygame_gui.elements.UIStatusBar):
-    def __init__(self, color_gradient_pair: tuple[Color, Color], **kwargs):
-        self.text_to_render = ''
-        super().__init__(**kwargs)
-        self.percent_full = 0
-        self.color_gradient = ColorGradient(*color_gradient_pair)
-    
-    def status_text(self):
-        return self.text_to_render
-    
-    def update_color(self):
-        self.bar_filled_colour = self.color_gradient(self.percent_full)
-    
-    def set_slider(self, slider: Slider):
-        self.text_to_render = str(slider)
-        self.percent_full = slider.get_percent_full()
-        self.update_color()
-
-
-class Notification(pygame_gui.elements.UITextBox):
-    def __init__(self,
-            text: str,
-            position: Vector2,
-            manager: pygame_gui.UIManager,
-            duration: float = 3.,
-            color: Color = Color('white'),
-            **kwargs):
-        super().__init__(
-            html_text=paint(text, color, 8),
-            relative_rect=pygame.Rect(position.x, position.y, len(text) * 12, 40),
-            manager=manager,
-            object_id='#notification', #! this doesn't work
-            **kwargs)
-        self.lifetime_timer = Timer(max_time=duration)
-        self._is_alive = True
-    
-    def update(self, time_delta: float):
-        if not self._is_alive: return
-        self.lifetime_timer.tick(time_delta)
-        self.rect.y -= 3. * time_delta # type: ignore
-        if not self.lifetime_timer.running():
-            self._is_alive = False
-            self.kill()
-        super().update(time_delta)
-
-
-class StatsPanel:
-    def __init__(self, surface: pygame.Surface, manager: pygame_gui.UIManager):
-        self.surface = surface
-        self.panel = pygame_gui.elements.UIPanel(
-            relative_rect=pygame.Rect(0, 0, *GAME_STATS_PANEL_SIZE),
-            manager=manager
-        )
-        self.health_bar = ProgressBar(
-            color_gradient_pair=(Color('red'), Color('green')),
-            relative_rect=pygame.Rect(SM, SM, *GAME_HEALTH_BAR_SIZE),
-            manager=manager,
-            parent_element=self.panel
-        )
-        self.energy_bar = ProgressBar(
-            color_gradient_pair=(Color('blue'), Color('yellow')),
-            relative_rect=pygame.Rect(SM, SM + GAME_HEALTH_BAR_SIZE[1], *GAME_ENERGY_BAR_SIZE),
-            manager=manager,
-            parent_element=self.panel
-        )
-        self.stats_textbox = pygame_gui.elements.UITextBox(
-            html_text='',
-            relative_rect=pygame.Rect(SM, 2*SM + GAME_HEALTH_BAR_SIZE[1] + GAME_ENERGY_BAR_SIZE[1], *GAME_STATS_TEXTBOX_SIZE),
-            manager=manager,
-            parent_element=self.panel
-        )
-
-    def update(self, game: Game):
-        player = game.player
-        self.health_bar.set_slider(player.get_health())
-        self.energy_bar.set_slider(player.get_energy())
-        STATS_LABELS = ['time', 'enemies killed', 'accuracy', 'orbs collected', 'damage dealt', 'damage taken']
-        STATS_VALUES = [game._time, player._stats.ENEMIES_KILLED, player._stats.get_accuracy(), player._stats.ENERGY_ORBS_COLLECTED, player._stats.DAMAGE_DEALT, player._stats.DAMAGE_TAKEN]
-        FORMATS = ['.1f', 'd', '.1%', 'd', '.0f', '.0f']
-        self.stats_textbox.set_text(
-            '<br>'.join((f'{label:<15} {value:{format_}}' for label, value, format_ in zip(STATS_LABELS, STATS_VALUES, FORMATS)))
-        )
 
 
 # TODO move everything above this line to other files
