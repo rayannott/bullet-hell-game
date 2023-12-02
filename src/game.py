@@ -181,9 +181,11 @@ class Game:
                 self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2.5, color=pygame.Color('red')))
                 self.reason_of_death = f'caught Bullet::{entity._projectile_type.name.title()}' # type: ignore
             elif ent_type in {EntityType.ENEMY, EntityType.CORPSE}:
-                self.player._health.set_percent_full(0.)
-                self.player.kill()
-                self.feedback_buffer.append(Feedback('you died', 3., color=pygame.Color('red')))
+                damage_on_collision = entity._damage_on_collision # type: ignore
+                damage_taken_actual = -self.player._health.change(-damage_on_collision)
+                self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
+                entity.kill()
+                self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
                 self.reason_of_death = f'collided with {ent_type.name.title()}'
                 if ent_type == EntityType.ENEMY:
                     self.reason_of_death += f'::{entity._enemy_type.name.title()}' # type: ignore

@@ -45,7 +45,7 @@ class RenderManager:
     
     def draw_entity_circular_status_bar(self, entity: Entity, slider: Slider, 
                                         radius: float, color: Color = Color('white'),
-                                        draw_full: bool = False):
+                                        draw_full: bool = False, width: int = 3):
         arc_percent = slider.get_percent_full()
         if draw_full or arc_percent < 1.:
             angle = math.pi * (2 * arc_percent + 0.5)
@@ -57,7 +57,7 @@ class RenderManager:
                 rect,
                 math.pi / 2,
                 angle,
-                width=3
+                width=width
             )
 
     def draw_player(self):
@@ -83,7 +83,7 @@ class RenderManager:
                 entity.get_size() * 1.5, color=Color('green'), draw_full=True)
         elif this_ent_type == EntityType.ENERGY_ORB:
             self.draw_entity_circular_status_bar(entity, entity._life_timer.get_slider(reverse=True), # type: ignore
-                entity.get_size() * 2., color=Color('magenta'), draw_full=True)
+                entity.get_size() * 2., color=Color('magenta'), draw_full=True, width=1)
         if entity._render_trail:
             _trail_len = len(entity._trail)
             for i, pos in enumerate(entity._trail):
