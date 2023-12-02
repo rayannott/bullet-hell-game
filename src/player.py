@@ -4,7 +4,7 @@ from pygame import Vector2
 from src import Entity, EntityType, Slider, Stats, Projectile, ProjectileType, Timer
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_RANGE,
+    PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
 
 
@@ -27,8 +27,8 @@ class Player(Entity):
         self._stats = Stats()
         self._shoot_cooldown = PLAYER_DEFAULT_SHOOT_COOLDOWN
         self._shoot_cooldown_timer = Timer(max_time=self._shoot_cooldown)
-        self.debug = {}
-        self._damage_range = PLAYER_DEFAULT_DAMAGE_RANGE
+        self._damage = PLAYER_DEFAULT_DAMAGE_AVG
+        self._damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -37,13 +37,13 @@ class Player(Entity):
 
         # this t is a parameter that controls the speed of the player based on the distance from the gravity point
         # it is non-linear so that it's the player is not too slow when close to the gravity point
-        t = (((self._pos - self._gravity_point).magnitude() + 10.) / 1900.)**(0.35)
+        towards_gravity_point = (self._gravity_point - self._pos)
+        dist_to_gravity_point = towards_gravity_point.magnitude()
+        t = (dist_to_gravity_point / 1500.) ** 0.4
         self._speed = self._speed_range[0] + (self._speed_range[1] - self._speed_range[0]) * t
 
         # this code sets the velocity of the player towards the gravity point;
         # the closer the player is to the gravity point, the slower it moves to avoid dancing
-        towards_gravity_point = (self._gravity_point - self._pos)
-        dist_to_gravity_point = towards_gravity_point.magnitude()
         if dist_to_gravity_point > self._size * 1.5:
             self._vel = (towards_gravity_point).normalize() * self._speed
         else:
@@ -51,6 +51,7 @@ class Player(Entity):
         self.health_energy_evolution(time_delta)
 
     def health_energy_evolution(self, time_delta: float):
+        # TODO decay enery when moving or regenerating health
         e_percent = self._energy.get_percent_full()
         h_percent = self._health.get_percent_full()
         # regenerate only if energy is not low:
@@ -79,7 +80,7 @@ class Player(Entity):
         return Projectile(
             _pos=self._pos.copy() + direction * self._size * 1.5,
             _vel=direction,
-            _damage=random.uniform(*self._damage_range),
+            _damage=random.uniform(self._damage - self._damage_spread, self._damage + self._damage_spread),
             _projectile_type=ProjectileType.PLAYER_BULLET,
             _speed=self._speed + PROJECTILE_DEFAULT_SPEED,
         )
@@ -87,14 +88,15 @@ class Player(Entity):
     def new_level(self):
         self._level += 1
         print('new level:', self._level)
-        # logging.info(f'new level: {self._level}')
-        self._speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 100. * (self._level - 1))
+        self._speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 130. * (self._level - 1))
         old_percentage = self._health.get_percent_full()
         self._health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self._level - 1)) # health keeps percentage full
         self._health.set_percent_full(old_percentage)
-        self._energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self._level - 1)) # energy resets to full
-        self._shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self._level - 1), 0.35)
+        self._energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self._level - 1)) # energy sets to 60%
+        self._energy.set_percent_full(0.6)
+        self._shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self._level - 1), 0.3)
         self._energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self._level - 1)
+        self._damage = PLAYER_DEFAULT_DAMAGE_AVG + 5. * (self._level - 1)
 
     def set_gravity_point(self, gravity_point: Vector2):
         self._gravity_point = gravity_point
