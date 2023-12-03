@@ -75,7 +75,7 @@ class Player(Entity):
 
         # this code sets the velocity of the player towards the gravity point;
         # the closer the player is to the gravity point, the slower it moves to avoid dancing
-        if dist_to_gravity_point > self.size * 1.4:
+        if dist_to_gravity_point > self.size * 0.2:
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:
             self.vel = Vector2()
