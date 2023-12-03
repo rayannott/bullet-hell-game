@@ -12,13 +12,17 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
     def __init__(self,
             pos: Vector2,
             energy: float,
-            lifetime: float
+            lifetime: float,
+            spawned_by_player: bool = False,
         ) -> None:
+        self.spawned_by_player = spawned_by_player
+        size = ENERGY_ORB_SIZE * 2 if spawned_by_player else ENERGY_ORB_SIZE
+        color = Color('#e880df') if spawned_by_player else Color('#f014a0')
         super().__init__(
             pos=pos,
             type=EntityType.ENERGY_ORB,
-            size=ENERGY_ORB_SIZE,
-            color=Color('#f014a0'),
+            size=size,
+            color=color,
             render_trail=False
         )
         self._energy = energy

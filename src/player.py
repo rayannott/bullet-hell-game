@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 import random
 
-from pygame import Vector2
-from src.energy_orb import EnergyOrb
+from pygame import Color, Vector2
 
+from src.energy_orb import EnergyOrb
 from src.entity import Entity
 from src.enums import EntityType, ProjectileType
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined
@@ -11,7 +11,8 @@ from src.projectile import Projectile
 from src.utils import Stats, Slider, Timer
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER,
+    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
+    PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST, PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_MIN_ENERGY_PERCENT,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
 
@@ -130,8 +131,16 @@ class Player(Entity):
         )
     
     def spawn_energy_orb(self) -> EnergyOrb:
-        if self.energy.get_percent_full() < 0.8:
-            raise Exception('energy < 80%')
+        if self.energy.get_percent_full() < PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_MIN_ENERGY_PERCENT:
+            raise NotEnoughEnergy(f'energy lower than {PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_MIN_ENERGY_PERCENT:%}')
+        self.energy.change(-PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST)
+        self.stats.ENERGY_ORBS_SPAWNED += 1
+        return EnergyOrb(
+            pos=self._gravity_point,
+            energy=PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST,
+            lifetime=ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
+            spawned_by_player=True
+        )
 
     def ultimate_ability(self):
         # TODO: implement different ultimates

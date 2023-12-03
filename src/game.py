@@ -90,6 +90,7 @@ class Game:
         print('new wave!')
         if any(ent._enemy_type == EnemyType.BOSS for ent in self.enemies()):
             print('OOPS: boss still alive')
+            self.feedback_buffer.append(Feedback('boss is still alive', 2., color=Color('red')))
             return
         self.spawn_enemy(EnemyType.BOSS)
         if self.level >= GAME_MAX_LEVEL: return False
@@ -213,8 +214,10 @@ class Game:
             if not eo.intersects(self.player): continue
             energy_collected: float = eo.energy_left()
             self.player.energy.change(energy_collected)
-            self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
-            self.player.get_stats().ENERGY_COLLECTED += energy_collected
+            if not eo.spawned_by_player:
+                # count stats only for env energy orbs
+                self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
+                self.player.get_stats().ENERGY_COLLECTED += energy_collected
             eo.kill()
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color('magenta')))
         for projectile in self.projectiles():

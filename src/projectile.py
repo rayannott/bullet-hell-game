@@ -122,3 +122,9 @@ class HomingProjectile(Projectile):
         self._life_timer.tick(time_delta)
         if not self._life_timer.running():
             self.kill()
+
+
+class DefinedTrajectoryProjectile(Projectile):
+    """A projectile that follows 
+    a defined trajectory (e.g. a Bezier curve, an arc, ...)."""
+    # TODO: implement this
