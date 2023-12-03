@@ -28,7 +28,9 @@ class GameScreen(Screen):
 
         self.game_is_over_window_shown = False
         self.notifications: list[Notification] = []
-        self.trail_cache = None
+
+        # TODO: create a class for this
+        self.ability_picker = ...
 
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
@@ -55,7 +57,7 @@ class GameScreen(Screen):
             if event.button == 1:
                 self.game.player_try_shooting()
             elif event.button == 3:
-                # TODO: come up with an extra ability
+                # TODO: pressing opens a wheel menu with options
                 ...
     
     def update(self, time_delta: float):
