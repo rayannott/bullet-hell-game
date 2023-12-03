@@ -90,8 +90,8 @@ class Game:
         self.feedback_buffer.append(Feedback(f'new wave!', 3.5, color=Color('green'), at_pos='cursor'))
         if self.level >= GAME_MAX_LEVEL: return False
         print(f'new wave! new level: {self.level}')
-        self.feedback_buffer.append(Feedback(f'new level: {self.level}', 3.5, color=Color('green'), at_pos='player'))
         self.level += 1
+        self.feedback_buffer.append(Feedback(f'new level: {self.level}', 3.5, color=Color('green'), at_pos='player'))
         self.player.new_level()
         self.current_spawn_enemy_cooldown *= 0.93
         return True
@@ -274,7 +274,9 @@ class Game:
             for enemy in self.enemies():
                 if not bullet.intersects(enemy): continue
                 bullet.kill()
+                is_ricochet = bullet._ricochet_count > 0
                 self.player.get_stats().ACCURATE_SHOTS += 1
+                if is_ricochet: self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
                 print('accurate shot')
                 damage_dealt = bullet._damage
                 damage_dealt_actual = -enemy.get_health().change(-damage_dealt)
@@ -291,7 +293,7 @@ class Game:
                     # killed the boss
                     self.new_level()
                     self.kill_projectiles()
-                    if bullet._ricochet_count > 0 and not self.player.get_achievements().KILL_BOSS_RICOCHET:
+                    if is_ricochet and not self.player.get_achievements().KILL_BOSS_RICOCHET:
                         print('new achievement: killed boss with ricochet')
                         self.player.get_achievements().KILL_BOSS_RICOCHET = True
                         self.feedback_buffer.append(Feedback('killed boss with ricochet!', 3., color=pygame.Color('blue')))
@@ -299,11 +301,11 @@ class Game:
                 self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
         
         # enemy-enemy collisions
-        MULT = 0.4
+        MULT = 0.3
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
             if enem1.intersects(enem2):
                 if enem1.intersects(enem2):
-                    vec_between = enem2.get_pos() - enem1.get_pos() # 1 -> 2
+                    vec_between = enem2.get_pos() - enem1.get_pos()
                     enem1.pos -= vec_between * MULT; enem2.pos += vec_between * MULT
 
     def add_entity(self, entity: Entity) -> None:
