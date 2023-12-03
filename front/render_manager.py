@@ -1,7 +1,8 @@
 import math
 
 import pygame, pygame_gui
-from pygame import Color, freetype
+from pygame import Color, Vector2, freetype
+from src.enemy import Enemy
 
 from src.game import Game
 from src.entity import Entity
@@ -33,6 +34,7 @@ class RenderManager:
             self.draw_entity_basics(enemy)
             self.draw_entity_circular_status_bar(enemy, enemy.get_health(),
                 enemy.get_size() * 1.5, color=Color('green'), draw_full=True, width=2)
+            if self.debug: self.draw_enemy_health_debug(enemy)
         for energy_orb in self.game.energy_orbs():
             self.draw_entity_basics(energy_orb)
             self.draw_entity_circular_status_bar(energy_orb, energy_orb._life_timer.get_slider(reverse=True),
@@ -49,7 +51,6 @@ class RenderManager:
 
     def draw_entity_debug(self, entity: Entity):
         if entity._speed and entity._vel.magnitude_squared():
-            # print(entity, entity._vel, entity._type)
             pygame.draw.line(
                 self.surface,
                 Color('white'),
@@ -57,7 +58,13 @@ class RenderManager:
                 entity.get_pos() + entity._vel.normalize() * entity._speed * 0.1,
                 width=2
             )
-    
+
+    def draw_enemy_health_debug(self, enemy: Enemy):
+        health_text = f'{enemy.get_health()}'
+        rect = pygame.Rect(0, 0, 85, 40)
+        rect.center = enemy.get_pos() + Vector2(0, -enemy.get_size() * 1.5)
+        font.render_to(self.surface, rect, health_text, Color('white'))
+
     def draw_entity_circular_status_bar(self, entity: Entity, slider: Slider, 
                                         radius: float, color: Color = Color('white'),
                                         draw_full: bool = False, width: int = 3):
