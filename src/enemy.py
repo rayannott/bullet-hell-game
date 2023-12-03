@@ -97,7 +97,8 @@ class Enemy(Entity):
             self.shoot()
             self._cooldown.reset()
 
-    def shoot_normal(self):
+    def shoot_normal(self, **kwargs):
+        speed_mult = kwargs.get('speed_mult', 1.)
         direction = self.get_shoot_direction()
         self.entities_buffer.append(
             Projectile(
@@ -105,7 +106,7 @@ class Enemy(Entity):
                 vel=direction,
                 damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
                 projectile_type=ProjectileType.NORMAL,
-                speed=self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
+                speed=self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.4) * speed_mult,
             )
         )
     
@@ -117,7 +118,7 @@ class Enemy(Entity):
                 _pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
                 _vel=direction,
                 _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
-                _speed=(self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2)) * speed_mult,
+                _speed=(self.speed + PROJECTILE_DEFAULT_SPEED * 0.8) * speed_mult,
                 _homing_target=self.homing_target,
             )
         )
@@ -131,7 +132,6 @@ class Enemy(Entity):
                 _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
                 _speed=self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
                 _num_subprojectiles=num_of_subprojectiles,
-                # _homing_target=self._homing_target,
             )
         )
     
@@ -218,7 +218,7 @@ class TankEnemy(Enemy):
             return
         num_shots = random.randint(2, 3 + int(self._player_level // 2))
         for _ in range(num_shots):
-            self.shoot_normal()
+            self.shoot_normal(speed_mult=1.4)
     
     def on_natural_death(self):
         super().on_natural_death()
@@ -243,7 +243,7 @@ class ArtilleryEnemy(Enemy):
             enemy_type=EnemyType.ARTILLERY,
             player=player,
             color=Color('#005c22'),
-            speed=0.,
+            speed=10.,
             health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 35. * (_player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4,
             reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * _player_level),
@@ -253,7 +253,7 @@ class ArtilleryEnemy(Enemy):
         )
     
     def shoot(self):
-        self.shoot_homing(speed_mult=1.4)
+        self.shoot_homing(speed_mult=1.2)
     
     def on_natural_death(self):
         super().on_natural_death()
@@ -276,8 +276,8 @@ class BossEnemy(Enemy):
             enemy_type=EnemyType.BOSS,
             player=player,
             color=Color('#510e78'),
-            speed=ENEMY_DEFAULT_SPEED,
-            health=(ENEMY_DEFAULT_MAX_HEALTH) * 5. + 30. * self._player_level,
+            speed=ENEMY_DEFAULT_SPEED + 60 * (self._player_level - 1),
+            health=(ENEMY_DEFAULT_MAX_HEALTH) * 3.5 + 35. * self._player_level,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.12 * self._player_level),
             lifetime=math.inf,
@@ -297,7 +297,7 @@ class BossEnemy(Enemy):
 
     def shoot(self):
         if random.random() < 0.3:
-            self.shoot_homing(speed_mult=0.7)
+            self.shoot_homing(speed_mult=0.65)
         else:
             self.shoot_normal()
     
