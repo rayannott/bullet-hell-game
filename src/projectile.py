@@ -37,6 +37,7 @@ class Projectile(Entity):
         self._damage = damage
         self._lifetime = lifetime
         self.color = PROJECTILE_COLOR_MAP[projectile_type]
+        self._ricochet_count = 0
         self._life_timer = Timer(max_time=self._lifetime)
 
     def update(self, time_delta: float):

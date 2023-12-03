@@ -28,6 +28,14 @@ class EffectFlags:
         self.OIL_SPILL = False
 
 
+@dataclass
+class Achievements:
+    """
+    Achievement flags.
+    """
+    KILL_BOSS_RICOCHET: bool = False
+
+
 class Player(Entity):
     def __init__(self, pos: Vector2):
         super().__init__(
@@ -50,6 +58,7 @@ class Player(Entity):
         self._damage = PLAYER_DEFAULT_DAMAGE_AVG
         self._damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
         self.effect_flags = EffectFlags()
+        self.achievements = Achievements()
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -167,10 +176,12 @@ class Player(Entity):
     
     def get_stats(self) -> Stats: return self.stats
 
+    def get_achievements(self) -> Achievements: return self.achievements
+
     def get_level(self) -> int: return self.level
 
     def __repr__(self) -> str:
         def pretty_vector2(v: Vector2) -> str:
             return f'({v.x:.2f}, {v.y:.2f})'
-        return f'Player(level={self.level}; pos={pretty_vector2(self.pos)}; vel={pretty_vector2(self.vel)}; speed={self.speed:.2f}; health={self.health}; cooldown={self._shoot_cooldown}; speed_range={self._speed_range}; gravity_point={pretty_vector2(self._gravity_point)}; stats={self.stats})'
+        return f'Player(level={self.level}; pos={pretty_vector2(self.pos)}; vel={pretty_vector2(self.vel)}; speed={self.speed:.2f}; health={self.health}; cooldown={self._shoot_cooldown}; speed_range={self._speed_range}; gravity_point={pretty_vector2(self._gravity_point)}; stats={self.stats}; achievements={self.achievements})'
     

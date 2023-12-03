@@ -210,6 +210,8 @@ class Game:
         for entity in self.all_entities_iter(with_player=False):
             pos_ = entity.get_pos()
             if entity.is_alive() and not self.screen_rectangle.collidepoint(pos_):
+                if entity.get_type() == EntityType.PROJECTILE:
+                    entity._ricochet_count += 1 # type: ignore
                 if pos_.x < self.screen_rectangle.left:
                     entity.vel.x *= -1.
                     entity.pos.x += delta
@@ -289,6 +291,10 @@ class Game:
                     # killed the boss
                     self.new_level()
                     self.kill_projectiles()
+                    if bullet._ricochet_count > 0 and not self.player.get_achievements().KILL_BOSS_RICOCHET:
+                        print('new achievement: killed boss with ricochet')
+                        self.player.get_achievements().KILL_BOSS_RICOCHET = True
+                        self.feedback_buffer.append(Feedback('killed boss with ricochet!', 3., color=pygame.Color('blue')))
                 print(f'enemy killed: {enemy._enemy_type.name}')
                 self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
         
