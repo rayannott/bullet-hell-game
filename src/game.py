@@ -50,7 +50,7 @@ class Game:
         self.e_enemies: list[Enemy] = []
 
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
-        self.increase_level_timer = Timer(max_time=INCREASE_LEVEL_EVERY)
+        self.one_wave_timer = Timer(max_time=INCREASE_LEVEL_EVERY)
         self.new_energy_orb_timer = Timer(max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
@@ -86,19 +86,19 @@ class Game:
     
     def toggle_pause(self) -> None: self.paused = not self.paused
 
-    def new_level(self):
-        print('new wave!')
-        if any(ent._enemy_type == EnemyType.BOSS for ent in self.enemies()):
-            print('OOPS: boss still alive')
-            self.feedback_buffer.append(Feedback('boss is still alive', 2., color=Color('red')))
-            return
-        self.spawn_enemy(EnemyType.BOSS)
+    def new_level(self) -> bool:
+        self.feedback_buffer.append(Feedback(f'new wave!', 3.5, color=Color('green'), at_pos='cursor'))
         if self.level >= GAME_MAX_LEVEL: return False
-        print('new level:', self.level)
+        print(f'new wave! new level: {self.level}')
+        self.feedback_buffer.append(Feedback(f'new level: {self.level}', 3.5, color=Color('green'), at_pos='player'))
         self.level += 1
         self.player.new_level()
         self.current_spawn_enemy_cooldown *= 0.93
         return True
+
+    def kill_projectiles(self):
+        for projectile in self.projectiles():
+            projectile.kill()
     
     def spawn_energy_orb(self):
         self.add_entity(
@@ -134,10 +134,15 @@ class Game:
             self.remove_dead_entities()
             self.remove_dead_entities_timer.reset()
             print('Removed dead entities')
-        self.increase_level_timer.tick(time_delta)
-        if not self.increase_level_timer.running():
-            self.new_level()
-            self.increase_level_timer.reset()
+        self.one_wave_timer.tick(time_delta)
+        if not self.one_wave_timer.running():
+            self.one_wave_timer.reset()
+            # spawn boss at the end of the wave unless one is already alive
+            if any(ent._enemy_type == EnemyType.BOSS for ent in self.enemies()):
+                print('tried to spawn a new boss, but one is still alive')
+                self.feedback_buffer.append(Feedback('boss is still alive!', 2., color=Color('red')))
+                return
+            self.spawn_enemy(EnemyType.BOSS)
             print('Increased level')
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
@@ -199,14 +204,24 @@ class Game:
     def reflect_entities_vel(self,) -> None:
         """
         Reflect the velocity of all entities that are outside of the screen.
+        Add some delta to the position to prevent the entity from getting stuck.
         """
-        for entity in self.all_entities_iter():
+        delta = 10.
+        for entity in self.all_entities_iter(with_player=False):
             pos_ = entity.get_pos()
             if entity.is_alive() and not self.screen_rectangle.collidepoint(pos_):
-                if pos_.x < self.screen_rectangle.left or pos_.x > self.screen_rectangle.right:
+                if pos_.x < self.screen_rectangle.left:
                     entity.vel.x *= -1.
-                if pos_.y < self.screen_rectangle.top or pos_.y > self.screen_rectangle.bottom:
+                    entity.pos.x += delta
+                if pos_.x > self.screen_rectangle.right:
+                    entity.vel.x *= -1.
+                    entity.pos.x -= delta
+                if pos_.y < self.screen_rectangle.top:
                     entity.vel.y *= -1.
+                    entity.pos.y += delta
+                if pos_.y > self.screen_rectangle.bottom:
+                    entity.vel.y *= -1.
+                    entity.pos.y -= delta
     
     def process_collisions(self) -> None:
         # player collides with anything:
@@ -255,23 +270,27 @@ class Game:
         player_bullets = [el for el in self.projectiles() if el._projectile_type == ProjectileType.PLAYER_BULLET]
         for bullet in player_bullets:
             for enemy in self.enemies():
-                if bullet.intersects(enemy):
-                    bullet.kill()
-                    self.player.get_stats().ACCURATE_SHOTS += 1
-                    print('accurate shot')
-                    damage_dealt = bullet._damage
-                    damage_dealt_actual = -enemy.get_health().change(-damage_dealt)
-                    self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
-                    self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
-                    enemy.update(0.)
-                    if not enemy.is_alive():
-                        enemy.kill()
-                        reward = enemy.get_reward()
-                        self.player.energy.change(reward)
-                        self.player.get_stats().ENEMIES_KILLED += 1
-                        self.player.get_stats().ENERGY_COLLECTED += reward
-                        print('enemy killed')
-                        self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
+                if not bullet.intersects(enemy): continue
+                bullet.kill()
+                self.player.get_stats().ACCURATE_SHOTS += 1
+                print('accurate shot')
+                damage_dealt = bullet._damage
+                damage_dealt_actual = -enemy.get_health().change(-damage_dealt)
+                self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
+                self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
+                enemy.update(0.)
+                if enemy.is_alive(): continue
+                enemy.kill()
+                reward = enemy.get_reward()
+                self.player.energy.change(reward)
+                self.player.get_stats().ENEMIES_KILLED += 1
+                self.player.get_stats().ENERGY_COLLECTED += reward
+                if enemy._enemy_type == EnemyType.BOSS:
+                    # killed the boss
+                    self.new_level()
+                    self.kill_projectiles()
+                print(f'enemy killed: {enemy._enemy_type.name}')
+                self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
         
         # enemy-enemy collisions
         MULT = 0.4
