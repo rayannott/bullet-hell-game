@@ -41,7 +41,7 @@ class GameScreen(Screen):
                 self.setup_game(self.surface)
             elif event.key == pygame.K_d:
                 print('--- debug ---')
-                print(repr(self.game.player))
+                print(self.game.player.get_stats())
                 print('-'*10)
         super().process_ui_event(event)
 
