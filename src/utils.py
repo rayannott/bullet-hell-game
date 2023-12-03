@@ -80,6 +80,9 @@ class Timer:
 
     def get_percent_full(self) -> float:
         return self.current_time / self.max_time
+
+    def set_percent_full(self, percent: float) -> None:
+        self.current_time = self.max_time * percent
     
     def get_slider(self, reverse=False) -> Slider:
         if reverse:
