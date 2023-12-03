@@ -64,7 +64,7 @@ class Player(Entity):
 
         # this code sets the velocity of the player towards the gravity point;
         # the closer the player is to the gravity point, the slower it moves to avoid dancing
-        if dist_to_gravity_point > self._size * 1.5:
+        if dist_to_gravity_point > self._size * 1.4:
             self._vel = (towards_gravity_point).normalize() * self._speed
         else:
             self._vel = Vector2()
@@ -72,7 +72,6 @@ class Player(Entity):
         self.effect_flags.reset()
 
     def health_energy_evolution(self, time_delta: float):
-        # TODO decay enery when moving or regenerating health
         e_percent = self._energy.get_percent_full()
         h_percent = self._health.get_percent_full()
 
@@ -128,6 +127,10 @@ class Player(Entity):
             _projectile_type=ProjectileType.PLAYER_BULLET,
             _speed=self._speed + PROJECTILE_DEFAULT_SPEED,
         )
+    
+    def ultimate_ability(self):
+        # TODO: implement different ultimates
+        ...
     
     def new_level(self):
         self._level += 1
