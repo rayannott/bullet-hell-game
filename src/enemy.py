@@ -276,24 +276,25 @@ class BossEnemy(Enemy):
             enemy_type=EnemyType.BOSS,
             player=player,
             color=Color('#510e78'),
-            speed=ENEMY_DEFAULT_SPEED + 60 * (self._player_level - 1),
+            speed=ENEMY_DEFAULT_SPEED + 40 * (self._player_level - 1),
             health=(ENEMY_DEFAULT_MAX_HEALTH) * 3.5 + 35. * self._player_level,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.12 * self._player_level),
             lifetime=math.inf,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
         )
-        spawn_oil_spills_cooldown = 18. - 1.3 * self._player_level
-        self._spawn_oil_spills_cooldown = Timer(max_time=spawn_oil_spills_cooldown)
+        self._spawn_oil_spills_cooldown = 18. - 1.3 * self._player_level
+        self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
         self._regen_rate = 0.6 + 0.15 * (self._player_level - 1)
 
     def update(self, time_delta: float):
         super().update(time_delta)
-        self._spawn_oil_spills_cooldown.tick(time_delta)
+        self._spawn_oil_spills_timer.tick(time_delta)
         self._health.change(self._regen_rate * time_delta)
-        if not self._spawn_oil_spills_cooldown.running():
+        if not self._spawn_oil_spills_timer.running():
             self.spawn_oil_spills()
-            self._spawn_oil_spills_cooldown.reset()
+            self._spawn_oil_spills_cooldown *= 0.9 # with every spawn the cooldown decreases
+            self._spawn_oil_spills_timer.reset(with_max_time=self._spawn_oil_spills_cooldown)
 
     def shoot(self):
         if random.random() < 0.3:
