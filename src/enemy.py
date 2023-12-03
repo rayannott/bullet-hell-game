@@ -11,7 +11,7 @@ from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile
 from src.oil_spill import OilSpill
 from front.utils import random_unit_vector
 
-from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, 
+from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE)
 
@@ -47,8 +47,11 @@ class Enemy(Entity):
             _shoot_cooldown: float,
             _reward: float,
             _lifetime: float,
-            _damage_on_collision: float,
             _player: Player,     
+            _damage_on_collision: float = ENEMY_DEFAULT_COLLISION_DAMAGE,
+            _damage: float = ENEMY_DEFAULT_DAMAGE,
+            _damage_spread: float = ENEMY_DEFAULT_DAMAGE_SPREAD,
+            _spread: float = ENEMY_DEFAULT_SHOOTING_SPREAD,
         ):
         super().__init__(
             _pos=_pos,
@@ -61,12 +64,13 @@ class Enemy(Entity):
         )
         self._health = Slider(_health)
         self._cooldown = Timer(max_time=_shoot_cooldown)
+        self._cooldown.set_percent_full(0.5) # enemies start with half of the cooldown
         self._lifetime_cooldown = Timer(max_time=_lifetime)
         self._reward = _reward
         self._enemy_type = _enemy_type
-        self._spread = 0.5 # in radians
-        self._damage = ENEMY_DEFAULT_DAMAGE
-        self._damage_spread = ENEMY_DEFAULT_DAMAGE_SPREAD
+        self._spread = _spread # in radians
+        self._damage = _damage
+        self._damage_spread = _damage_spread
 
         self._damage_on_collision = _damage_on_collision
         self._shoots_player = True
@@ -105,14 +109,15 @@ class Enemy(Entity):
             )
         )
     
-    def shoot_homing(self):
+    def shoot_homing(self, **kwargs):
+        speed_mult = kwargs.get('speed_mult', 1.)
         direction = self.get_shoot_direction()
         self._entities_buffer.append(
             HomingProjectile(
                 _pos=self._pos.copy() + direction * (self._size * random.uniform(1.5, 2.5)),
                 _vel=direction,
                 _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
-                _speed=self._speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
+                _speed=(self._speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2)) * speed_mult,
                 _homing_target=self._homing_target,
             )
         )
@@ -133,9 +138,9 @@ class Enemy(Entity):
     def on_natural_death(self):
         self._entities_buffer.append(Corpse(self))
 
-    def get_health(self): return self._health
+    def get_health(self) -> Slider: return self._health
 
-    def get_reward(self): return self._reward
+    def get_reward(self) -> float: return self._reward
 
 
 class BasicEnemy(Enemy):
@@ -155,6 +160,8 @@ class BasicEnemy(Enemy):
             _reward=ENEMY_DEFAULT_REWARD,
             _lifetime=ENEMY_DEFAULT_LIFETIME,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE,
+            _damage=ENEMY_DEFAULT_DAMAGE,
+            _damage_spread=ENEMY_DEFAULT_DAMAGE_SPREAD,
         )
 
 
@@ -164,41 +171,44 @@ class FastEnemy(Enemy):
             _pos: Vector2,
             _player: Player,
         ):
+        _player_level = _player.get_level()
         super().__init__(
             _pos=_pos,
             _enemy_type=EnemyType.FAST,
             _player=_player,
             _color=Color('#ad2f52'),
-            _speed=ENEMY_DEFAULT_SPEED * 1.7,
-            _health=ENEMY_DEFAULT_MAX_HEALTH * 0.8,
+            _speed=ENEMY_DEFAULT_SPEED * (1.6 + 0.05 * _player_level),
+            _health=ENEMY_DEFAULT_MAX_HEALTH * 0.8 + 20. * (_player_level - 1),
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
-            _reward=ENEMY_DEFAULT_REWARD * 1.5,
-            _lifetime=ENEMY_DEFAULT_LIFETIME,
+            _reward=ENEMY_DEFAULT_REWARD * (1.4 + 0.1 * _player_level),
+            _lifetime=ENEMY_DEFAULT_LIFETIME + 6. * (_player_level - 1),
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.15,
         )
         self._shoots_player = False
 
 
 class TankEnemy(Enemy):
-    """Moves slowly, has high health and big size. Shoots in bursts."""
+    """Moves slowly, has high health and big size. Shoots in bursts.
+    Spawns some basic enemies on natural death."""
     def __init__(self, 
             _pos: Vector2,
             _player: Player,
         ):
+        self._player_level = _player.get_level()
         super().__init__(
             _pos=_pos,
             _enemy_type=EnemyType.TANK,
             _player=_player,
             _color=Color('#9e401e'),
             _speed=ENEMY_DEFAULT_SPEED * 0.6,
-            _health=ENEMY_DEFAULT_MAX_HEALTH * 3.5,
+            _health=ENEMY_DEFAULT_MAX_HEALTH * 3.5 + 35. * (self._player_level - 1),
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0,
-            _reward=ENEMY_DEFAULT_REWARD * 2.5,
-            _lifetime=ENEMY_DEFAULT_LIFETIME,
+            _reward=ENEMY_DEFAULT_REWARD * (2.3 + 0.1 * self._player_level),
+            _lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.4,
+            _damage=ENEMY_DEFAULT_DAMAGE * (1. + 0.1 * self._player_level),
         )
-        self._player_level = _player.get_level()
-        self._spread = 1.4
+        self._spread = 1.3 + 0.03 * self._player_level
     
     def shoot(self):
         """Shoots in bursts with probability 0.5 and explosive projectiles with probability 0.5."""
@@ -206,7 +216,7 @@ class TankEnemy(Enemy):
             num_shots = 3 + self._player_level
             self.shoot_explosive(num_of_subprojectiles=num_shots)
             return
-        num_shots = random.randint(2, 5)
+        num_shots = random.randint(2, 3 + int(self._player_level // 2))
         for _ in range(num_shots):
             self.shoot_normal()
     
@@ -227,27 +237,29 @@ class ArtilleryEnemy(Enemy):
             _pos: Vector2,
             _player: Player,
         ):
+        _player_level = _player.get_level()
         super().__init__(
             _pos=_pos,
             _enemy_type=EnemyType.ARTILLERY,
             _player=_player,
             _color=Color('#005c22'),
             _speed=0.,
-            _health=ENEMY_DEFAULT_MAX_HEALTH * 2.5,
+            _health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 35. * (_player_level - 1),
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4,
-            _reward=ENEMY_DEFAULT_REWARD * 2.,
-            _lifetime=ENEMY_DEFAULT_LIFETIME,
+            _reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * _player_level),
+            _lifetime=ENEMY_DEFAULT_LIFETIME + 3. * _player_level,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.3,
+            _damage=ENEMY_DEFAULT_DAMAGE * 1.35,
         )
     
     def shoot(self):
-        self.shoot_homing()
+        self.shoot_homing(speed_mult=1.4)
     
     def on_natural_death(self):
         super().on_natural_death()
         # spawn some homing projectiles
         for _ in range(random.randint(1, 3)):
-            self.shoot_homing()
+            self.shoot_homing(speed_mult=1.4)
 
 
 class BossEnemy(Enemy):
@@ -267,23 +279,25 @@ class BossEnemy(Enemy):
             _speed=ENEMY_DEFAULT_SPEED,
             _health=(ENEMY_DEFAULT_MAX_HEALTH) * 5. + 30. * self._player_level,
             _shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
-            _reward=ENEMY_DEFAULT_REWARD * 3.7,
+            _reward=ENEMY_DEFAULT_REWARD * (3. + 0.12 * self._player_level),
             _lifetime=math.inf,
             _damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
         )
         spawn_oil_spills_cooldown = 18. - 1.3 * self._player_level
         self._spawn_oil_spills_cooldown = Timer(max_time=spawn_oil_spills_cooldown)
+        self._regen_rate = 0.6 + 0.15 * (self._player_level - 1)
 
     def update(self, time_delta: float):
         super().update(time_delta)
         self._spawn_oil_spills_cooldown.tick(time_delta)
+        self._health.change(self._regen_rate * time_delta)
         if not self._spawn_oil_spills_cooldown.running():
             self.spawn_oil_spills()
             self._spawn_oil_spills_cooldown.reset()
 
     def shoot(self):
         if random.random() < 0.3:
-            self.shoot_homing()
+            self.shoot_homing(speed_mult=0.7)
         else:
             self.shoot_normal()
     
@@ -292,9 +306,11 @@ class BossEnemy(Enemy):
 
     def spawn_oil_spills(self):
         towards_player = self._player_pos - self._pos
+        # precision of spawning oil spills increases with level
+        inprecision = 0.5 - 0.028 * self._player_level 
         self._entities_buffer.append(
-            OilSpill(_pos=self._pos + towards_player * random.uniform(0.5, 1.5), 
-                     _size=OIL_SPILL_SIZE * random.uniform(0.5, 1.7))
+            OilSpill(_pos=self._pos + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
+                     _size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
         )
 
 
