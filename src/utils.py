@@ -9,6 +9,7 @@ class Stats:
     ENERGY_ORBS_COLLECTED: int = 0
     PROJECTILES_FIRED: int = 0
     ENEMIES_KILLED: int = 0
+    ACCURATE_SHOTS_RICOCHET: int = 0
     BULLETS_CAUGHT: int = 0
     ACCURATE_SHOTS: int = 0
     ENEMIES_COLLIDED_WITH: int = 0
