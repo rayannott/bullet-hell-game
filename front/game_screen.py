@@ -42,7 +42,6 @@ class GameScreen(Screen):
             elif event.key == pygame.K_d:
                 print('--- debug ---')
                 print(repr(self.game.player))
-                self.game.spawn_enemy(enemy_type=EnemyType.BOSS)
                 print('-'*10)
         super().process_ui_event(event)
 

@@ -10,7 +10,7 @@ from config import (PROJECTILE_DEFAULT_SIZE, PROJECTILE_DEFAULT_DAMAGE,
 PROJECTILE_COLOR_MAP = {
     ProjectileType.PLAYER_BULLET: Color('yellow'),
     ProjectileType.NORMAL: Color('#d3dbc8'),
-    ProjectileType.HOMING: Color('#aee665'),
+    ProjectileType.HOMING: Color('#46c6e3'),
     ProjectileType.EXPLOSIVE: Color('#598c15'),
 }
 
@@ -36,7 +36,7 @@ class Projectile(Entity):
         self._projectile_type = projectile_type
         self._damage = damage
         self._lifetime = lifetime
-        self._color = PROJECTILE_COLOR_MAP[projectile_type]
+        self.color = PROJECTILE_COLOR_MAP[projectile_type]
         self._life_timer = Timer(max_time=self._lifetime)
 
     def update(self, time_delta: float):

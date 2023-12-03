@@ -12,7 +12,7 @@ from src.utils import Stats, Slider, Timer
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
-    PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST, PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_MIN_ENERGY_PERCENT,
+    PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST, PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_REQUIRED_ENERGY,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
 
@@ -131,8 +131,8 @@ class Player(Entity):
         )
     
     def spawn_energy_orb(self) -> EnergyOrb:
-        if self.energy.get_percent_full() < PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_MIN_ENERGY_PERCENT:
-            raise NotEnoughEnergy(f'energy lower than {PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_MIN_ENERGY_PERCENT:%}')
+        if self.energy.get_value() < PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_REQUIRED_ENERGY:
+            raise NotEnoughEnergy(f'energy lower than {PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_REQUIRED_ENERGY}')
         self.energy.change(-PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST)
         self.stats.ENERGY_ORBS_SPAWNED += 1
         return EnergyOrb(
@@ -152,8 +152,8 @@ class Player(Entity):
         old_percentage = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
-        self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self.level - 1)) # energy sets to 60%
-        self.energy.set_percent_full(0.6)
+        self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self.level - 1))
+        self.energy.set_percent_full(0.6) # energy sets to 60%
         self._shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.3)
         self._energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self.level - 1)
         self._damage = PLAYER_DEFAULT_DAMAGE_AVG + 5. * (self.level - 1)

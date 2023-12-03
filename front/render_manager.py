@@ -108,8 +108,7 @@ class RenderManager:
             )
 
     def draw_entity_basics(self, entity: Entity):
-        _current_color = entity.get_color()
-        pygame.draw.circle(self.surface, _current_color, entity.get_pos(), entity.get_size())
+        pygame.draw.circle(self.surface, entity.get_color(), entity.get_pos(), entity.get_size())
         self.entities_drawn += 1
         if entity.render_trail:
             self.draw_entity_trail(entity)
