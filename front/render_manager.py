@@ -50,12 +50,12 @@ class RenderManager:
         self.reset()
 
     def draw_entity_debug(self, entity: Entity):
-        if entity._speed and entity._vel.magnitude_squared():
+        if entity.speed and entity.vel.magnitude_squared():
             pygame.draw.line(
                 self.surface,
                 Color('white'),
                 entity.get_pos(),
-                entity.get_pos() + entity._vel.normalize() * entity._speed * 0.1,
+                entity.get_pos() + entity.vel.normalize() * entity.speed * 0.1,
                 width=2
             )
 
@@ -96,9 +96,9 @@ class RenderManager:
             )
 
     def draw_entity_trail(self, entity: Entity):
-        _trail_len = len(entity._trail)
+        _trail_len = len(entity.trail)
         color_gradient = ColorGradient(Color('black'), entity.get_color())
-        for i, pos in enumerate(entity._trail):
+        for i, pos in enumerate(entity.trail):
             pygame.draw.circle(
                 self.surface,
                 color_gradient(i / _trail_len),
@@ -111,7 +111,7 @@ class RenderManager:
         _current_color = entity.get_color()
         pygame.draw.circle(self.surface, _current_color, entity.get_pos(), entity.get_size())
         self.entities_drawn += 1
-        if entity._render_trail:
+        if entity.render_trail:
             self.draw_entity_trail(entity)
         if self.debug: self.draw_entity_debug(entity)
 

@@ -25,9 +25,9 @@ class Stats:
 
 
 class Slider:
-    def __init__(self, _max_value: float, _current_value: float | None = None):
-        self.max_value = _max_value
-        self.current_value = _current_value if _current_value is not None else _max_value
+    def __init__(self, max_value: float, current_value: float | None = None):
+        self.max_value = max_value
+        self.current_value = current_value if current_value is not None else max_value
     
     def is_alive(self) -> bool:
         return self.current_value > 0

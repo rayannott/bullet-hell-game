@@ -40,7 +40,7 @@ class StatsPanel:
         self.energy_bar.set_slider(player.get_energy())
         # TODO: choose more interesting stats
         STATS_LABELS = ['time', 'level', 'enemies killed', 'accuracy', 'avg damage']
-        STATS_VALUES = [game._time, game._level, player._stats.ENEMIES_KILLED, player._stats.get_accuracy(), player._damage]
+        STATS_VALUES = [game.time, game.level, player.stats.ENEMIES_KILLED, player.stats.get_accuracy(), player._damage]
         FORMATS = ['.1f', 'd', 'd', '.1%', '.0f']
         self.stats_textbox.set_text(
             '<br>'.join((f'{label:<15} {value:{format_}}' for label, value, format_ in zip(STATS_LABELS, STATS_VALUES, FORMATS)))

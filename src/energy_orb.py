@@ -10,19 +10,19 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
     An energy orb that the player can collect to increase their energy.
     """
     def __init__(self,
-            _pos: Vector2,
-            _energy: float,
-            _lifetime: float
+            pos: Vector2,
+            energy: float,
+            lifetime: float
         ) -> None:
         super().__init__(
-            _pos=_pos,
-            _type=EntityType.ENERGY_ORB,
-            _size=ENERGY_ORB_SIZE,
-            _color=Color('#f014a0'),
-            _render_trail=False
+            pos=pos,
+            type=EntityType.ENERGY_ORB,
+            size=ENERGY_ORB_SIZE,
+            color=Color('#f014a0'),
+            render_trail=False
         )
-        self._energy = _energy
-        self._lifetime = _lifetime
+        self._energy = energy
+        self._lifetime = lifetime
         self._life_timer = Timer(max_time=self._lifetime)
 
     def energy_left(self) -> float:

@@ -32,9 +32,9 @@ def get_enemy_type_prob_weights(level: int) -> dict[EnemyType, float]:
 
 class Game:
     def __init__(self, screen_rectangle: pygame.Rect) -> None:
-        self._level = 1
-        self._time = 0.
-        self._paused = False
+        self.level = 1
+        self.time = 0.
+        self.paused = False
         self.screen_rectangle = screen_rectangle
         
         self.feedback_buffer: deque[Feedback] = deque()
@@ -84,7 +84,7 @@ class Game:
     def is_running(self) -> bool:
         return self.player.is_alive()
     
-    def toggle_pause(self) -> None: self._paused = not self._paused
+    def toggle_pause(self) -> None: self.paused = not self.paused
 
     def new_level(self):
         print('new wave!')
@@ -92,9 +92,9 @@ class Game:
             print('OOPS: boss still alive')
             return
         self.spawn_enemy(EnemyType.BOSS)
-        if self._level >= GAME_MAX_LEVEL: return False
-        print('new level:', self._level)
-        self._level += 1
+        if self.level >= GAME_MAX_LEVEL: return False
+        print('new level:', self.level)
+        self.level += 1
         self.player.new_level()
         self.current_spawn_enemy_cooldown *= 0.93
         return True
@@ -102,9 +102,9 @@ class Game:
     def spawn_energy_orb(self):
         self.add_entity(
             EnergyOrb(
-                _pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
-                _lifetime=random.uniform(*ENERGY_ORB_LIFETIME_RANGE),
-                _energy=ENERGY_ORB_DEFAULT_ENERGY + 15. * (self._level - 1)
+                pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
+                lifetime=random.uniform(*ENERGY_ORB_LIFETIME_RANGE) + 1. * (self.level - 1),
+                energy=ENERGY_ORB_DEFAULT_ENERGY + 20. * (self.level - 1)
             )
         )
 
@@ -112,14 +112,14 @@ class Game:
         position = self.get_random_screen_position_for_entity(entity_size=ENEMY_SIZE_MAP[enemy_type])
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
-                _pos=position,
-                _player=self.player,
+                pos=position,
+                player=self.player,
             )
         )
     
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
-        type_weights = get_enemy_type_prob_weights(level=self._level)
+        type_weights = get_enemy_type_prob_weights(level=self.level)
         enemy_type = random.choices(
             list(type_weights.keys()), 
             list(type_weights.values()), 
@@ -150,8 +150,8 @@ class Game:
             print('Spawned enemy')
 
     def update(self, time_delta: float) -> None:
-        if not self.is_running() or self._paused: return
-        self._time += time_delta
+        if not self.is_running() or self.paused: return
+        self.time += time_delta
         for entity in self.all_entities_iter():
             entity.update(time_delta)
         self.process_timers(time_delta)
@@ -173,6 +173,14 @@ class Game:
         else:
             self.add_entity(new_projectile)
 
+    def player_try_spawning_energy_orb(self):
+        try: new_energy_orb = self.player.spawn_energy_orb()
+        except NotEnoughEnergy as e:
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
+        else:
+            self.add_entity(new_energy_orb)
+
     def spawn_buffered_entities(self) -> None:
         """
         Spawn all entities that are in the buffer of the other entities.
@@ -181,9 +189,9 @@ class Game:
         # TODO: this is confusing: 
         #       the player can spawn entities, but player._can_spawn_entities is False
         for entity in self.all_entities_iter(with_player=False, include_dead=True):
-            if entity._can_spawn_entities:
-                new_ent.extend(entity._entities_buffer)
-                entity._entities_buffer.clear()
+            if entity.can_spawn_entities:
+                new_ent.extend(entity.entities_buffer)
+                entity.entities_buffer.clear()
         for ent in new_ent:
             self.add_entity(ent)
 
@@ -195,23 +203,23 @@ class Game:
             pos_ = entity.get_pos()
             if entity.is_alive() and not self.screen_rectangle.collidepoint(pos_):
                 if pos_.x < self.screen_rectangle.left or pos_.x > self.screen_rectangle.right:
-                    entity._vel.x *= -1.
+                    entity.vel.x *= -1.
                 if pos_.y < self.screen_rectangle.top or pos_.y > self.screen_rectangle.bottom:
-                    entity._vel.y *= -1.
+                    entity.vel.y *= -1.
     
     def process_collisions(self) -> None:
         # player collides with anything:
         for eo in self.energy_orbs():
             if not eo.intersects(self.player): continue
             energy_collected: float = eo.energy_left()
-            self.player._energy.change(energy_collected)
+            self.player.energy.change(energy_collected)
             self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
             eo.kill()
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color('magenta')))
         for projectile in self.projectiles():
             if not projectile.intersects(self.player): continue
-            damage_taken_actual = -self.player._health.change(-projectile._damage)
+            damage_taken_actual = -self.player.health.change(-projectile._damage)
             self.player.get_stats().BULLETS_CAUGHT += 1
             self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
             projectile.kill()
@@ -219,7 +227,7 @@ class Game:
             self.reason_of_death = f'caught Bullet::{projectile._projectile_type.name.title()}'
         for enemy in self.enemies():
             if not enemy.intersects(self.player): continue
-            damage_taken_actual = -self.player._health.change(-enemy._damage_on_collision)
+            damage_taken_actual = -self.player.health.change(-enemy._damage_on_collision)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
             enemy.kill()
@@ -228,7 +236,7 @@ class Game:
             self.reason_of_death = f'collided with Enemy::{enemy._enemy_type.name.title()}'
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
-            damage_taken_actual = -self.player._health.change(-corpse._damage_on_collision)
+            damage_taken_actual = -self.player.health.change(-corpse._damage_on_collision)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
             corpse.kill()
@@ -256,7 +264,7 @@ class Game:
                     if not enemy.is_alive():
                         enemy.kill()
                         reward = enemy.get_reward()
-                        self.player._energy.change(reward)
+                        self.player.energy.change(reward)
                         self.player.get_stats().ENEMIES_KILLED += 1
                         self.player.get_stats().ENERGY_COLLECTED += reward
                         print('enemy killed')
@@ -268,7 +276,7 @@ class Game:
             if enem1.intersects(enem2):
                 if enem1.intersects(enem2):
                     vec_between = enem2.get_pos() - enem1.get_pos() # 1 -> 2
-                    enem1._pos -= vec_between * MULT; enem2._pos += vec_between * MULT
+                    enem1.pos -= vec_between * MULT; enem2.pos += vec_between * MULT
 
     def add_entity(self, entity: Entity) -> None:
         ent_type = entity.get_type()

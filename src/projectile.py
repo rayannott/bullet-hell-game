@@ -17,26 +17,26 @@ PROJECTILE_COLOR_MAP = {
 
 class Projectile(Entity):
     def __init__(self, 
-            _pos: Vector2, 
-            _vel: Vector2,
-            _projectile_type: ProjectileType,
-            _damage: float = PROJECTILE_DEFAULT_DAMAGE,
-            _speed: float = PROJECTILE_DEFAULT_SPEED,
-            _lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
-            _homing_target: Entity | None = None,
+            pos: Vector2, 
+            vel: Vector2,
+            projectile_type: ProjectileType,
+            damage: float = PROJECTILE_DEFAULT_DAMAGE,
+            speed: float = PROJECTILE_DEFAULT_SPEED,
+            lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
+            homing_target: Entity | None = None,
         ):
         super().__init__(
-            _pos=_pos,
-            _type=EntityType.PROJECTILE,
-            _size=PROJECTILE_DEFAULT_SIZE,
-            _speed=_speed,
-            _vel=_vel,
-            _homing_target=_homing_target,
+            pos=pos,
+            type=EntityType.PROJECTILE,
+            size=PROJECTILE_DEFAULT_SIZE,
+            speed=speed,
+            vel=vel,
+            homing_target=homing_target,
         )
-        self._projectile_type = _projectile_type
-        self._damage = _damage
-        self._lifetime = _lifetime
-        self._color = PROJECTILE_COLOR_MAP[_projectile_type]
+        self._projectile_type = projectile_type
+        self._damage = damage
+        self._lifetime = lifetime
+        self._color = PROJECTILE_COLOR_MAP[projectile_type]
         self._life_timer = Timer(max_time=self._lifetime)
 
     def update(self, time_delta: float):
@@ -58,13 +58,13 @@ class ExplosiveProjectile(Projectile):
             _homing_target: Entity | None = None,
         ):
         super().__init__(
-            _pos=_pos,
-            _vel=_vel,
-            _projectile_type=ProjectileType.EXPLOSIVE,
-            _damage=_damage,
-            _speed=_speed,
-            _lifetime=_lifetime,
-            _homing_target=_homing_target,
+            pos=_pos,
+            vel=_vel,
+            projectile_type=ProjectileType.EXPLOSIVE,
+            damage=_damage,
+            speed=_speed,
+            lifetime=_lifetime,
+            homing_target=_homing_target,
         )
         self._num_subprojectiles = _num_subprojectiles
         self._can_spawn_entities = True
@@ -83,14 +83,14 @@ class ExplosiveProjectile(Projectile):
         N = self._num_subprojectiles
         for i in range(N):
             direction = Vector2(1., 0.).rotate(i * 360. / N)
-            self._entities_buffer.append(
+            self.entities_buffer.append(
                 Projectile(
-                    _pos=self._pos.copy() + direction * (self._size * 1.5),
-                    _vel=direction,
-                    _damage=self._damage,
-                    _projectile_type=ProjectileType.NORMAL,
-                    _speed=self._speed,
-                    _lifetime=self._lifetime * 0.8,
+                    pos=self.pos.copy() + direction * (self.size * 1.5),
+                    vel=direction,
+                    damage=self._damage,
+                    projectile_type=ProjectileType.NORMAL,
+                    speed=self.speed,
+                    lifetime=self._lifetime * 0.8,
                 )
             )
 
@@ -105,13 +105,13 @@ class HomingProjectile(Projectile):
             _homing_target: Entity | None = None,
         ):
         super().__init__(
-            _pos=_pos,
-            _vel=_vel,
-            _projectile_type=ProjectileType.HOMING,
-            _damage=_damage,
-            _speed=_speed,
-            _lifetime=_lifetime,
-            _homing_target=_homing_target,
+            pos=_pos,
+            vel=_vel,
+            projectile_type=ProjectileType.HOMING,
+            damage=_damage,
+            speed=_speed,
+            lifetime=_lifetime,
+            homing_target=_homing_target,
         )
         self._homing_target = _homing_target
         self._render_trail = True

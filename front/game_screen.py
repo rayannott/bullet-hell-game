@@ -47,7 +47,7 @@ class GameScreen(Screen):
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
-        if self.game._paused: return
+        if self.game.paused: return
         if not self.game.is_running(): return
 
         mouse_pos = pygame.mouse.get_pos()
@@ -59,6 +59,9 @@ class GameScreen(Screen):
             elif event.button == 3:
                 # TODO: pressing opens a wheel menu with options
                 ...
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                self.game.player_try_spawning_energy_orb()
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
