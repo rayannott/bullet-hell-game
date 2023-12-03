@@ -86,19 +86,20 @@ class Player(Entity):
         e_percent = self.energy.get_percent_full()
         h_percent = self.health.get_percent_full()
 
-        # moving contributes 40% of the energy decay 
-        energy_decay_rate_velocity = 0.4 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (self.vel.magnitude_squared() > 0.)
-        # regenerating health contributes 60% of the energy decay
+        # moving contributes 20% of the energy decay 
+        energy_decay_rate_velocity = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (self.vel.magnitude_squared() > 0.)
+        # regenerating health contributes 80% of the energy decay
         if h_percent == 1.:
             energy_decay_rate_health = 0.
             low_health_multiplier = 1.
-        elif h_percent > 0.3:
-            energy_decay_rate_health = 0.6 * PLAYER_DEFAULT_ENERGY_DECAY_RATE
+        elif h_percent > 0.4:
+            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE
             low_health_multiplier = 1.
         else:
-            # unless health is low, then it contributes 120% of the energy decay
-            energy_decay_rate_health = 0.6 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * 2.
-            low_health_multiplier = 2.
+            # unless health is low
+            # then it contributes 160% of the energy decay if energy is low and 320% if high
+            low_health_multiplier = 2. if e_percent < 0.6 else 4.
+            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * low_health_multiplier
 
         # decay energy and regenerate health faster when health is low
         if e_percent > 0.: self.health.change(
@@ -157,7 +158,7 @@ class Player(Entity):
     
     def new_level(self):
         self.level += 1
-        self._speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 130. * (self.level - 1))
+        self._speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 150. * (self.level - 1))
         old_percentage = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
