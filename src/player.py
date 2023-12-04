@@ -169,7 +169,7 @@ class Player(Entity):
         self.energy.set_percent_full(0.6) # energy sets to 60%
         self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.2)
         self.energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self.level - 1)
-        self.damage = PLAYER_DEFAULT_DAMAGE_AVG + 5. * (self.level - 1)
+        self.damage = PLAYER_DEFAULT_DAMAGE_AVG + 10. * (self.level - 1)
 
     def set_gravity_point(self, gravity_point: Vector2):
         self.gravity_point = gravity_point
