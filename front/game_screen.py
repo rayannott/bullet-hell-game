@@ -25,7 +25,7 @@ class GameScreen(Screen):
     
     def setup_game(self, surface: pygame.Surface):
         self.screen_rectangle = self.surface.get_rect()
-        self.game = Game(self.screen_rectangle)
+        self.game = Game(self.screen_rectangle, self.settings)
         self.stats_panel = StatsPanel(surface, self.manager, self.game)
         self.debug = False
         self.render_manager = RenderManager(surface=surface, debug=self.debug, game=self.game)
