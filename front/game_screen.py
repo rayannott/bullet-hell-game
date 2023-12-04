@@ -26,9 +26,9 @@ class GameScreen(Screen):
     def setup_game(self, surface: pygame.Surface):
         self.screen_rectangle = self.surface.get_rect()
         self.game = Game(self.screen_rectangle)
-        self.stats_panel = StatsPanel(surface, self.manager)
+        self.stats_panel = StatsPanel(surface, self.manager, self.game)
         self.debug = False
-        self.render_manager = RenderManager(surface=surface, manager=self.manager, debug=self.debug, game=self.game)
+        self.render_manager = RenderManager(surface=surface, debug=self.debug, game=self.game)
 
         self.game_is_over_window_shown = False
         self.notifications: list[Notification] = []
@@ -69,9 +69,7 @@ class GameScreen(Screen):
     def update(self, time_delta: float):
         self.game.update(time_delta)
         self.game.reflect_entities_vel()
-        self.stats_panel.update(
-            game=self.game
-        )
+        self.stats_panel.update(time_delta=time_delta)
         self.render()
         if not self.game.is_running() and not self.game_is_over_window_shown:
             self.show_game_is_over_window(self.game.reason_of_death)
@@ -102,7 +100,7 @@ class GameScreen(Screen):
             action_long_desc=death_message,
             blocking=True
         )
-        print('game over', repr(self.game.player))
+        print('game over', self.game.get_info())
     
     def spawn_notification(self,
             text: str = '', 
@@ -129,3 +127,9 @@ class GameScreen(Screen):
         )
         # remove dead notifications
         self.notifications = [notification for notification in self.notifications if notification._is_alive]
+
+    def post_run(self):
+        # if player quit the game witout dying
+        if self.game.player.is_alive():
+            # do not write the reason of death to the info
+            self.game.reason_of_death = ''
