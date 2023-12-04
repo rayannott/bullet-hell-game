@@ -1,10 +1,11 @@
-from collections import defaultdict, deque
+from collections import deque
 import random
 from typing import Generator
 import itertools
 
 import pygame
 from pygame import Vector2, Color
+from config.settings import Settings
 
 from src.entity import Corpse, Entity, DummyEntity
 from src.oil_spill import OilSpill
@@ -20,10 +21,13 @@ from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERG
     WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from front.sounds import play_sfx
 
-def get_enemy_type_prob_weights(level: int) -> dict[EnemyType, float]:
+
+def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, float]:
+    DIFF_MULTS = {1: 0, 2: 1, 3: 2, 4: 5, 5: 8}
+    # the higher the difficulty, the lower the probability of spawning a basic enemy
     return {
-        EnemyType.BASIC: 200,
-        EnemyType.FAST: (level - 1) * 10,
+        EnemyType.BASIC: 230 - DIFF_MULTS[difficulty] * 10,
+        EnemyType.FAST: (level - 1) * 10 * (difficulty > 2),
         EnemyType.ARTILLERY: level * 8,
         EnemyType.TANK: 10 + level * 5,
         EnemyType.BOSS: 0.,
@@ -31,17 +35,18 @@ def get_enemy_type_prob_weights(level: int) -> dict[EnemyType, float]:
 
 
 class Game:
-    def __init__(self, screen_rectangle: pygame.Rect) -> None:
+    def __init__(self, screen_rectangle: pygame.Rect, settings: Settings) -> None:
         self.level = 1
         self.time = 0.
         self.paused = False
         self.screen_rectangle = screen_rectangle
+        self.settings = settings
         
         self.feedback_buffer: deque[Feedback] = deque()
         self._last_fps: float = 0.
 
         # entities:
-        self.player = Player(Vector2(*self.screen_rectangle.center))
+        self.player = Player(Vector2(*self.screen_rectangle.center), settings)
         self.e_dummies: list[DummyEntity] = []
         self.e_oil_spills: list[OilSpill] = []
         self.e_corpses: list[Corpse] = []
@@ -94,7 +99,8 @@ class Game:
         self.level += 1
         self.feedback_buffer.append(Feedback(f'new level: {self.level}', 3.5, color=Color('green'), at_pos='player'))
         self.player.new_level()
-        self.current_spawn_enemy_cooldown *= 0.93
+        # the higher the difficulty, the faster the spawn cooldown shrinks
+        self.current_spawn_enemy_cooldown *= (1. - 0.02 * self.settings.difficulty)
         return True
 
     def kill_projectiles(self):
@@ -102,11 +108,12 @@ class Game:
             projectile.kill()
     
     def spawn_energy_orb(self):
+        difficulty_mult = 1 + 0.1 * (self.settings.difficulty - 1)
         self.add_entity(
             EnergyOrb(
                 pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
                 lifetime=random.uniform(*ENERGY_ORB_LIFETIME_RANGE) + 1. * (self.level - 1),
-                energy=ENERGY_ORB_DEFAULT_ENERGY + 20. * (self.level - 1)
+                energy=ENERGY_ORB_DEFAULT_ENERGY * difficulty_mult + 20. * (self.level - 1)
             )
         )
 
@@ -121,7 +128,7 @@ class Game:
     
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
-        type_weights = get_enemy_type_prob_weights(level=self.level)
+        type_weights = get_enemy_type_prob_weights(level=self.level, difficulty=self.settings.difficulty)
         enemy_type = random.choices(
             list(type_weights.keys()), 
             list(type_weights.values()), 
@@ -373,6 +380,7 @@ class Game:
     def get_info(self) -> dict:
         return {
             'level': self.level,
+            'difficulty': self.settings.difficulty,
             'time': self.time,
             'stats': self.player.get_stats(),
             'achievements': self.player.get_achievements(),

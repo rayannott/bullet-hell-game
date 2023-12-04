@@ -11,7 +11,8 @@ from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile
 from src.oil_spill import OilSpill
 from front.utils import random_unit_vector
 
-from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD,
+from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_RATE,
+    PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE)
 
@@ -62,6 +63,7 @@ class Enemy(Entity):
             can_spawn_entities=True,
             homing_target=player,
         )
+        self.homing_target: Player # to avoid typing errors (this is always a player)
         self.health = Slider(health)
         self.cooldown = Timer(max_time=shoot_cooldown)
         self.cooldown.set_percent_full(0.5) # enemies start with half of the cooldown
@@ -74,7 +76,18 @@ class Enemy(Entity):
 
         self.damage_on_collision = damage_on_collision
         self.shoots_player = True
-        
+        self.post_init()
+
+    def post_init(self):
+        """Called after the constructor.
+        This is used to adjust values according to the difficulty."""
+        difficulty = self.homing_target.settings.difficulty
+        difficulty_mult = 1. + 0.1 * (difficulty - 3) # from 0.8 to 1.2
+        self.speed *= difficulty_mult
+        self.damage *= difficulty_mult
+        self.cooldown = Timer(max_time=self.cooldown.max_time / difficulty_mult)
+        self.reward *= difficulty_mult
+        self.damage_on_collision *= difficulty_mult
     
     def get_shoot_direction(self) -> Vector2:
         rot_angle = random.uniform(-self.spread, self.spread) if self.spread else 0.
@@ -208,7 +221,7 @@ class TankEnemy(Enemy):
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.4,
             damage=ENEMY_DEFAULT_DAMAGE * (1. + 0.1 * self._player_level),
         )
-        self._spread = 1.3 + 0.03 * self._player_level
+        self._spread = 1.3 + 0.03 * (self._player_level + player.settings.difficulty)
     
     def shoot(self):
         """Shoots in bursts with probability 0.5 and explosive projectiles with probability 0.5."""
@@ -270,6 +283,8 @@ class BossEnemy(Enemy):
             player: Player,
         ):
         self._player_level = player.get_level()
+        self.difficulty = player.settings.difficulty
+        self.difficulty_mult = 1. + 0.1 * (self.difficulty - 3) # from 0.8 to 1.2
         self._player_pos = player.get_pos()
         super().__init__(
             pos=pos,
@@ -277,15 +292,22 @@ class BossEnemy(Enemy):
             player=player,
             color=Color('#510e78'),
             speed=ENEMY_DEFAULT_SPEED + 40 * (self._player_level - 1),
-            health=(ENEMY_DEFAULT_MAX_HEALTH) * 3.5 + 35. * self._player_level,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 40. * self._player_level,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.12 * self._player_level),
             lifetime=math.inf,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
         )
-        self._spawn_oil_spills_cooldown = 18. - 1.3 * self._player_level
+        self._spawn_oil_spills_cooldown = BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 1. * self._player_level
         self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
-        self._regen_rate = 0.6 + 0.15 * (self._player_level - 1)
+        DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 2, 5: 5}
+        self._regen_rate = (BOSS_DEFAULT_REGEN_RATE * DIFF_MULT[self.difficulty] +
+            0.2 * (self._player_level - 1))
+        self.PROJECTILE_TYPES_TO_WEIGHTS = {
+            ProjectileType.NORMAL: 200,
+            ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty],
+            ProjectileType.EXPLOSIVE: 20 + 30 * DIFF_MULT[self.difficulty],
+        }
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -297,18 +319,25 @@ class BossEnemy(Enemy):
             self._spawn_oil_spills_timer.reset(with_max_time=self._spawn_oil_spills_cooldown)
 
     def shoot(self):
-        if random.random() < 0.3:
-            self.shoot_homing(speed_mult=0.65)
-        else:
+        projectile_type_to_shoot = random.choices(
+            list(self.PROJECTILE_TYPES_TO_WEIGHTS.keys()),
+            weights=list(self.PROJECTILE_TYPES_TO_WEIGHTS.values()),
+            k=1
+        )[0]
+        if projectile_type_to_shoot == ProjectileType.NORMAL:
             self.shoot_normal()
+        elif projectile_type_to_shoot == ProjectileType.HOMING:
+            self.shoot_homing(speed_mult=0.65)
+        elif projectile_type_to_shoot == ProjectileType.EXPLOSIVE:
+            self.shoot_explosive(num_of_subprojectiles=4)
     
     def on_natural_death(self):
         raise ValueError('Bosses should not die naturally.')
 
     def spawn_oil_spills(self):
         towards_player = self._player_pos - self.pos
-        # precision of spawning oil spills increases with level
-        inprecision = 0.5 - 0.028 * self._player_level 
+        # precision of spawning oil spills increases with level and difficulty
+        inprecision = 0.5 - 0.03 * (self._player_level + self.difficulty - 3)
         self.entities_buffer.append(
             OilSpill(_pos=self.pos + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
                      _size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
