@@ -86,6 +86,7 @@ class Enemy(Entity):
         self.speed *= difficulty_mult
         self.damage *= difficulty_mult
         self.cooldown = Timer(max_time=self.cooldown.max_time / difficulty_mult)
+        self.health = Slider(self.health.max_value + [-10., 0., 5., 15., 30][difficulty - 1])
         self.reward *= difficulty_mult
         self.damage_on_collision *= difficulty_mult
     
@@ -292,7 +293,7 @@ class BossEnemy(Enemy):
             player=player,
             color=Color('#510e78'),
             speed=ENEMY_DEFAULT_SPEED + 40 * (self._player_level - 1),
-            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 40. * self._player_level,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 50. * self._player_level,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.12 * self._player_level),
             lifetime=math.inf,
@@ -300,7 +301,7 @@ class BossEnemy(Enemy):
         )
         self._spawn_oil_spills_cooldown = BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 1. * self._player_level
         self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
-        DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 2, 5: 5}
+        DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 3, 5: 8}
         self._regen_rate = (BOSS_DEFAULT_REGEN_RATE * DIFF_MULT[self.difficulty] +
             0.2 * (self._player_level - 1))
         self.PROJECTILE_TYPES_TO_WEIGHTS = {
