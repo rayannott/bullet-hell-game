@@ -17,12 +17,7 @@ class MenuScreen(Screen):
     def __init__(self, surface: pygame.Surface):
         super().__init__(surface)
 
-        self.settings = Settings.load()
-
-        set_sfx_volume(self.settings.sfx_volume)
-        set_bg_music_vol(self.settings.music_volume)
-        if self.settings.music_volume > 0:
-            play_bg_music()
+        self.reload_settings()
 
         start_game_btn_rect = pygame.Rect(0, 0, 0, 0)
         start_game_btn_rect.size = MENU_BUTTONS_SIZE
@@ -45,19 +40,26 @@ class MenuScreen(Screen):
         rules_btn_rect.topleft = settings_btn_rect.bottomleft
         self.rules_btn = pygame_gui.elements.UIButton(rules_btn_rect, 'RULES', self.manager)
 
-        self.game_screen = GameScreen(self.surface, self.settings)
+        self.game_screen = None
 
+    def reload_settings(self):
+        self.settings = Settings.load()
+        set_sfx_volume(self.settings.sfx_volume)
+        set_bg_music_vol(self.settings.music_volume)
+        if self.settings.music_volume > 0:
+            play_bg_music()
 
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.start_game_btn:
                 print('Game started')
+                self.game_screen = GameScreen(self.surface, self.settings)
                 self.game_screen.run()
             elif event.ui_element == self.stats_btn:
                 print('Stats opened')
             elif event.ui_element == self.settings_btn:
                 print('Settings opened')
-                self.console_window = ConsoleWindow(self.manager, self.game_screen)
+                self.console_window = ConsoleWindow(self.manager, self)
                 # TODO add settings: sound, music, difficulty, etc.
             elif event.ui_element == self.rules_btn:
                 print('Rules opened')
