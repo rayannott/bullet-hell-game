@@ -268,7 +268,7 @@ class Game:
             self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
             enemy.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
-            self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
+            self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
             self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
             play_sfx('damage_taken')
         for corpse in self.corpses():
@@ -278,7 +278,7 @@ class Game:
             self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
             corpse.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
-            self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
+            self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
             self.reason_of_death = f'collided with Corpse'
             play_sfx('damage_taken')
 
@@ -295,7 +295,7 @@ class Game:
                 damage_dealt = bullet.damage
                 damage_dealt_actual = -enemy.get_health().change(-damage_dealt)
                 self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
-                self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
+                self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.0f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
                 enemy.update(0.)
                 play_sfx('accurate_shot')
                 if enemy.is_alive(): continue
@@ -313,7 +313,7 @@ class Game:
                         self.player.get_achievements().KILL_BOSS_RICOCHET = True
                         self.feedback_buffer.append(Feedback('killed boss with ricochet!', 3., color=pygame.Color('blue')))
                 print(f'enemy killed: {enemy.enemy_type.name}')
-                self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
+                self.feedback_buffer.append(Feedback(f'+{reward:.0f}e', 2., color=pygame.Color('magenta')))
                 play_sfx('enemy_killed')
         
         # enemy-enemy collisions

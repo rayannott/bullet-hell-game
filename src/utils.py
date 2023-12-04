@@ -55,7 +55,7 @@ class Slider:
         return f'Slider({self})'
     
     def __str__(self) -> str:
-        return f'{self.current_value:.1f}/{self.max_value:.1f}'
+        return f'{self.current_value:.0f}/{self.max_value:.0f}'
 
 
 class Timer:
