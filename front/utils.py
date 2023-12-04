@@ -2,14 +2,21 @@ import math
 import random
 
 import pygame, pygame_gui
-from pygame import Color, Vector2
+from pygame import Color, Vector2, freetype
 
 from src.utils import Slider, Timer
 
+freetype.init()
+font = freetype.SysFont('Arial', 20)
 
-def paint(text: str, color: Color, size: int = 4) -> str:
+
+def paint(text: str, color: Color) -> str:
     hex_color = "#{:02x}{:02x}{:02x}".format(color.r, color.g, color.b)
-    return f'<font color={hex_color} size={size}>{text}</font>'
+    return f'<font color={hex_color}>{text}</font>'
+
+
+def bold(text: str) -> str:
+    return f'<b>{text}</b>'
 
 
 class ColorGradient:
@@ -52,6 +59,7 @@ class ProgressBar(pygame_gui.elements.UIStatusBar):
 
 
 class Notification(pygame_gui.elements.UITextBox):
+    # TODO: make this a custom label
     def __init__(self,
             text: str,
             position: Vector2,
@@ -62,7 +70,7 @@ class Notification(pygame_gui.elements.UITextBox):
         rect = pygame.Rect(0., 0., len(text) * 12, 40)
         rect.center = position
         super().__init__(
-            html_text=paint(text, color, 8),
+            html_text=paint(text, color),
             relative_rect=rect,
             manager=manager,
             object_id='#notification', #! this doesn't work
@@ -78,3 +86,45 @@ class Notification(pygame_gui.elements.UITextBox):
             self._is_alive = False
             self.kill()
         super().update(time_delta)
+
+
+class Notification_new(pygame_gui.core.UIElement):
+    def __init__(self,
+            text: str,
+            position: Vector2,
+            manager: pygame_gui.UIManager,
+            duration: float = 3.,
+            color: Color = Color('white'),
+            **kwargs):
+        rect = pygame.Rect(0., 0., len(text) * 12, 40)
+        rect.center = position
+        super().__init__(
+            relative_rect=rect,
+            manager=manager,
+            container=None,
+            starting_height=1,
+            layer_thickness=1,
+            **kwargs)
+        self.text = text
+        self.lifetime_timer = Timer(max_time=duration)
+        self._is_alive = True
+        self.element_ids = [[]]
+        self.color = color
+    
+    def update(self, time_delta: float):
+        if not self._is_alive: return
+        self.lifetime_timer.tick(time_delta)
+        self.rect.y -= 3. * time_delta # type: ignore
+        if not self.lifetime_timer.running():
+            self._is_alive = False
+            self.kill()
+        super().update(time_delta)
+    
+    def kill(self):
+        self._is_alive = False
+        super().kill()
+    
+    def draw(self, surface: pygame.Surface):
+        if not self._is_alive: return
+        font.render_to(surface, self.relative_rect, self.text, self.color)
+    
