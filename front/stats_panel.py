@@ -1,8 +1,8 @@
 import pygame, pygame_gui
-from pygame import Color, freetype
+from pygame import Color, Vector2, freetype
 
 from src.game import Game
-from front.utils import ProgressBar
+from front.utils import ProgressBar, Label, TextBox
 from config import (SM, BM, GAME_STATS_PANEL_SIZE, FONT_FILE,
     GAME_HEALTH_BAR_SIZE, GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
 
@@ -30,20 +30,19 @@ class StatsPanel:
             manager=manager,
             parent_element=self.panel
         )
-        r = pygame.Rect(0, 0, *GAME_ENERGY_BAR_SIZE)
-        r.topleft = self.energy_bar.relative_rect.bottomleft; r.y += 2 * BM; r.x += BM
-        self.stats_rects = [r]
-        for _ in range(3):
-            r = self.stats_rects[-1].copy()
-            r.topleft = r.bottomleft; r.y += SM
-            self.stats_rects.append(r)
+        self.stats_textbox = TextBox(
+            text_lines=[''] * 3,
+            position=Vector2(BM, SM + self.energy_bar.relative_rect.bottomleft[1] + 2 * BM),
+            surface=surface
+        )
 
     def update(self, time_delta: float):
         player = self.game.player
         self.health_bar.set_slider(player.get_health())
         self.energy_bar.set_slider(player.get_energy())
-        for rect, text in zip(self.stats_rects, [
-            f'difficulty: {self.game.settings.difficulty}',
-            f'level: {self.game.level}',
-            f'time: {self.game.time:.2f}',
-        ]): font.render_to(self.surface, rect, text, Color('white'))
+        self.stats_textbox.set_lines([
+                f'{"difficulty":<16} {self.game.settings.difficulty}',
+                f'{"level":<16} {self.game.level}',
+                f'{"time":<16} {self.game.time:.2f}',
+            ])
+        self.stats_textbox.update()
