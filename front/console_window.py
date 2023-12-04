@@ -77,7 +77,7 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
 
     def process_event(self, event: pygame.event.Event):
         text = self.command_entry.get_text()
-        if super().process_event(event):
+        if super().process_event(event) and text:
             text = text.strip()
             print(text)
             if text == 'clear':
