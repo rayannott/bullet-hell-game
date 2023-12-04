@@ -131,7 +131,8 @@ class Notification(Label):
         position: Vector2, 
         surface: pygame.Surface,
         duration: float = 3.,
-        color: Color = Color('white'), ):
+        color: Color = Color('white')
+    ):
         super().__init__(text=text, surface=surface, position=position, color=color, anker='center')
         self.lifetime_timer = Timer(max_time=duration)
         self._is_alive = True

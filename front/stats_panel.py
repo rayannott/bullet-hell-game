@@ -19,13 +19,13 @@ class StatsPanel:
             manager=manager
         )
         self.health_bar = ProgressBar(
-            color_gradient_pair=(Color('red'), Color('green')),
+            color_gradient_pair=(Color('#751729'), Color('#58ed71')),
             relative_rect=pygame.Rect(SM, SM, *GAME_HEALTH_BAR_SIZE),
             manager=manager,
             parent_element=self.panel
         )
         self.energy_bar = ProgressBar(
-            color_gradient_pair=(Color('blue'), Color('yellow')),
+            color_gradient_pair=(Color('#0d182b'), Color('#3f7ae8')),
             relative_rect=pygame.Rect(SM, SM + GAME_HEALTH_BAR_SIZE[1], *GAME_ENERGY_BAR_SIZE),
             manager=manager,
             parent_element=self.panel

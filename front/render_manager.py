@@ -49,10 +49,11 @@ class RenderManager:
             self.draw_entity_basics(corpse)
         self.draw_player()
 
+        # "boss spawns in 5 seconds" indicator
         if self.game.one_wave_timer.get_value() > WAVE_DURATION - 5.:
             self.boss_soon_slider.set_percent_full(1. - (self.game.one_wave_timer.get_value() - (WAVE_DURATION - 5.)) / 5.)
             self.draw_circular_status_bar(self.game.player.get_gravity_point(), self.boss_soon_slider,
-                self.game.player.get_size() * 5., color=LIGHTER_MAGENTA, draw_full=True, width=5)
+                self.game.player.get_size() * 4., color=LIGHTER_MAGENTA, draw_full=True, width=6)
             
         if self.debug:
             font.render_to(self.surface, self.debug_rel_rect, 
