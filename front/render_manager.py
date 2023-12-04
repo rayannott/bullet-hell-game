@@ -1,29 +1,35 @@
 import math
 
-import pygame, pygame_gui
+import pygame
 from pygame import Color, Vector2, freetype
 from src.enemy import Enemy
 
 from src.game import Game
 from src.entity import Entity
-from src.utils import Slider
-from src.enums import EntityType
+from src.utils import Slider, Timer
 from front.utils import ColorGradient
-from config import PLAYER_SHOT_COST
+from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION
 
 freetype.init()
 font = freetype.SysFont('Arial', 20)
 
 
+NICER_GREEN = Color('#3ce870')
+MAGENTA = Color('magenta')
+LIGHTER_MAGENTA = Color('#a22ac9')
+
+
 class RenderManager:
     HP_COLOR_GRADIENT = (Color('red'), Color('green'))
-    def __init__(self, surface: pygame.Surface, manager: pygame_gui.UIManager, game: Game, debug: bool = False):
+    def __init__(self, surface: pygame.Surface, game: Game, debug: bool = False):
         self.surface = surface
         self.debug = debug
         self.game = game
-        self.rel_rect = pygame.Rect(0, 0, 220, 80)
-        self.rel_rect.topright = surface.get_rect().topright
+        self.debug_rel_rect = pygame.Rect(0, 0, *GAME_DEBUG_RECT_SIZE)
+        self.debug_rel_rect.topright = surface.get_rect().topright
         self.entities_drawn = 0
+        self.five_sec_timer = Timer(5.)
+        self.boss_soon_slider = Slider(1., 0.)
     
     def render(self):
         for oil_spill in self.game.oil_spills():
@@ -32,18 +38,24 @@ class RenderManager:
             self.draw_entity_basics(projectile)
         for enemy in self.game.enemies():
             self.draw_entity_basics(enemy)
-            self.draw_entity_circular_status_bar(enemy, enemy.get_health(),
-                enemy.get_size() * 1.5, color=Color('green'), draw_full=True, width=2)
+            self.draw_circular_status_bar(enemy.get_pos(), enemy.get_health(),
+                enemy.get_size() * 1.5, color=NICER_GREEN, draw_full=True, width=2)
             if self.debug: self.draw_enemy_health_debug(enemy)
         for energy_orb in self.game.energy_orbs():
             self.draw_entity_basics(energy_orb)
-            self.draw_entity_circular_status_bar(energy_orb, energy_orb._life_timer.get_slider(reverse=True),
-                energy_orb.get_size() * 2., color=Color('magenta'), draw_full=True, width=1)
+            self.draw_circular_status_bar(energy_orb.get_pos(), energy_orb._life_timer.get_slider(reverse=True),
+                energy_orb.get_size() * 2., color=MAGENTA, draw_full=True, width=1)
         for corpse in self.game.corpses():
             self.draw_entity_basics(corpse)
         self.draw_player()
+
+        if self.game.one_wave_timer.get_value() > WAVE_DURATION - 5.:
+            self.boss_soon_slider.set_percent_full(1. - (self.game.one_wave_timer.get_value() - (WAVE_DURATION - 5.)) / 5.)
+            self.draw_circular_status_bar(self.game.player.get_gravity_point(), self.boss_soon_slider,
+                self.game.player.get_size() * 5., color=LIGHTER_MAGENTA, draw_full=True, width=5)
+            
         if self.debug:
-            font.render_to(self.surface, self.rel_rect, 
+            font.render_to(self.surface, self.debug_rel_rect, 
                 f'[fps {self.game.get_last_fps():.1f}] [entd {self.entities_drawn}]',
                 Color('white')
             )
@@ -65,14 +77,14 @@ class RenderManager:
         rect.center = enemy.get_pos() + Vector2(0, -enemy.get_size() * 1.5)
         font.render_to(self.surface, rect, health_text, Color('white'))
 
-    def draw_entity_circular_status_bar(self, entity: Entity, slider: Slider, 
+    def draw_circular_status_bar(self, pos: Vector2, slider: Slider, 
                                         radius: float, color: Color = Color('white'),
                                         draw_full: bool = False, width: int = 3):
         arc_percent = slider.get_percent_full()
         if draw_full or arc_percent < 1.:
             angle = math.pi * (2 * arc_percent + 0.5)
             rect = pygame.Rect(0, 0, radius * 2, radius * 2)
-            rect.center = entity.get_pos()
+            rect.center = pos
             pygame.draw.arc(
                 self.surface,
                 color,
@@ -85,7 +97,7 @@ class RenderManager:
     def draw_player(self):
         player = self.game.player
         self.draw_entity_basics(player)
-        self.draw_entity_circular_status_bar(player, player._shoot_cooldown_timer.get_slider(), player.get_size()*2)
+        self.draw_circular_status_bar(player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
         if player.get_energy().get_value() > PLAYER_SHOT_COST:
             pygame.draw.circle(
                 self.surface,
