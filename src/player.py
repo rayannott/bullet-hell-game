@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import random
 
 from pygame import Color, Vector2
+from config.settings import Settings
 
 from src.energy_orb import EnergyOrb
 from src.entity import Entity
@@ -37,7 +38,7 @@ class Achievements:
 
 
 class Player(Entity):
-    def __init__(self, pos: Vector2):
+    def __init__(self, pos: Vector2, settings: Settings):
         super().__init__(
             pos=pos,
             type=EntityType.PLAYER,
@@ -46,6 +47,7 @@ class Player(Entity):
             render_trail=True
         )
         self.level = 1
+        self.settings = settings
         self.gravity_point: Vector2 = pos
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH)
         self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE
