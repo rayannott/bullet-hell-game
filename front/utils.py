@@ -9,7 +9,7 @@ from src.utils import Slider, Timer
 from config import FONT_FILE
 
 freetype.init()
-font = freetype.Font(FONT_FILE, 20)
+FONT = freetype.Font(FONT_FILE, 20)
 
 
 def paint(text: str, color: Color) -> str:
@@ -47,8 +47,10 @@ class Label:
             rect: pygame.Rect | None = None,
             position: Vector2 | None = None,
             color: Color = Color('white'),
-            anker: Literal['center', 'topleft'] = 'center',
+            anker: Literal['center', 'topleft', 'topright', 'bottomleft', 'bottomright'] = 'center',
+            font: freetype.Font = FONT
         ):
+        self.font = font
         self.position = position
         self.rect = rect
         if self.rect is None and self.position is None:
@@ -63,15 +65,22 @@ class Label:
                 self.rect.center = self.position
             elif anker == 'topleft':
                 self.rect.topleft = self.position
+            elif anker == 'topright':
+                self.rect.topright = self.position
+            elif anker == 'bottomleft':
+                self.rect.bottomleft = self.position
         
     def draw(self):
-        font.render_to(self.surface, self.rect, self.text, self.color) # type: ignore
+        self.font.render_to(self.surface, self.rect, self.text, self.color) # type: ignore
     
     def update(self):
         self.draw()
     
     def set_text(self, text: str):
         self.text = text
+    
+    def set_color(self, color: Color):
+        self.color = color
 
 
 class TextBox:
@@ -84,7 +93,7 @@ class TextBox:
         self.position = position
         self.surface = surface
 
-        r = pygame.Rect(0, 0, 200, 40)
+        r = pygame.Rect(0, 0, 200, 25)
         r.topleft = position
         self.rects = [r]
         for _ in range(len(text_lines) - 1):
