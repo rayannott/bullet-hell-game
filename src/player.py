@@ -99,8 +99,8 @@ class Player(Entity):
             low_health_multiplier = 1.
         else:
             # unless health is low
-            # then it contributes 160% of the energy decay if energy is low and 320% if high
-            low_health_multiplier = 2. if e_percent < 0.6 else 4.
+            # then it contributes 160% of the energy decay if energy is low and 240% if high
+            low_health_multiplier = 2. if e_percent < 0.6 else 3.
             energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * low_health_multiplier
 
         # decay energy and regenerate health faster when health is low
