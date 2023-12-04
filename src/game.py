@@ -240,6 +240,11 @@ class Game:
                 play_sfx('energy_collected')
             eo.kill()
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color('magenta')))
+        for oil_spill in self.oil_spills():
+            if not oil_spill.intersects(self.player): continue
+            self.player.effect_flags.OIL_SPILL = True
+            self.reason_of_death = 'slipped on oil to death'
+            play_sfx('in_oil_spill')
         for projectile in self.projectiles():
             if not projectile.intersects(self.player): continue
             damage_taken_actual = -self.player.health.change(-projectile._damage)
@@ -269,11 +274,6 @@ class Game:
             self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
             self.reason_of_death = f'collided with Corpse'
             play_sfx('damage_taken')
-        for oil_spill in self.oil_spills():
-            if not oil_spill.intersects(self.player): continue
-            self.player.effect_flags.OIL_SPILL = True
-            self.reason_of_death = 'slipped on oil to death'
-            play_sfx('in_oil_spill')
 
         # player bullets collide with enemies -> enemies get damage, player gets energy:
         player_bullets = [el for el in self.projectiles() if el._projectile_type == ProjectileType.PLAYER_BULLET]
