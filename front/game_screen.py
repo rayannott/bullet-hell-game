@@ -3,6 +3,7 @@ from typing import Literal
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
+from front.sounds import play_sfx
 
 from src.utils import Feedback
 from src.game import Game
@@ -74,6 +75,7 @@ class GameScreen(Screen):
         self.render()
         if not self.game.is_running() and not self.game_is_over_window_shown:
             self.show_game_is_over_window(self.game.reason_of_death)
+            play_sfx('game_over') # TODO: move this to `on_game_over()`
             self.game_is_over_window_shown = True
         self.render_manager.reset()
         self.process_feedback_buffer()

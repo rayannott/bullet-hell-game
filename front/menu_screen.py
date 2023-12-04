@@ -60,10 +60,8 @@ class MenuScreen(Screen):
             elif event.ui_element == self.settings_btn:
                 print('Settings opened')
                 self.console_window = ConsoleWindow(self.manager, self)
-                # TODO add settings: sound, music, difficulty, etc.
             elif event.ui_element == self.rules_btn:
                 print('Rules opened')
-                # TODO add rules: spawn a window with rules
                 RulesWindow(self.manager, self.surface)
         super().process_ui_event(event)
 
