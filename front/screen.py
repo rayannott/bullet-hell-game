@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import pygame
 import pygame_gui
 
+from front.sounds import play_sfx
 from config import QUIT_BUTTON_SIZE, FRAMERATE
 
 
@@ -40,6 +41,7 @@ class Screen(ABC):
 
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            play_sfx('click') # TODO: fix playing only after the window is closed
             if event.ui_element == self.quit_button:
                 self.is_running = False
         ...
