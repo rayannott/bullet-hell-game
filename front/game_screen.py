@@ -78,6 +78,8 @@ class GameScreen(Screen):
         self.render_manager.reset()
         self.process_feedback_buffer()
         self.game.set_last_fps(self.clock.get_fps())
+        for notification in self.notifications:
+            notification.update(time_delta)
 
     def process_feedback_buffer(self):
         if len(self.game.feedback_buffer):
@@ -120,7 +122,7 @@ class GameScreen(Screen):
             Notification(
                 text=text,
                 position=at_pos,
-                manager=self.manager,
+                surface=self.surface,
                 duration=duration,
                 color=color
             )
