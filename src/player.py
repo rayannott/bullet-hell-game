@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import random
 
-from pygame import Color, Vector2
+from pygame import Vector2
 from config.settings import Settings
 
 from src.energy_orb import EnergyOrb
@@ -166,7 +166,7 @@ class Player(Entity):
         self.health.set_percent_full(old_percentage)
         self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self.level - 1))
         self.energy.set_percent_full(0.6) # energy sets to 60%
-        self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.3)
+        self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.2)
         self.energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self.level - 1)
         self.damage = PLAYER_DEFAULT_DAMAGE_AVG + 5. * (self.level - 1)
 

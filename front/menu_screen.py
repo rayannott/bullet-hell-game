@@ -1,7 +1,4 @@
-import datetime
-
 import pygame
-from pygame import Color
 import pygame_gui
 
 from front.screen import Screen
