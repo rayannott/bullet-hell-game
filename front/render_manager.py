@@ -7,8 +7,8 @@ from src.enemy import Enemy
 from src.game import Game
 from src.entity import Entity
 from src.utils import Slider, Timer
-from front.utils import ColorGradient
-from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION
+from front.utils import ColorGradient, Label, TextBox
+from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM
 
 freetype.init()
 font = freetype.SysFont('Arial', 20)
@@ -25,11 +25,13 @@ class RenderManager:
         self.surface = surface
         self.debug = debug
         self.game = game
-        self.debug_rel_rect = pygame.Rect(0, 0, *GAME_DEBUG_RECT_SIZE)
-        self.debug_rel_rect.topright = surface.get_rect().topright
+        debug_rel_rect = pygame.Rect(0, 0, *GAME_DEBUG_RECT_SIZE)
+        debug_rel_rect.topright = surface.get_rect().topright
         self.entities_drawn = 0
         self.five_sec_timer = Timer(5.)
         self.boss_soon_slider = Slider(1., 0.)
+        top_right = Vector2(*self.surface.get_rect().topright)
+        self.debug_textbox = TextBox(['']*4, top_right - Vector2(310., -BM), self.surface)
     
     def render(self):
         for oil_spill in self.game.oil_spills():
@@ -56,10 +58,13 @@ class RenderManager:
                 self.game.player.get_size() * 4., color=LIGHTER_MAGENTA, draw_full=True, width=6)
             
         if self.debug:
-            font.render_to(self.surface, self.debug_rel_rect, 
-                f'[fps {self.game.get_last_fps():.1f}] [entd {self.entities_drawn}]',
-                Color('white')
+            ROWS = ['fps', 'entities drawn', 'speed', 'accuracy']
+            VALUES = [f'{self.game.get_last_fps():.1f}', f'{self.entities_drawn}', 
+                f'{self.game.player.speed:.1f}', f'{self.game.player.stats.get_accuracy():.0%}']
+            self.debug_textbox.set_lines(
+                [f'[{row:<16} {value:>5}]' for row, value in zip(ROWS, VALUES)]
             )
+            self.debug_textbox.update()
         self.reset()
 
     def draw_entity_debug(self, entity: Entity):
@@ -74,9 +79,10 @@ class RenderManager:
 
     def draw_enemy_health_debug(self, enemy: Enemy):
         health_text = f'{enemy.get_health()}'
-        rect = pygame.Rect(0, 0, 85, 40)
-        rect.center = enemy.get_pos() + Vector2(0, -enemy.get_size() * 1.5)
-        font.render_to(self.surface, rect, health_text, Color('white'))
+        label = Label(health_text, self.surface, 
+            position=enemy.get_pos() + Vector2(enemy.get_size(), -enemy.get_size() * 1.5))
+        label.update()
+        # TODO: check if this is expensive; if so, cache it
 
     def draw_circular_status_bar(self, pos: Vector2, slider: Slider, 
                                         radius: float, color: Color = Color('white'),
