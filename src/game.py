@@ -360,3 +360,11 @@ class Game:
 
     def get_last_fps(self) -> float:
         return self._last_fps
+
+    def get_info(self) -> dict:
+        return {
+            'level': self.level,
+            'time': self.time,
+            'stats': self.player.get_stats(),
+            'reason_of_death': self.reason_of_death,
+        }
