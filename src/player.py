@@ -46,17 +46,17 @@ class Player(Entity):
             render_trail=True
         )
         self.level = 1
-        self._gravity_point: Vector2 = pos
+        self.gravity_point: Vector2 = pos
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH)
-        self._regeneration_rate = PLAYER_DEFAULT_REGEN_RATE
-        self._energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE
-        self._speed_range = PLAYER_DEFAULT_SPEED_RANGE
+        self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE
+        self.energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE
+        self.speed_range = PLAYER_DEFAULT_SPEED_RANGE
         self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY)
         self.stats = Stats()
-        self._shoot_cooldown = PLAYER_DEFAULT_SHOOT_COOLDOWN
-        self._shoot_cooldown_timer = Timer(max_time=self._shoot_cooldown)
-        self._damage = PLAYER_DEFAULT_DAMAGE_AVG
-        self._damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
+        self.shoot_cooldown = PLAYER_DEFAULT_SHOOT_COOLDOWN
+        self.shoot_cooldown_timer = Timer(max_time=self.shoot_cooldown)
+        self.damage = PLAYER_DEFAULT_DAMAGE_AVG
+        self.damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
 
@@ -67,10 +67,10 @@ class Player(Entity):
 
         # this t is a parameter that controls the speed of the player based on the distance from the gravity point
         # it is non-linear so that it's the player is not too slow when close to the gravity point
-        towards_gravity_point = (self._gravity_point - self.pos)
+        towards_gravity_point = (self.gravity_point - self.pos)
         dist_to_gravity_point = towards_gravity_point.magnitude()
         t = (dist_to_gravity_point / 1500.) ** 0.4
-        self.speed = self._speed_range[0] + (self._speed_range[1] - self._speed_range[0]) * t *\
+        self.speed = self.speed_range[0] + (self.speed_range[1] - self.speed_range[0]) * t *\
             (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.)
 
         # this code sets the velocity of the player towards the gravity point;
@@ -103,7 +103,7 @@ class Player(Entity):
 
         # decay energy and regenerate health faster when health is low
         if e_percent > 0.: self.health.change(
-            self._regeneration_rate * low_health_multiplier * time_delta
+            self.regeneration_rate * low_health_multiplier * time_delta
         )
 
         self.energy.change(
@@ -114,10 +114,10 @@ class Player(Entity):
         if self.effect_flags.OIL_SPILL:
             self.health.change(-OIL_SPILL_DAMAGE_PER_SECOND * time_delta)
             self.get_stats().OIL_SPILL_TIME_SPENT += time_delta
-        self._shoot_cooldown_timer.tick(time_delta)
+        self.shoot_cooldown_timer.tick(time_delta)
 
     def is_on_cooldown(self) -> bool:
-        return self._shoot_cooldown_timer.running()
+        return self.shoot_cooldown_timer.running()
 
     def shoot(self) -> Projectile:
         if self.is_on_cooldown():
@@ -125,17 +125,17 @@ class Player(Entity):
         if self.energy.get_value() < PLAYER_SHOT_COST:
             raise NotEnoughEnergy('not enough energy')
         if self.vel == Vector2():
-            self.vel = self._gravity_point - self.pos
+            self.vel = self.gravity_point - self.pos
             if self.vel.magnitude_squared() == 0.:
                 raise ShootingDirectionUndefined('direction undefined')
         self.energy.change(-PLAYER_SHOT_COST)
         direction = self.vel.normalize()
         self.stats.PROJECTILES_FIRED += 1
-        self._shoot_cooldown_timer.reset(with_max_time=self._shoot_cooldown)
+        self.shoot_cooldown_timer.reset(with_max_time=self.shoot_cooldown)
         return Projectile(
             pos=self.pos.copy() + direction * self.size * 1.5,
             vel=direction,
-            damage=random.uniform(self._damage - self._damage_spread, self._damage + self._damage_spread),
+            damage=random.uniform(self.damage - self.damage_spread, self.damage + self.damage_spread),
             projectile_type=ProjectileType.PLAYER_BULLET,
             speed=self.speed + PROJECTILE_DEFAULT_SPEED,
         )
@@ -146,7 +146,7 @@ class Player(Entity):
         self.energy.change(-PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST)
         self.stats.ENERGY_ORBS_SPAWNED += 1
         return EnergyOrb(
-            pos=self._gravity_point,
+            pos=self.gravity_point,
             energy=PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST,
             lifetime=ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
             spawned_by_player=True
@@ -158,18 +158,18 @@ class Player(Entity):
     
     def new_level(self):
         self.level += 1
-        self._speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 150. * (self.level - 1))
+        self.speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 150. * (self.level - 1))
         old_percentage = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
         self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self.level - 1))
         self.energy.set_percent_full(0.6) # energy sets to 60%
-        self._shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.3)
-        self._energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self.level - 1)
-        self._damage = PLAYER_DEFAULT_DAMAGE_AVG + 5. * (self.level - 1)
+        self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.3)
+        self.energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self.level - 1)
+        self.damage = PLAYER_DEFAULT_DAMAGE_AVG + 5. * (self.level - 1)
 
     def set_gravity_point(self, gravity_point: Vector2):
-        self._gravity_point = gravity_point
+        self.gravity_point = gravity_point
     
     def get_health(self) -> Slider: return self.health
 
@@ -181,8 +181,10 @@ class Player(Entity):
 
     def get_level(self) -> int: return self.level
 
+    def get_gravity_point(self) -> Vector2: return self.gravity_point
+
     def __repr__(self) -> str:
         def pretty_vector2(v: Vector2) -> str:
             return f'({v.x:.2f}, {v.y:.2f})'
-        return f'Player(level={self.level}; pos={pretty_vector2(self.pos)}; vel={pretty_vector2(self.vel)}; speed={self.speed:.2f}; health={self.health}; cooldown={self._shoot_cooldown}; speed_range={self._speed_range}; gravity_point={pretty_vector2(self._gravity_point)}; stats={self.stats}; achievements={self.achievements})'
+        return f'Player(level={self.level}; pos={pretty_vector2(self.pos)}; vel={pretty_vector2(self.vel)}; speed={self.speed:.2f}; health={self.health}; cooldown={self.shoot_cooldown}; speed_range={self.speed_range}; gravity_point={pretty_vector2(self.gravity_point)}; stats={self.stats}; achievements={self.achievements})'
     

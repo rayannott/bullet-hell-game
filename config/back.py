@@ -1,6 +1,6 @@
 REMOVE_DEAD_ENTITIES_EVERY = 3.5 # seconds
 GAME_MAX_LEVEL = 10
-INCREASE_LEVEL_EVERY = 45. # seconds
+WAVE_DURATION = 45. # seconds
 TRAIL_MAX_LENGTH = 50 # positions
 SPAWN_ENEMY_EVERY = 7. # seconds
 

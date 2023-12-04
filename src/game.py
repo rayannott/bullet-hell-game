@@ -17,7 +17,7 @@ from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefin
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
-    INCREASE_LEVEL_EVERY, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
+    WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from front.sounds import play_sfx
 
 def get_enemy_type_prob_weights(level: int) -> dict[EnemyType, float]:
@@ -50,7 +50,7 @@ class Game:
         self.e_enemies: list[Enemy] = []
 
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
-        self.one_wave_timer = Timer(max_time=INCREASE_LEVEL_EVERY)
+        self.one_wave_timer = Timer(max_time=WAVE_DURATION)
         self.new_energy_orb_timer = Timer(max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
@@ -139,7 +139,7 @@ class Game:
         if not self.one_wave_timer.running():
             self.one_wave_timer.reset()
             # spawn boss at the end of the wave unless one is already alive
-            if any(ent._enemy_type == EnemyType.BOSS for ent in self.enemies()):
+            if any(ent.enemy_type == EnemyType.BOSS for ent in self.enemies()):
                 print('tried to spawn a new boss, but one is still alive')
                 self.feedback_buffer.append(Feedback('boss is still alive!', 2., color=Color('red')))
                 return
@@ -213,7 +213,7 @@ class Game:
             pos_ = entity.get_pos()
             if entity.is_alive() and not self.screen_rectangle.collidepoint(pos_):
                 if entity.get_type() == EntityType.PROJECTILE:
-                    entity._ricochet_count += 1 # type: ignore
+                    entity.ricochet_count += 1 # type: ignore
                 if pos_.x < self.screen_rectangle.left:
                     entity.vel.x *= -1.
                     entity.pos.x += delta
@@ -247,22 +247,22 @@ class Game:
             play_sfx('in_oil_spill')
         for projectile in self.projectiles():
             if not projectile.intersects(self.player): continue
-            damage_taken_actual = -self.player.health.change(-projectile._damage)
+            damage_taken_actual = -self.player.health.change(-projectile.damage)
             self.player.get_stats().BULLETS_CAUGHT += 1
             self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
             projectile.kill()
             self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2.5, color=pygame.Color('red')))
-            self.reason_of_death = f'caught Bullet::{projectile._projectile_type.name.title()}'
+            self.reason_of_death = f'caught Bullet::{projectile.projectile_type.name.title()}'
             play_sfx('damage_taken')
         for enemy in self.enemies():
             if not enemy.intersects(self.player): continue
-            damage_taken_actual = -self.player.health.change(-enemy._damage_on_collision)
+            damage_taken_actual = -self.player.health.change(-enemy.damage_on_collision)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
             enemy.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
             self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
-            self.reason_of_death = f'collided with Enemy::{enemy._enemy_type.name.title()}'
+            self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
             play_sfx('damage_taken')
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
@@ -276,16 +276,16 @@ class Game:
             play_sfx('damage_taken')
 
         # player bullets collide with enemies -> enemies get damage, player gets energy:
-        player_bullets = [el for el in self.projectiles() if el._projectile_type == ProjectileType.PLAYER_BULLET]
+        player_bullets = [el for el in self.projectiles() if el.projectile_type == ProjectileType.PLAYER_BULLET]
         for bullet in player_bullets:
             for enemy in self.enemies():
                 if not bullet.intersects(enemy): continue
                 bullet.kill()
-                is_ricochet = bullet._ricochet_count > 0
+                is_ricochet = bullet.ricochet_count > 0
                 self.player.get_stats().ACCURATE_SHOTS += 1
                 if is_ricochet: self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
                 print('accurate shot')
-                damage_dealt = bullet._damage
+                damage_dealt = bullet.damage
                 damage_dealt_actual = -enemy.get_health().change(-damage_dealt)
                 self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
                 self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.1f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
@@ -297,7 +297,7 @@ class Game:
                 self.player.energy.change(reward)
                 self.player.get_stats().ENEMIES_KILLED += 1
                 self.player.get_stats().ENERGY_COLLECTED += reward
-                if enemy._enemy_type == EnemyType.BOSS:
+                if enemy.enemy_type == EnemyType.BOSS:
                     # killed the boss
                     self.new_level()
                     self.kill_projectiles()
@@ -305,7 +305,7 @@ class Game:
                         print('new achievement: killed boss with ricochet')
                         self.player.get_achievements().KILL_BOSS_RICOCHET = True
                         self.feedback_buffer.append(Feedback('killed boss with ricochet!', 3., color=pygame.Color('blue')))
-                print(f'enemy killed: {enemy._enemy_type.name}')
+                print(f'enemy killed: {enemy.enemy_type.name}')
                 self.feedback_buffer.append(Feedback(f'+{reward:.1f}e', 2., color=pygame.Color('magenta')))
                 play_sfx('enemy_killed')
         
@@ -375,5 +375,6 @@ class Game:
             'level': self.level,
             'time': self.time,
             'stats': self.player.get_stats(),
+            'achievements': self.player.get_achievements(),
             'reason_of_death': self.reason_of_death,
         }

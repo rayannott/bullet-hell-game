@@ -62,22 +62,22 @@ class Enemy(Entity):
             can_spawn_entities=True,
             homing_target=player,
         )
-        self._health = Slider(health)
-        self._cooldown = Timer(max_time=shoot_cooldown)
-        self._cooldown.set_percent_full(0.5) # enemies start with half of the cooldown
-        self._lifetime_cooldown = Timer(max_time=lifetime)
-        self._reward = reward
-        self._enemy_type = enemy_type
-        self._spread = spread # in radians
-        self._damage = damage
-        self._damage_spread = damage_spread
+        self.health = Slider(health)
+        self.cooldown = Timer(max_time=shoot_cooldown)
+        self.cooldown.set_percent_full(0.5) # enemies start with half of the cooldown
+        self.lifetime_cooldown = Timer(max_time=lifetime)
+        self.reward = reward
+        self.enemy_type = enemy_type
+        self.spread = spread # in radians
+        self.damage = damage
+        self.damage_spread = damage_spread
 
-        self._damage_on_collision = damage_on_collision
-        self._shoots_player = True
+        self.damage_on_collision = damage_on_collision
+        self.shoots_player = True
         
     
     def get_shoot_direction(self) -> Vector2:
-        rot_angle = random.uniform(-self._spread, self._spread) if self._spread else 0.
+        rot_angle = random.uniform(-self.spread, self.spread) if self.spread else 0.
         return self.vel.rotate(rot_angle).normalize()
 
     def shoot(self):
@@ -85,17 +85,17 @@ class Enemy(Entity):
     
     def update(self, time_delta: float):
         if not self.is_alive(): return
-        if not self._health.is_alive(): self.kill()
+        if not self.health.is_alive(): self.kill()
         super().update(time_delta)
-        self._cooldown.tick(time_delta)
-        self._lifetime_cooldown.tick(time_delta)
-        if not self._lifetime_cooldown.running():
+        self.cooldown.tick(time_delta)
+        self.lifetime_cooldown.tick(time_delta)
+        if not self.lifetime_cooldown.running():
             self.kill()
             self.on_natural_death()
-        if not self._shoots_player: return
-        if not self._cooldown.running():
+        if not self.shoots_player: return
+        if not self.cooldown.running():
             self.shoot()
-            self._cooldown.reset()
+            self.cooldown.reset()
 
     def shoot_normal(self, **kwargs):
         speed_mult = kwargs.get('speed_mult', 1.)
@@ -104,7 +104,7 @@ class Enemy(Entity):
             Projectile(
                 pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
                 vel=direction,
-                damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
+                damage=self.damage + random.uniform(-self.damage_spread, self.damage_spread),
                 projectile_type=ProjectileType.NORMAL,
                 speed=self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.4) * speed_mult,
             )
@@ -115,11 +115,11 @@ class Enemy(Entity):
         direction = self.get_shoot_direction()
         self.entities_buffer.append(
             HomingProjectile(
-                _pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
-                _vel=direction,
-                _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
-                _speed=(self.speed + PROJECTILE_DEFAULT_SPEED * 0.8) * speed_mult,
-                _homing_target=self.homing_target,
+                pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
+                vel=direction,
+                damage=self.damage + random.uniform(-self.damage_spread, self.damage_spread),
+                speed=(self.speed + PROJECTILE_DEFAULT_SPEED * 0.8) * speed_mult,
+                homing_target=self.homing_target,
             )
         )
 
@@ -127,20 +127,20 @@ class Enemy(Entity):
         direction = self.get_shoot_direction()
         self.entities_buffer.append(
             ExplosiveProjectile(
-                _pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
-                _vel=direction,
-                _damage=self._damage + random.uniform(-self._damage_spread, self._damage_spread),
-                _speed=self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
-                _num_subprojectiles=num_of_subprojectiles,
+                pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
+                vel=direction,
+                damage=self.damage + random.uniform(-self.damage_spread, self.damage_spread),
+                speed=self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.2),
+                num_subprojectiles=num_of_subprojectiles,
             )
         )
     
     def on_natural_death(self):
         self.entities_buffer.append(Corpse(self))
 
-    def get_health(self) -> Slider: return self._health
+    def get_health(self) -> Slider: return self.health
 
-    def get_reward(self) -> float: return self._reward
+    def get_reward(self) -> float: return self.reward
 
 
 class BasicEnemy(Enemy):
@@ -290,7 +290,7 @@ class BossEnemy(Enemy):
     def update(self, time_delta: float):
         super().update(time_delta)
         self._spawn_oil_spills_timer.tick(time_delta)
-        self._health.change(self._regen_rate * time_delta)
+        self.health.change(self._regen_rate * time_delta)
         if not self._spawn_oil_spills_timer.running():
             self.spawn_oil_spills()
             self._spawn_oil_spills_cooldown *= 0.9 # with every spawn the cooldown decreases
