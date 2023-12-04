@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import fields
 
 import pygame_gui
 import pygame
@@ -30,14 +31,18 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
             'settings <field> <value>': 'Changes the value of the <field> to <value>',
         }
     
+    def add_log(self, text: str):
+        self.add_output_line_to_log(text)
+    
     def reset(self):
         self.clear_log()
-        self.add_output_line_to_log(self.starting_text)
+        self.add_log(self.starting_text)
 
     def change_settings(self, field: str, new_value: str):
         s: Settings = self.menu_screen.settings
-        if field not in s.__dict__: raise UnknownSettingsField
-        field_type = type(s.__dict__[field])
+        if field not in s.__dataclass_fields__: raise UnknownSettingsField
+        print(s.__dataclass_fields__[field])
+        field_type = s.__annotations__[field]
         try:
             new_value_to_set = field_type(new_value)
         except ValueError:
@@ -47,27 +52,27 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
     
     def command_settings(self, args: list[str]):
         if not len(args):
-            self.add_output_line_to_log(str(self.menu_screen.settings))
+            self.add_log(str(self.menu_screen.settings))
             return
         if len(args) == 1 and args[0] == 'default':
             s = Settings.create_default()
             self.menu_screen.reload_settings()
-            self.add_output_line_to_log(f'Settings set to default')
+            self.add_log(f'Settings set to default')
             return
         if len(args) == 2:
             try:
                 field, new_value = args
                 self.change_settings(field, new_value)
                 self.menu_screen.reload_settings()
-                self.add_output_line_to_log(f'Successfully changed {field} to {new_value}')
+                self.add_log(f'Successfully changed {field} to {new_value}')
                 return
             except UnknownSettingsField:
-                self.add_output_line_to_log(f'[!] Unknown settings field: {field}') # type: ignore
+                self.add_log(f'[!] Unknown settings field: {field}') # type: ignore
                 return
             except WrongValueType as e:
-                self.add_output_line_to_log(f'[!] {e}')
+                self.add_log(f'[!] {e}')
                 return
-        self.add_output_line_to_log(f'[!] Usage: settings <field> <value>')
+        self.add_log(f'[!] Usage: settings <field> <value>')
 
     def process_event(self, event: pygame.event.Event):
         text = self.command_entry.get_text()
@@ -79,11 +84,16 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
             elif text == 'exit':
                 self.kill()
             elif text == 'help':
-                self.add_output_line_to_log('Available commands:')
+                self.add_log('Available commands:')
                 for k, v in self.AVAILABLE_COMMANDS.items():
-                    self.add_output_line_to_log(f'{k}: {v}')
+                    self.add_log(f'{k}: {v}')
             elif text.startswith('settings'):
                 args = text.split()[1:]
                 self.command_settings(args)
+            elif text == 'info':
+                if self.menu_screen.game_screen is not None:
+                    self.add_log(str(self.menu_screen.game_screen.game.get_info()))
+                else:
+                    self.add_log('Game not started')
             else:
-                self.add_output_line_to_log(f'[!] Unknown command: {text}. Type "help" for available commands')
+                self.add_log(f'[!] Unknown command: {text}. Type "help" for available commands')
