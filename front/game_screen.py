@@ -1,20 +1,21 @@
+import datetime
 import random
 from typing import Literal
 
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
-from front.sounds import play_sfx
 
 from src.utils import Feedback
 from src.game import Game
-from src.enums import EnemyType
 
+from front.sounds import play_sfx
 from front.screen import Screen
 from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
 
+from config.front import SAVES_FILE
 from config.settings import Settings
 
 
@@ -137,3 +138,5 @@ class GameScreen(Screen):
         if self.game.player.is_alive():
             # do not write the reason of death to the info
             self.game.reason_of_death = ''
+        with open(SAVES_FILE, 'a') as f:
+            print({datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S') :self.game.get_info()}, file=f)
