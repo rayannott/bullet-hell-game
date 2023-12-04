@@ -9,7 +9,7 @@ MUSIC_DIR = SOUNDS_DIR / 'music'
 
 
 SOUND_EFFECTS = {file.stem: mixer.Sound(file)
-    for file in SFX_DIR.iterdir()}
+    for file in SFX_DIR.iterdir() if file.suffix == '.wav'}
 
 
 def play_sfx(name: str):
