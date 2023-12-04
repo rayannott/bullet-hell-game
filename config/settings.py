@@ -8,7 +8,7 @@ from config.front import SETTINGS_FILE
 @dataclass
 class Settings:
     sfx_volume: float = 0.3
-    music_volume: float = 0.3
+    music_volume: float = 0.2
     difficulty: int = 3 # from 1 to 5; 3 is normal
 
     def dump(self):
