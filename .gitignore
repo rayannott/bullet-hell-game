@@ -4,7 +4,8 @@ __pycache__/
 .ipynb_checkpoints/
 dist/
 build/
+assets/settings.json
+assets/saves/
 desktop.ini
 main.spec
 basic.log
-assets/settings.json
