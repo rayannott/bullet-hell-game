@@ -4,6 +4,7 @@ import pygame_gui
 from front.screen import Screen
 from front.game_screen import GameScreen
 from front.console_window import ConsoleWindow
+from front.settings_window import SettingsWindow
 from front.rules_window import RulesWindow
 from front.sounds import set_sfx_volume, set_bg_music_vol, play_bg_music
 from config import MENU_BUTTONS_SIZE
@@ -56,6 +57,7 @@ class MenuScreen(Screen):
                 print('Stats opened')
             elif event.ui_element == self.settings_btn:
                 print('Settings opened')
+                self.settings_window = SettingsWindow(self.manager, self)
                 self.console_window = ConsoleWindow(self.manager, self)
             elif event.ui_element == self.rules_btn:
                 print('Rules opened')
