@@ -81,6 +81,7 @@ class Player(Entity):
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:
             self.vel = Vector2()
+            self.speed = 0.
         self.health_energy_evolution(time_delta)
         self.effect_flags.reset()
 
