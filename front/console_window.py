@@ -1,9 +1,11 @@
 import datetime
 from dataclasses import fields
+from pprint import pformat
 
 import pygame_gui
 import pygame
 
+from config import CONSOLE_WINDOW_SIZE
 from config.settings import Settings
 
 
@@ -17,7 +19,7 @@ class WrongValueType(Exception):
 
 class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
     def __init__(self, manager: pygame_gui.UIManager, menu_screen):
-        rect = pygame.Rect(0, 0, 600, 400)
+        rect = pygame.Rect(0, 0, *CONSOLE_WINDOW_SIZE)
         super().__init__(rect, manager, 'Console')
         self.menu_screen = menu_screen
         self.starting_text = f'[{datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}] Console opened'
@@ -92,8 +94,8 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
                 self.command_settings(args)
             elif text == 'info':
                 if self.menu_screen.game_screen is not None:
-                    self.add_log(str(self.menu_screen.game_screen.game.get_info()))
+                    self.add_log(pformat(self.menu_screen.game_screen.game.get_info()))
                 else:
-                    self.add_log('Game not started')
+                    self.add_log('No game has been played yet')
             else:
                 self.add_log(f'[!] Unknown command: {text}. Type "help" for available commands')
