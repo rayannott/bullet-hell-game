@@ -15,7 +15,7 @@ from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
 
-from config.paths import SAVES_FILE
+from config.paths import SAVES_FILE, SAVES_DIR
 from config.settings import Settings
 
 
@@ -138,5 +138,7 @@ class GameScreen(Screen):
         if self.game.player.is_alive():
             # do not write the reason of death to the info
             self.game.reason_of_death = ''
+        if not SAVES_DIR.exists():
+            SAVES_DIR.mkdir(exist_ok=True, parents=True)
         with open(SAVES_FILE, 'a') as f:
-            print({datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S') :self.game.get_info()}, file=f)
+            print({datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S'): self.game.get_info()}, file=f)
