@@ -1,6 +1,3 @@
-import pathlib
-
-
 FRAMERATE = 60
 
 SM = 5 # small margin
@@ -19,10 +16,3 @@ GAME_ENERGY_BAR_SIZE = 240, 30
 
 GAME_STATS_TEXTBOX_SIZE = 200, 200
 GAME_DEBUG_RECT_SIZE = 220, 80
-
-ASSETS_DIR = pathlib.Path('assets').resolve()
-SOUNDS_DIR = ASSETS_DIR / 'sounds'
-SAVES_DIR = ASSETS_DIR / 'saves'
-SETTINGS_FILE = ASSETS_DIR / 'settings.json'
-FONT_FILE = ASSETS_DIR / 'cnr.otf'
-SAVES_FILE = SAVES_DIR / 'saves.txt'

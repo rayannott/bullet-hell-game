@@ -15,7 +15,7 @@ from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
 
-from config.front import SAVES_FILE
+from config.paths import SAVES_FILE
 from config.settings import Settings
 
 

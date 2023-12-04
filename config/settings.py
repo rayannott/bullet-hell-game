@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import json
 from typing import TypedDict
 
-from config.front import SETTINGS_FILE
+from config.paths import SETTINGS_FILE
 
 
 @dataclass
