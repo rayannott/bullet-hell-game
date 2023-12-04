@@ -1,3 +1,4 @@
+import random
 from typing import Literal
 
 import pygame
@@ -116,8 +117,9 @@ class GameScreen(Screen):
             duration = feedback.duration
             at_pos = feedback.at_pos
             color = feedback.color
-        if at_pos == 'player': at_pos = self.game.player.get_pos()
-        elif at_pos == 'cursor': at_pos = Vector2(pygame.mouse.get_pos())
+        random_vector = Vector2(random.uniform(-20, 20), random.uniform(-20, 20))
+        if at_pos == 'player': at_pos = self.game.player.get_pos() + random_vector
+        elif at_pos == 'cursor': at_pos = Vector2(pygame.mouse.get_pos()) + random_vector
         self.notifications.append(
             Notification(
                 text=text,
