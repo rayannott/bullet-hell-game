@@ -13,10 +13,13 @@ from front.render_manager import RenderManager
 from front.utils import Notification
 from front.stats_panel import StatsPanel
 
+from config.settings import Settings
+
 
 class GameScreen(Screen):
-    def __init__(self, surface: pygame.Surface):
+    def __init__(self, surface: pygame.Surface, settings: Settings):
         super().__init__(surface)
+        self.settings = settings
         self.setup_game(surface)
     
     def setup_game(self, surface: pygame.Surface):
