@@ -38,6 +38,9 @@ class Screen(ABC):
     @abstractmethod
     def update(self, time_delta: float):
         ...
+    
+    def post_run(self):
+        ...
 
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
@@ -63,3 +66,4 @@ class Screen(ABC):
             self.update(time_delta)
             self.manager.draw_ui(self.surface)
             pygame.display.update()
+        self.post_run()
