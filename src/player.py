@@ -80,7 +80,7 @@ class Player(Entity):
         # it is non-linear so that it's the player is not too slow when close to the gravity point
         towards_gravity_point = (self.gravity_point - self.pos)
         dist_to_gravity_point = towards_gravity_point.magnitude()
-        t = (dist_to_gravity_point / 1500.) ** 0.4
+        t = (dist_to_gravity_point / 1500.) ** 0.75
         self.speed = self.speed_range[0] + (self.speed_range[1] - self.speed_range[0]) * t *\
             (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.)
 
@@ -186,7 +186,7 @@ class Player(Entity):
     
     def new_level(self):
         self.level += 1
-        self.speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 150. * (self.level - 1))
+        self.speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 300. * (self.level - 1))
         old_percentage = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
