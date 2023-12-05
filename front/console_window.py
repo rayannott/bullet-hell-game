@@ -42,7 +42,6 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
     def change_settings(self, field: str, new_value: str):
         s: Settings = self.menu_screen.settings
         if field not in s.__dataclass_fields__: raise UnknownSettingsField
-        print(s.__dataclass_fields__[field])
         field_type = s.__annotations__[field]
         try:
             new_value_to_set = field_type(new_value)
@@ -79,7 +78,6 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
         text = self.command_entry.get_text()
         if super().process_event(event) and text:
             text = text.strip()
-            print(text)
             if text == 'clear':
                 self.reset()
             elif text == 'exit':
