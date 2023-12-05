@@ -10,11 +10,11 @@ from config.settings import Settings
 from src.entity import Corpse, Entity, DummyEntity
 from src.oil_spill import OilSpill
 from src.player import Player
-from src.enums import EntityType, EnemyType, ProjectileType
+from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType
 from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback
 from src.energy_orb import EnergyOrb
-from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning
+from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
@@ -134,11 +134,13 @@ class Game:
     
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
+        # TODO: do not spawn if the boss is alive
         type_weights = get_enemy_type_prob_weights(level=self.level, difficulty=self.settings.difficulty)
         enemy_type = random.choices(
             list(type_weights.keys()), 
             list(type_weights.values()), 
         k=1)[0]
+        # TODO: spawn more basic enemies on higher levels
         self.spawn_enemy(enemy_type)
 
     def process_timers(self, time_delta: float) -> None:
@@ -194,8 +196,11 @@ class Game:
             self.add_entity(new_projectile)
             play_sfx('player_shot')
 
-    def player_try_ultimate(self):
-        try: self.player.ultimate_ability()
+    def player_try_ultimate(self, artifact_type: ArtifactType):
+        try: self.player.ultimate_ability(artifact_type)
+        except ArtifactMissing as e:
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
         except OnCooldown as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             print(e)
@@ -205,7 +210,7 @@ class Game:
         except ShieldRunning as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             print(e)
-    
+
     def player_try_spawning_energy_orb(self):
         try: new_energy_orb = self.player.spawn_energy_orb()
         except NotEnoughEnergy as e:
@@ -271,10 +276,11 @@ class Game:
             self.reason_of_death = 'slipped on oil to death'
             play_sfx('in_oil_spill')
         for projectile in self.projectiles():
-            if projectile.projectile_type != ProjectileType.PLAYER_BULLET and self.player.inside_shield(projectile.get_pos()):
-                projectile.kill()
-                self.feedback_buffer.append(Feedback(f'blocked', 1., color=pygame.Color('yellow')))
-                continue
+            # TODO: fix using artifact handler
+            # if projectile.projectile_type != ProjectileType.PLAYER_BULLET and self.player.inside_shield(projectile.get_pos()):
+            #     projectile.kill()
+            #     self.feedback_buffer.append(Feedback(f'blocked', 1., color=pygame.Color('yellow')))
+            #     continue
             if not projectile.intersects(self.player): continue
             damage_taken_actual = -self.player.health.change(-projectile.damage)
             self.player.get_stats().BULLETS_CAUGHT += 1

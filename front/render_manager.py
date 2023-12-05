@@ -8,7 +8,7 @@ from src.game import Game
 from src.entity import Entity
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
-from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM, PLAYER_ULT_SHIELD_SIZE
+from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE
 
 freetype.init()
 font = freetype.SysFont('Arial', 20)
@@ -114,16 +114,17 @@ class RenderManager:
                 player.get_size() + 4,
                 width=2
             )
-        if player.is_shield_on():
-            pygame.draw.circle(
-                self.surface,
-                Color('yellow'),
-                player.get_pos(),
-                PLAYER_ULT_SHIELD_SIZE,
-                width=2
-            )
-            self.draw_circular_status_bar(player.get_pos(), 
-                player.shield_duration_timer.get_slider(reverse=True), PLAYER_ULT_SHIELD_SIZE + 5., draw_full=True)
+        # TODO: fix using artifact handler
+        # if player.is_shield_on():
+        #     pygame.draw.circle(
+        #         self.surface,
+        #         Color('yellow'),
+        #         player.get_pos(),
+        #         ARTIFACT_SHIELD_SIZE,
+        #         width=2
+        #     )
+        #     self.draw_circular_status_bar(player.get_pos(), 
+        #         player.shield_duration_timer.get_slider(reverse=True), ARTIFACT_SHIELD_SIZE + 5., draw_full=True)
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)
