@@ -14,6 +14,7 @@ class Stats:
     ACCURATE_SHOTS: int = 0
     ENEMIES_COLLIDED_WITH: int = 0
     ENERGY_ORBS_SPAWNED: int = 0
+    CORPSES_LET_SPAWN: int = 0
     DAMAGE_TAKEN: float = 0.
     DAMAGE_DEALT: float = 0.
     ENERGY_COLLECTED: float = 0.

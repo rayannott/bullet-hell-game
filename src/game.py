@@ -347,6 +347,7 @@ class Game:
             self.e_projectiles.append(entity) # type: ignore
         elif ent_type == EntityType.CORPSE:
             self.e_corpses.append(entity) # type: ignore
+            self.player.get_stats().CORPSES_LET_SPAWN += 1
         elif ent_type == EntityType.DUMMY:
             self.e_dummies.append(entity) # type: ignore
         elif ent_type == EntityType.OIL_SPILL:
