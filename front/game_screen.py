@@ -5,7 +5,7 @@ from typing import Literal
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
-from src.enums import ArtifactType
+from src.enums import ArtifactType, EnemyType
 
 from src.utils import Feedback
 from src.game import Game
@@ -67,6 +67,18 @@ class GameScreen(Screen):
             elif event.key == pygame.K_q:
                 self.game.toggle_pause()
                 self.ingame_shop = InGameShop(self.manager, self.surface, self.game)
+            # debug:
+            elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                if event.key == pygame.K_1:
+                    self.game.spawn_enemy(EnemyType.BASIC)
+                elif event.key == pygame.K_2:
+                    self.game.spawn_enemy(EnemyType.FAST)
+                elif event.key == pygame.K_3:
+                    self.game.spawn_enemy(EnemyType.TANK)
+                elif event.key == pygame.K_4:
+                    self.game.spawn_enemy(EnemyType.ARTILLERY)
+                elif event.key == pygame.K_5:
+                    self.game.spawn_enemy(EnemyType.BOSS)
 
         super().process_ui_event(event)
 
