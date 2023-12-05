@@ -114,6 +114,15 @@ class RenderManager:
                 player.get_size() + 4,
                 width=2
             )
+        if player.is_shield_on():
+            pygame.draw.circle(
+                self.surface,
+                Color('yellow'),
+                player.get_pos(),
+                100.,
+                width=2
+            )
+            self.draw_circular_status_bar(player.get_pos(), player.shield_duration_timer.get_slider(reverse=True), 105., draw_full=True)
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)

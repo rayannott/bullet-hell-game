@@ -188,6 +188,15 @@ class Game:
             self.add_entity(new_projectile)
             play_sfx('player_shot')
 
+    def player_try_ultimate(self):
+        try: self.player.ultimate_ability()
+        except OnCooldown as e:
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
+        except NotEnoughEnergy as e:
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
+
     def player_try_spawning_energy_orb(self):
         try: new_energy_orb = self.player.spawn_energy_orb()
         except NotEnoughEnergy as e:

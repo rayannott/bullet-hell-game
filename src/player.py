@@ -7,13 +7,13 @@ from config.settings import Settings
 from src.energy_orb import EnergyOrb
 from src.entity import Entity
 from src.enums import EntityType, ProjectileType
-from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined
-from src.projectile import Projectile
+from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ShieldRunning
+from src.projectile import ExplosiveProjectile, Projectile
 from src.utils import Stats, Slider, Timer
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
-    PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST, PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_REQUIRED_ENERGY,
+    PLAYER_SPAWN_ENERGY_ORB_COST, PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
 
@@ -23,7 +23,7 @@ class EffectFlags:
     """
     Flags for effects that can be applied to the player.
     """
-    OIL_SPILL: bool = False    
+    OIL_SPILL: bool = False
 
     def reset(self):
         self.OIL_SPILL = False
@@ -62,6 +62,10 @@ class Player(Entity):
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
 
+        self.shield_duration_timer = Timer(max_time=5.)
+        self.shield_duration_timer.turn_off()
+        self.shield_cooldown_timer = Timer(max_time=20.)
+
     def update(self, time_delta: float):
         super().update(time_delta)
         if not self._is_alive: return
@@ -83,6 +87,8 @@ class Player(Entity):
             self.vel = Vector2()
             self.speed = 0.
         self.health_energy_evolution(time_delta)
+        self.shield_duration_timer.tick(time_delta)
+        self.shield_cooldown_timer.tick(time_delta)
         self.effect_flags.reset()
 
     def health_energy_evolution(self, time_delta: float):
@@ -132,32 +138,43 @@ class Player(Entity):
             if self.vel.magnitude_squared() == 0.:
                 raise ShootingDirectionUndefined('direction undefined')
         self.energy.change(-PLAYER_SHOT_COST)
-        direction = self.vel.normalize()
-        self.stats.PROJECTILES_FIRED += 1
         self.shoot_cooldown_timer.reset(with_max_time=self.shoot_cooldown)
+        self.stats.PROJECTILES_FIRED += 1
+        direction = self.vel.normalize()
         return Projectile(
             pos=self.pos.copy() + direction * self.size * 1.5,
             vel=direction,
-            damage=random.uniform(self.damage - self.damage_spread, self.damage + self.damage_spread),
+            damage=self.damage + self.damage_spread * random.uniform(-1, 1),
             projectile_type=ProjectileType.PLAYER_BULLET,
             speed=self.speed + PROJECTILE_DEFAULT_SPEED,
         )
-    
+
     def spawn_energy_orb(self) -> EnergyOrb:
-        if self.energy.get_value() < PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_REQUIRED_ENERGY:
-            raise NotEnoughEnergy(f'energy lower than {PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_REQUIRED_ENERGY}')
-        self.energy.change(-PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST)
+        if self.energy.get_value() < PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY:
+            raise NotEnoughEnergy(f'energy lower than {PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY}')
+        self.energy.change(-PLAYER_SPAWN_ENERGY_ORB_COST)
         self.stats.ENERGY_ORBS_SPAWNED += 1
         return EnergyOrb(
             pos=self.gravity_point,
-            energy=PLAYER_ULTIMATE_SPAWN_ENERGY_ORB_COST,
+            energy=PLAYER_SPAWN_ENERGY_ORB_COST,
             lifetime=ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
             spawned_by_player=True
         )
 
+    def shield_on(self):
+        if self.energy.get_value() < 300.:
+            raise NotEnoughEnergy('not enough energy for shield')
+        if self.is_shield_on():
+            raise ShieldRunning('shield already running')
+        if self.shield_cooldown_timer.running():
+            raise OnCooldown('shield on cooldown')
+        self.energy.change(-300.)
+        self.shield_duration_timer.reset(with_max_time=5.)
+        self.shield_cooldown_timer.reset()
+
     def ultimate_ability(self):
         # TODO: implement different ultimates
-        ...
+        self.shield_on()
     
     def new_level(self):
         self.level += 1
@@ -185,6 +202,8 @@ class Player(Entity):
     def get_level(self) -> int: return self.level
 
     def get_gravity_point(self) -> Vector2: return self.gravity_point
+
+    def is_shield_on(self) -> bool: return self.shield_duration_timer.running()
 
     def __repr__(self) -> str:
         def pretty_vector2(v: Vector2) -> str:

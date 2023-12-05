@@ -67,7 +67,10 @@ class Timer:
         self.current_time = 0.
     
     def tick(self, time_delta: float) -> None:
-        self.current_time += time_delta 
+        self.current_time += time_delta
+
+    def turn_off(self) -> None:
+        self.current_time = self.max_time + 0.01
 
     def running(self) -> bool:
         return self.current_time < self.max_time

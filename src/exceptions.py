@@ -6,3 +6,6 @@ class NotEnoughEnergy(Exception):
 
 class ShootingDirectionUndefined(Exception):
     pass
+
+class ShieldRunning(Exception):
+    pass

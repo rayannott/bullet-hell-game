@@ -63,7 +63,7 @@ class GameScreen(Screen):
                 self.game.player_try_shooting()
             elif event.button == 3:
                 # TODO: pressing opens a wheel menu with options
-                ...
+                self.game.player_try_ultimate()
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self.game.player_try_spawning_energy_orb()
