@@ -153,21 +153,17 @@ class Game:
             self.one_wave_timer.reset()
             # spawn boss at the end of the wave unless one is already alive
             if any(ent.enemy_type == EnemyType.BOSS for ent in self.enemies()):
-                print('tried to spawn a new boss, but one is still alive')
                 self.feedback_buffer.append(Feedback('boss is still alive!', 2., color=Color('red')))
                 return
             self.spawn_enemy(EnemyType.BOSS)
-            print('Increased level')
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
             self.spawn_energy_orb()
             self.new_energy_orb_timer.reset(with_max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
-            print('Spawned energy orb')
         self.spawn_enemy_timer.tick(time_delta)
         if not self.spawn_enemy_timer.running():
             self.spawn_random_enemy()
             self.spawn_enemy_timer.reset(with_max_time=self.current_spawn_enemy_cooldown)
-            print('Spawned enemy')
 
     def update(self, time_delta: float) -> None:
         if not self.is_running() or self.paused: return
@@ -317,7 +313,6 @@ class Game:
                 is_ricochet = bullet.ricochet_count > 0
                 self.player.get_stats().ACCURATE_SHOTS += 1
                 if is_ricochet: self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
-                print('accurate shot')
                 damage_dealt = bullet.damage
                 damage_dealt_actual = -enemy.get_health().change(-damage_dealt)
                 self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
@@ -335,10 +330,8 @@ class Game:
                     self.new_level()
                     self.kill_projectiles()
                     if is_ricochet and not self.player.get_achievements().KILL_BOSS_RICOCHET:
-                        print('new achievement: killed boss with ricochet')
                         self.player.get_achievements().KILL_BOSS_RICOCHET = True
                         self.feedback_buffer.append(Feedback('[A] killed boss with ricochet!', 3., color=pygame.Color('blue')))
-                print(f'enemy killed: {enemy.enemy_type.name}')
                 self.feedback_buffer.append(Feedback(f'+{reward:.0f}e', 2., color=pygame.Color('magenta')))
                 play_sfx('enemy_killed')
         
