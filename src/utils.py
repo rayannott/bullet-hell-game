@@ -15,6 +15,11 @@ class Stats:
     ENEMIES_COLLIDED_WITH: int = 0
     ENERGY_ORBS_SPAWNED: int = 0
     CORPSES_LET_SPAWN: int = 0
+    BULLET_SHIELDS_ACTIVATED: int = 0
+    BULLET_SHIELD_BULLETS_BLOCKED: int = 0
+    MINES_STEPPED_ON: int = 0
+    MINES_PLANTED: int = 0
+
     DAMAGE_TAKEN: float = 0.
     DAMAGE_DEALT: float = 0.
     ENERGY_COLLECTED: float = 0.
@@ -72,6 +77,9 @@ class Timer:
 
     def turn_off(self) -> None:
         self.current_time = self.max_time + 0.01
+    
+    def get_time_left(self) -> float:
+        return self.max_time - self.current_time
 
     def running(self) -> bool:
         return self.current_time < self.max_time
