@@ -146,14 +146,16 @@ class Game:
     
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
-        # TODO: do not spawn if the boss is alive
         type_weights = get_enemy_type_prob_weights(level=self.level, difficulty=self.settings.difficulty)
         enemy_type = random.choices(
             list(type_weights.keys()), 
             list(type_weights.values()), 
         k=1)[0]
-        # TODO: spawn more basic enemies on higher levels
-        self.spawn_enemy(enemy_type)
+        if enemy_type == EnemyType.BASIC and self.level > 3:
+            num = random.randint(1, 2 + self.level // 3)
+        else: num = 1
+        for _ in range(num):
+            self.spawn_enemy(enemy_type)
 
     def process_timers(self, time_delta: float) -> None:
         """Process events that happen periodically."""
@@ -161,15 +163,14 @@ class Game:
         if not self.remove_dead_entities_timer.running():
             self.remove_dead_entities()
             self.remove_dead_entities_timer.reset()
-            print('Removed dead entities')
         self.one_wave_timer.tick(time_delta)
         if not self.one_wave_timer.running():
-            self.one_wave_timer.reset()
             # spawn boss at the end of the wave unless one is already alive
             if any(ent.enemy_type == EnemyType.BOSS for ent in self.enemies()):
                 self.feedback_buffer.append(Feedback('boss is still alive!', 2., color=Color('red')))
                 return
             self.spawn_enemy(EnemyType.BOSS)
+            self.one_wave_timer.reset()
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
             self.spawn_energy_orb()
@@ -464,5 +465,6 @@ class Game:
             'time': self.time,
             'stats': self.player.get_stats(),
             'achievements': self.player.get_achievements(),
+            'artifacts': self.player.artifacts_handler, 
             'reason_of_death': self.reason_of_death,
         }
