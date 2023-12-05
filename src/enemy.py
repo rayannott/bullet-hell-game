@@ -169,7 +169,7 @@ class BasicEnemy(Enemy):
             player=player,
             color=Color('#e82337'),
             speed=ENEMY_DEFAULT_SPEED,
-            health=ENEMY_DEFAULT_MAX_HEALTH + 10. * (player.get_level() - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH + 12. * (player.get_level() - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
             reward=ENEMY_DEFAULT_REWARD,
             lifetime=ENEMY_DEFAULT_LIFETIME,
@@ -198,7 +198,7 @@ class FastEnemy(Enemy):
             lifetime=ENEMY_DEFAULT_LIFETIME + 6. * (_player_level - 1),
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.15,
         )
-        self._shoots_player = False
+        self.shoots_player = False
 
 
 class TankEnemy(Enemy):
@@ -215,7 +215,7 @@ class TankEnemy(Enemy):
             player=player,
             color=Color('#9e401e'),
             speed=ENEMY_DEFAULT_SPEED * 0.6,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 3.5 + 35. * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH * 3.5 + 30. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0,
             reward=ENEMY_DEFAULT_REWARD * (2.3 + 0.1 * self._player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
@@ -258,7 +258,7 @@ class ArtilleryEnemy(Enemy):
             player=player,
             color=Color('#005c22'),
             speed=10.,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 35. * (_player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2. + 35. * (_player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4,
             reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * _player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * _player_level,
@@ -292,7 +292,7 @@ class BossEnemy(Enemy):
             enemy_type=EnemyType.BOSS,
             player=player,
             color=Color('#510e78'),
-            speed=ENEMY_DEFAULT_SPEED + 40 * (self._player_level - 1),
+            speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 40 * (self._player_level - 1),
             health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 50. * self._player_level,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.12 * self._player_level),
