@@ -13,7 +13,7 @@ from src.game import Game
 from front.sounds import play_sfx
 from front.screen import Screen
 from front.render_manager import RenderManager
-from front.utils import Notification
+from front.utils import Notification, random_unit_vector
 from front.stats_panel import StatsPanel
 
 from config.paths import SAVES_FILE, SAVES_DIR
@@ -60,13 +60,9 @@ class GameScreen(Screen):
                 self.toggle_debug()
             elif event.key == pygame.K_F5:
                 self.setup_game(self.surface)
-            elif event.key == pygame.K_d:
-                print('--- debug ---')
-                print(self.game.player.get_stats())
-                print('-'*10)
-            elif event.key == pygame.K_q:
-                self.game.toggle_pause()
-                self.ingame_shop = InGameShop(self.manager, self.surface, self.game)
+            # elif event.key == pygame.K_q:
+            #     self.game.toggle_pause()
+            #     self.ingame_shop = InGameShop(self.manager, self.surface, self.game)
             # debug:
             elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 if event.key == pygame.K_1:
@@ -79,6 +75,12 @@ class GameScreen(Screen):
                     self.game.spawn_enemy(EnemyType.ARTILLERY)
                 elif event.key == pygame.K_5:
                     self.game.spawn_enemy(EnemyType.BOSS)
+                elif event.key == pygame.K_d:
+                    print('--- debug ---')
+                    print(self.game.player.get_stats())
+                    print('-'*10)
+                elif event.key == pygame.K_l:
+                    self.game.new_level()
 
         super().process_ui_event(event)
 
@@ -151,7 +153,7 @@ class GameScreen(Screen):
             duration = feedback.duration
             at_pos = feedback.at_pos
             color = feedback.color
-        random_vector = Vector2(random.uniform(-20, 20), random.uniform(-20, 20))
+        random_vector = random_unit_vector() * random.random() * 50
         if at_pos == 'player': at_pos = self.game.player.get_pos() + random_vector
         elif at_pos == 'cursor': at_pos = Vector2(pygame.mouse.get_pos()) + random_vector
         self.notifications.append(
