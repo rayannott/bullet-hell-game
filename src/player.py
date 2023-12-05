@@ -150,18 +150,6 @@ class Player(Entity):
             speed=self.speed + PROJECTILE_DEFAULT_SPEED,
         )
 
-    def spawn_energy_orb(self) -> EnergyOrb:
-        if self.energy.get_value() < PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY:
-            raise NotEnoughEnergy(f'energy lower than {PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY}')
-        self.energy.change(-PLAYER_SPAWN_ENERGY_ORB_COST)
-        self.stats.ENERGY_ORBS_SPAWNED += 1
-        return EnergyOrb(
-            pos=self.gravity_point,
-            energy=PLAYER_SPAWN_ENERGY_ORB_COST,
-            lifetime=ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
-            spawned_by_player=True
-        )
-
     def ultimate_ability(self, artifact_type: ArtifactType):
         if artifact_type == ArtifactType.BULLET_SHIELD:
             self.artifacts_handler.get_bullet_shield().turn_on()
