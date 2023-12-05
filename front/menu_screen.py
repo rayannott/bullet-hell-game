@@ -50,17 +50,14 @@ class MenuScreen(Screen):
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.start_game_btn:
-                print('Game started')
                 self.game_screen = GameScreen(self.surface, self.settings)
                 self.game_screen.run()
             elif event.ui_element == self.stats_btn:
-                print('Stats opened')
+                ...
             elif event.ui_element == self.settings_btn:
-                print('Settings opened')
                 self.settings_window = SettingsWindow(self.manager, self)
                 self.console_window = ConsoleWindow(self.manager, self)
             elif event.ui_element == self.rules_btn:
-                print('Rules opened')
                 RulesWindow(self.manager, self.surface)
         super().process_ui_event(event)
 

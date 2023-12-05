@@ -94,7 +94,6 @@ class Game:
     def new_level(self) -> bool:
         self.feedback_buffer.append(Feedback(f'new wave!', 3.5, color=Color('green'), at_pos='cursor'))
         if self.level >= GAME_MAX_LEVEL: return False
-        print(f'new level: {self.level}')
         play_sfx('new_level')
         self.level += 1
         self.feedback_buffer.append(Feedback(f'new level: {self.level}', 3.5, color=Color('green'), at_pos='player'))
@@ -103,7 +102,6 @@ class Game:
         self.current_spawn_enemy_cooldown *= (1. - 0.02 * self.settings.difficulty)
 
         if self.level == 5 and not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES:
-            print('new achievement: reach level 5 without corpses')
             self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES = True
             self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=pygame.Color('blue')))
 

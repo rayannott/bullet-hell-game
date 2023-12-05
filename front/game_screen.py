@@ -65,7 +65,6 @@ class GameScreen(Screen):
                 print(self.game.player.get_stats())
                 print('-'*10)
             elif event.key == pygame.K_q:
-                print('opened in-game shop')
                 self.game.toggle_pause()
                 self.ingame_shop = InGameShop(self.manager, self.surface, self.game)
 
@@ -126,7 +125,7 @@ class GameScreen(Screen):
             action_long_desc=death_message,
             blocking=True
         )
-        print('game over', self.game.get_info())
+        print('[game over]', self.game.get_info())
     
     def spawn_notification(self,
             text: str = '', 
