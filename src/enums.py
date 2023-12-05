@@ -12,6 +12,8 @@ class EntityType(Enum):
     PROJECTILE = auto()
     ENERGY_ORB = auto()
     ENEMY = auto()
+    MINE = auto()
+    CRATER = auto()
 
 
 class EnemyType(Enum):
@@ -40,3 +42,4 @@ class ArtifactType(Enum):
     DASH = auto()
     BAIT = auto()
     ROTATING_BULLETS = auto()
+    MINE_SPAWN = auto()
