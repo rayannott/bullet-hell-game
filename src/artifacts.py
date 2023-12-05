@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from pygame import Vector2
+from front.utils import random_unit_vector
 
 from src.entity import Mine
 from src.enums import ArtifactType
@@ -80,7 +81,7 @@ class MineSpawn(Artifact):
         if self.player.energy.get_value() < MINE_COST:
             raise NotEnoughEnergy('not enough energy for a mine')
         self.player.energy.change(-MINE_COST)
-        vel: Vector2 = self.player.get_vel() + Vector2(0.01, 0.01)
+        vel: Vector2 = self.player.get_vel() + random_unit_vector()
         vel.scale_to_length(20.)
         pos: Vector2 = self.player.get_pos()
         self.player.entities_buffer.append(Mine(pos=pos-vel, 

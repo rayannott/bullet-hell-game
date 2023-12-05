@@ -6,6 +6,7 @@ import itertools
 import pygame
 from pygame import Vector2, Color
 from config.settings import Settings
+from front.utils import random_unit_vector
 
 from src.entity import Corpse, AOEEffect, Entity, DummyEntity, Mine
 from src.oil_spill import OilSpill
@@ -132,12 +133,10 @@ class Game:
         )
 
     def spawn_enemy(self, enemy_type: EnemyType):
-        # TODO: rewrite this so that the enemies are spawned behind the player
-        # except the boss -- it should be spawned in the center of the screen
         if enemy_type == EnemyType.BOSS:
             position = self.screen_rectangle.center
         else:
-            position = self.get_random_screen_position_for_enemy(enemy_size=ENEMY_SIZE_MAP[enemy_type])
+            position = self.get_screen_position_for_enemy(enemy_size=ENEMY_SIZE_MAP[enemy_type])
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
                 pos=position,
@@ -438,10 +437,11 @@ class Game:
                 not any(entity.intersects(dummy) for entity in self.all_entities_iter())):
                     return pos_candidate
     
-    def get_random_screen_position_for_enemy(self, enemy_size: float) -> Vector2:
+    def get_screen_position_for_enemy(self, enemy_size: float) -> Vector2:
         """Give a position behind the player.
         If it is outside of the screen, return a random position inside the screen."""
-        pos = self.player.get_pos() + Vector2(0., -200.)
+        player_vel = self.player.get_vel() + random_unit_vector()
+        pos = self.player.get_pos() - player_vel.normalize() * 300.
         if self.screen_rectangle.collidepoint(pos): return pos
         return self.get_random_screen_position_for_entity(enemy_size)
 
