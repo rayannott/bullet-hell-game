@@ -8,7 +8,7 @@ from src.game import Game
 from src.entity import Entity
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
-from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM
+from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM, PLAYER_ULT_SHIELD_SIZE
 
 freetype.init()
 font = freetype.SysFont('Arial', 20)
@@ -119,10 +119,11 @@ class RenderManager:
                 self.surface,
                 Color('yellow'),
                 player.get_pos(),
-                100.,
+                PLAYER_ULT_SHIELD_SIZE,
                 width=2
             )
-            self.draw_circular_status_bar(player.get_pos(), player.shield_duration_timer.get_slider(reverse=True), 105., draw_full=True)
+            self.draw_circular_status_bar(player.get_pos(), 
+                player.shield_duration_timer.get_slider(reverse=True), PLAYER_ULT_SHIELD_SIZE + 5., draw_full=True)
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)

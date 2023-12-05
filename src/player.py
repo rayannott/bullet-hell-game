@@ -15,7 +15,10 @@ from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
     PLAYER_SPAWN_ENERGY_ORB_COST, PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
-    PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST)
+    PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST,
+    PLAYER_ULT_SHIELD_SIZE, PLAYER_ULT_SHIELD_COOLDOWN, PLAYER_ULT_SHIELD_DURATION, PLAYER_ULT_SHIELD_COST,
+    PLAYER_ULT_SHIELD_SIZE, 
+)
 
 
 @dataclass
@@ -62,9 +65,9 @@ class Player(Entity):
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
 
-        self.shield_duration_timer = Timer(max_time=5.)
+        self.shield_duration_timer = Timer(max_time=PLAYER_ULT_SHIELD_DURATION)
         self.shield_duration_timer.turn_off()
-        self.shield_cooldown_timer = Timer(max_time=20.)
+        self.shield_cooldown_timer = Timer(max_time=PLAYER_ULT_SHIELD_COOLDOWN)
         self.shield_cooldown_timer.set_percent_full(0.8)
 
     def update(self, time_delta: float):
@@ -163,18 +166,18 @@ class Player(Entity):
         )
 
     def shield_on(self):
-        if self.energy.get_value() < 300.:
+        if self.energy.get_value() < PLAYER_ULT_SHIELD_COST:
             raise NotEnoughEnergy('not enough energy for shield')
         if self.is_shield_on():
             raise ShieldRunning('shield already running')
         if self.shield_cooldown_timer.running():
             raise OnCooldown('shield on cooldown')
-        self.energy.change(-300.)
+        self.energy.change(-PLAYER_ULT_SHIELD_COST)
         self.shield_duration_timer.reset(with_max_time=5.)
         self.shield_cooldown_timer.reset()
 
     def inside_shield(self, pos: Vector2) -> bool:
-        return self.is_shield_on() and (pos - self.pos).magnitude_squared() < 100. ** 2
+        return self.is_shield_on() and (pos - self.pos).magnitude_squared() < PLAYER_ULT_SHIELD_SIZE ** 2
 
     def ultimate_ability(self):
         # TODO: implement different ultimates
