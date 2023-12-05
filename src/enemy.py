@@ -191,7 +191,7 @@ class FastEnemy(Enemy):
             enemy_type=EnemyType.FAST,
             player=player,
             color=Color('#ad2f52'),
-            speed=ENEMY_DEFAULT_SPEED * 1.6 + 100 * _player_level,
+            speed=ENEMY_DEFAULT_SPEED * 1.6 + 40. * _player_level,
             health=ENEMY_DEFAULT_MAX_HEALTH * 0.8 + 20. * (_player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
             reward=ENEMY_DEFAULT_REWARD * (1.4 + 0.1 * _player_level),
@@ -292,14 +292,14 @@ class BossEnemy(Enemy):
             enemy_type=EnemyType.BOSS,
             player=player,
             color=Color('#510e78'),
-            speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 40 * (self._player_level - 1),
+            speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 25 * (self._player_level - 1),
             health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 50. * self._player_level,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.12 * self._player_level),
             lifetime=math.inf,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
         )
-        self._spawn_oil_spills_cooldown = BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 1. * self._player_level
+        self._spawn_oil_spills_cooldown = max(BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 2. * self._player_level, 5.)
         self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
         DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 3, 5: 8}
         self._regen_rate = (BOSS_DEFAULT_REGEN_RATE * DIFF_MULT[self.difficulty] +
