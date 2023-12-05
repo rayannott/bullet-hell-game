@@ -191,7 +191,7 @@ class FastEnemy(Enemy):
             enemy_type=EnemyType.FAST,
             player=player,
             color=Color('#ad2f52'),
-            speed=ENEMY_DEFAULT_SPEED * (1.6 + 0.05 * _player_level),
+            speed=ENEMY_DEFAULT_SPEED * 1.6 + 100 * _player_level,
             health=ENEMY_DEFAULT_MAX_HEALTH * 0.8 + 20. * (_player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
             reward=ENEMY_DEFAULT_REWARD * (1.4 + 0.1 * _player_level),

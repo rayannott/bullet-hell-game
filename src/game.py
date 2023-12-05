@@ -14,7 +14,7 @@ from src.enums import EntityType, EnemyType, ProjectileType
 from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback
 from src.energy_orb import EnergyOrb
-from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined
+from src.exceptions import OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
@@ -202,7 +202,10 @@ class Game:
         except NotEnoughEnergy as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             print(e)
-
+        except ShieldRunning as e:
+            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
+            print(e)
+    
     def player_try_spawning_energy_orb(self):
         try: new_energy_orb = self.player.spawn_energy_orb()
         except NotEnoughEnergy as e:
