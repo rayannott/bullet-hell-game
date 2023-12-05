@@ -7,7 +7,7 @@ from src.enums import ArtifactType
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing
 from src.utils import Timer
 from config import (ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN,
-    ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST, MINE_COOLDOWN, MINE_COST
+    ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE
 )
 
 
@@ -80,11 +80,11 @@ class MineSpawn(Artifact):
         if self.player.energy.get_value() < MINE_COST:
             raise NotEnoughEnergy('not enough energy for a mine')
         self.player.energy.change(-MINE_COST)
-        vel: Vector2 = self.player.get_vel()
+        vel: Vector2 = self.player.get_vel() + Vector2(0.01, 0.01)
         vel.scale_to_length(20.)
         pos: Vector2 = self.player.get_pos()
-        self.player.entities_buffer.append(Mine(pos=pos-vel))
-        print(pos-vel)
+        self.player.entities_buffer.append(Mine(pos=pos-vel, 
+                                    damage=MINE_DEFAULT_DAMAGE + 10. * (self.player.level - 1)))
         self.cooldown_timer.reset()
 
 

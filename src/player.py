@@ -3,6 +3,8 @@ import random
 
 from pygame import Vector2
 from config.settings import Settings
+from front.sounds import play_sfx
+from src.artifacts import ArtifactsHandler, BulletShield, MineSpawn
 
 from src.energy_orb import EnergyOrb
 from src.entity import Entity
@@ -48,7 +50,8 @@ class Player(Entity):
             type=EntityType.PLAYER,
             size=PLAYER_SIZE,
             speed=PLAYER_DEFAULT_SPEED_RANGE[0],
-            render_trail=True
+            render_trail=True,
+            can_spawn_entities=True
         )
         self.level = 1
         self.settings = settings
@@ -65,7 +68,9 @@ class Player(Entity):
         self.damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
-        self.artifacts_handler = ... # TODO create class
+        self.artifacts_handler = ArtifactsHandler(player=self)
+        self.artifacts_handler.add_artifact(BulletShield(player=self))
+        self.artifacts_handler.add_artifact(MineSpawn(player=self))
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -75,19 +80,16 @@ class Player(Entity):
         self.speed_velocity_evolution()
         self.health_energy_evolution(time_delta)
         self.shoot_cooldown_timer.tick(time_delta)
+        self.artifacts_handler.update(time_delta)
         self.effect_flags.reset()
     
     def speed_velocity_evolution(self):
-        # this t is a parameter that controls the speed of the player based on the distance from the gravity point
-        # it is non-linear so that it's the player is not too slow when close to the gravity point
         towards_gravity_point = (self.gravity_point - self.pos)
         dist_to_gravity_point = towards_gravity_point.magnitude()
         t = (dist_to_gravity_point / 1500.) ** 0.8
         self.speed = self.speed_range[0] + (self.speed_range[1] - self.speed_range[0]) * t *\
             (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.)
 
-        # this code sets the velocity of the player towards the gravity point;
-        # the closer the player is to the gravity point, the slower it moves to avoid dancing
         if dist_to_gravity_point > self.size * 0.2:
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:
@@ -97,7 +99,6 @@ class Player(Entity):
     def health_energy_evolution(self, time_delta: float):
         e_percent = self.energy.get_percent_full()
         h_percent = self.health.get_percent_full()
-
         # moving contributes 20% of the energy decay 
         energy_decay_rate_velocity = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (self.vel.magnitude_squared() > 0.)
         # regenerating health contributes 80% of the energy decay
@@ -112,20 +113,18 @@ class Player(Entity):
             # then it contributes 160% of the energy decay if energy is low and 240% if high
             low_health_multiplier = 2. if e_percent < 0.6 else 3.
             energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * low_health_multiplier
-
         # decay energy and regenerate health faster when health is low
         if e_percent > 0.: self.health.change(
             self.regeneration_rate * low_health_multiplier * time_delta
         )
-
         self.energy.change(
             -(energy_decay_rate_velocity + energy_decay_rate_health) * time_delta
         )
-
         # other effects
         if self.effect_flags.OIL_SPILL:
-            self.health.change(-OIL_SPILL_DAMAGE_PER_SECOND * time_delta)
+            oil_spill_damage_dealt = -self.health.change(-OIL_SPILL_DAMAGE_PER_SECOND * time_delta)
             self.get_stats().OIL_SPILL_TIME_SPENT += time_delta
+            self.get_stats().DAMAGE_TAKEN += oil_spill_damage_dealt
 
     def is_on_cooldown(self) -> bool:
         return self.shoot_cooldown_timer.running()
@@ -164,7 +163,15 @@ class Player(Entity):
         )
 
     def ultimate_ability(self, artifact_type: ArtifactType):
-        # TODO: implement different ultimates
+        if artifact_type == ArtifactType.BULLET_SHIELD:
+            self.artifacts_handler.get_bullet_shield().turn_on()
+            self.get_stats().BULLET_SHIELDS_ACTIVATED += 1
+            play_sfx('bullet_shield_on')
+            return
+        if artifact_type == ArtifactType.MINE_SPAWN:
+            self.artifacts_handler.get_mine_spawn().spawn()
+            self.get_stats().MINES_PLANTED += 1
+            return
         raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
     
     def new_level(self):
