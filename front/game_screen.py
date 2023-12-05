@@ -19,6 +19,20 @@ from config.paths import SAVES_FILE, SAVES_DIR
 from config.settings import Settings
 
 
+class InGameShop(pygame_gui.elements.UIWindow):
+    def __init__(self, manager: pygame_gui.UIManager, surface: pygame.Surface, game: Game):
+        rect = pygame.Rect(0, 0, 400, 400)
+        self.surface = surface
+        self.game = game
+        top_right = surface.get_rect().topright
+        rect.topright = (top_right[0] - 50, top_right[1] + 50)
+        super().__init__(
+            rect=rect,
+            manager=manager,
+            window_display_title='In-game shop',
+        )
+
+
 class GameScreen(Screen):
     def __init__(self, surface: pygame.Surface, settings: Settings):
         super().__init__(surface)
@@ -49,6 +63,11 @@ class GameScreen(Screen):
                 print('--- debug ---')
                 print(self.game.player.get_stats())
                 print('-'*10)
+            elif event.key == pygame.K_q:
+                print('opened in-game shop')
+                self.game.toggle_pause()
+                self.ingame_shop = InGameShop(self.manager, self.surface, self.game)
+
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
