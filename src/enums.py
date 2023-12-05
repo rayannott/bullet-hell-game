@@ -33,3 +33,10 @@ class ProjectileType(Enum):
     NORMAL = auto()
     HOMING = auto()
     EXPLOSIVE = auto()
+
+
+class ArtifactType(Enum):
+    BULLET_SHIELD = auto()
+    DASH = auto()
+    BAIT = auto()
+    ROTATING_BULLETS = auto()
