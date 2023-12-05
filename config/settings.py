@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import json
-from typing import TypedDict
 
 from config.paths import SETTINGS_FILE
 
