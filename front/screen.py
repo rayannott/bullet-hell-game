@@ -4,14 +4,14 @@ import pygame
 import pygame_gui
 
 from front.sounds import play_sfx
-from config import QUIT_BUTTON_SIZE, FRAMERATE
+from config import QUIT_BUTTON_SIZE, FRAMERATE, BACKGROUND_COLOR_HEX
 
 
 class Screen(ABC):
     """Abstract class for all screens in the game."""
     def __init__(self,
             surface: pygame.Surface,
-            bg_color: str = '#080808'
+            bg_color: str = BACKGROUND_COLOR_HEX
         ):
         self.surface = surface
         self.window_size = self.surface.get_rect().size
