@@ -43,11 +43,7 @@ class RenderManager:
         for projectile in self.game.projectiles():
             self.draw_entity_basics(projectile)
         for enemy in self.game.enemies():
-            self.draw_entity_basics(enemy)
-            self.draw_circular_status_bar(enemy.get_pos(), enemy.get_health(),
-                enemy.get_size() * 1.5, 
-                color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
-            if self.debug: self.draw_enemy_health_debug(enemy)
+            self.draw_enemy(enemy)
         for energy_orb in self.game.energy_orbs():
             self.draw_entity_basics(energy_orb)
             self.draw_circular_status_bar(energy_orb.get_pos(), energy_orb._life_timer.get_slider(reverse=True),
@@ -85,6 +81,22 @@ class RenderManager:
                 width=2
             )
 
+    def draw_enemy(self, enemy: Enemy):
+        self.draw_entity_basics(enemy)
+        self.draw_circular_status_bar(enemy.get_pos(), enemy.get_health(),
+            enemy.get_size() * 1.5, 
+            color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
+        # if less than 1.5 sec left on the cooldown timer, indicate shooting intent
+        if enemy.cooldown.get_time_left() < 1.5:
+            pygame.draw.circle(
+                self.surface,
+                Color('white'),
+                enemy.get_pos(),
+                enemy.get_size() * enemy.cooldown.get_time_left() / 1.5,
+                width=1
+            )
+        if self.debug: self.draw_enemy_health_debug(enemy)
+
     def draw_enemy_health_debug(self, enemy: Enemy):
         health_text = f'{enemy.get_health()}'
         label = Label(health_text, self.surface, 
@@ -113,14 +125,14 @@ class RenderManager:
         player = self.game.player
         self.draw_entity_basics(player)
         self.draw_circular_status_bar(player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
-        if player.get_energy().get_value() > PLAYER_SHOT_COST:
-            pygame.draw.circle(
-                self.surface,
-                Color('yellow'),
-                player.get_pos(),
-                player.get_size() + 4,
-                width=2
-            )
+        # if player.get_energy().get_value() > PLAYER_SHOT_COST:
+        #     pygame.draw.circle(
+        #         self.surface,
+        #         Color('yellow'),
+        #         player.get_pos(),
+        #         player.get_size() + 4,
+        #         width=2
+        #     )
         # bullet shield:
         if (player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD) and 
             player.artifacts_handler.get_bullet_shield().is_on()):
