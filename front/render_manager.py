@@ -33,7 +33,7 @@ class RenderManager:
         self.five_sec_timer = Timer(5.)
         self.boss_soon_slider = Slider(1., 0.)
         top_right = Vector2(*self.surface.get_rect().topright)
-        self.debug_textbox = TextBox(['']*6, top_right - Vector2(310., -BM), self.surface)
+        self.debug_textbox = TextBox(['']*5, top_right - Vector2(310., -BM), self.surface)
     
     def render(self):
         for oil_spill in self.game.oil_spills():
@@ -61,9 +61,9 @@ class RenderManager:
                 80., color=LIGHTER_MAGENTA, draw_full=True, width=8)
             
         if self.debug:
-            ROWS = ['fps', 'entities drawn', 'speed', 'avg damage', 'accuracy', 'orbs collected']
+            ROWS = ['fps', 'entities drawn', 'speed', 'accuracy', 'orbs collected']
             VALUES = [f'{self.game.get_last_fps():.1f}', f'{self.entities_drawn}',
-                f'{self.game.player.speed:.1f}', f'{self.game.player.damage:.0f}',
+                f'{self.game.player.speed:.1f}',
                 f'{self.game.player.stats.get_accuracy():.0%}', f'{self.game.player.stats.ENERGY_ORBS_COLLECTED}']
             self.debug_textbox.set_lines(
                 [f'[{row:<16} {value:>5}]' for row, value in zip(ROWS, VALUES)]
@@ -125,14 +125,6 @@ class RenderManager:
         player = self.game.player
         self.draw_entity_basics(player)
         self.draw_circular_status_bar(player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
-        # if player.get_energy().get_value() > PLAYER_SHOT_COST:
-        #     pygame.draw.circle(
-        #         self.surface,
-        #         Color('yellow'),
-        #         player.get_pos(),
-        #         player.get_size() + 4,
-        #         width=2
-        #     )
         # bullet shield:
         if (player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD) and 
             player.artifacts_handler.get_bullet_shield().is_on()):

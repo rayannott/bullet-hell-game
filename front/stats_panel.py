@@ -31,7 +31,7 @@ class StatsPanel:
             parent_element=self.panel
         )
         self.stats_textbox = TextBox(
-            text_lines=[''] * 3,
+            text_lines=[''] * 4,
             position=Vector2(BM, SM + self.energy_bar.relative_rect.bottomleft[1] + 2 * BM),
             surface=surface
         )
@@ -44,5 +44,6 @@ class StatsPanel:
                 f'{"difficulty":<16} {self.game.settings.difficulty}',
                 f'{"level":<16} {self.game.level}',
                 f'{"time":<16} {self.game.time:.2f}',
+                f'{"damage":<16} {player.damage:.0f}',
             ])
         self.stats_textbox.update()
