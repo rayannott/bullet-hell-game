@@ -53,6 +53,7 @@ class Enemy(Entity):
             damage: float = ENEMY_DEFAULT_DAMAGE,
             damage_spread: float = ENEMY_DEFAULT_DAMAGE_SPREAD,
             spread: float = ENEMY_DEFAULT_SHOOTING_SPREAD,
+            turn_coefficient: float = 1.,
         ):
         super().__init__(
             pos=pos,
@@ -62,6 +63,7 @@ class Enemy(Entity):
             color=color,
             can_spawn_entities=True,
             homing_target=player,
+            turn_coefficient=turn_coefficient,
         )
         self.homing_target: Player # to avoid typing errors (this is always a player)
         self.health = Slider(health)
@@ -126,6 +128,7 @@ class Enemy(Entity):
     
     def shoot_homing(self, **kwargs):
         speed_mult = kwargs.get('speed_mult', 1.)
+        player_level = self.homing_target.get_level()
         direction = self.get_shoot_direction()
         self.entities_buffer.append(
             HomingProjectile(
@@ -134,7 +137,7 @@ class Enemy(Entity):
                 damage=self.damage + random.uniform(-self.damage_spread, self.damage_spread),
                 speed=(self.speed + PROJECTILE_DEFAULT_SPEED * 0.8) * speed_mult,
                 homing_target=self.homing_target,
-                turn_coefficient=0.15,
+                turn_coefficient=0.2 + 0.02 * player_level,
             )
         )
 
@@ -198,6 +201,7 @@ class FastEnemy(Enemy):
             reward=ENEMY_DEFAULT_REWARD * (1.4 + 0.1 * _player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 6. * (_player_level - 1),
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.15,
+            turn_coefficient=0.35,
         )
         self.shoots_player = False
 
@@ -260,15 +264,16 @@ class ArtilleryEnemy(Enemy):
             color=Color('#005c22'),
             speed=10.,
             health=ENEMY_DEFAULT_MAX_HEALTH * 2. + 30. * (_player_level - 1),
-            shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.4,
+            shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,
             reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * _player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * _player_level,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.3,
             damage=ENEMY_DEFAULT_DAMAGE * 1.35,
         )
+        self.cooldown.set_percent_full(0.2)
     
     def shoot(self):
-        self.shoot_homing(speed_mult=1.2)
+        self.shoot_homing(speed_mult=1.4)
     
     def on_natural_death(self):
         super().on_natural_death()
