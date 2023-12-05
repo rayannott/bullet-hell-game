@@ -93,7 +93,7 @@ class Enemy(Entity):
         self.damage_on_collision *= difficulty_mult
     
     def get_shoot_direction(self) -> Vector2:
-        rot_angle = random.uniform(-self.spread, self.spread) if self.spread else 0.
+        rot_angle = random.uniform(-self.spread, self.spread) * 180./math.pi if self.spread else 0.
         return self.vel.rotate(rot_angle).normalize()
 
     def shoot(self):
@@ -241,7 +241,7 @@ class TankEnemy(Enemy):
     
     def on_natural_death(self):
         super().on_natural_death()
-        for _ in range(random.randint(1, 3)):
+        for _ in range(random.randint(1, 4)):
             self.entities_buffer.append(
                 BasicEnemy(
                     pos=self.pos + random_unit_vector() * self.size * 1.5,
@@ -277,8 +277,8 @@ class ArtilleryEnemy(Enemy):
     
     def on_natural_death(self):
         super().on_natural_death()
-        # spawn some homing projectiles
-        for _ in range(random.randint(1, 3)):
+        self.spread = math.pi / 2.
+        for _ in range(random.randint(1, 5)):
             self.shoot_homing(speed_mult=1.4)
 
 
@@ -304,6 +304,7 @@ class BossEnemy(Enemy):
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.15 * self._player_level),
             lifetime=math.inf,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
+            turn_coefficient=0.3 + 0.06 * self._player_level,
         )
         self._spawn_oil_spills_cooldown = max(BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 2. * self._player_level, 5.)
         self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
