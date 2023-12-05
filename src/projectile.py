@@ -24,6 +24,7 @@ class Projectile(Entity):
             speed: float = PROJECTILE_DEFAULT_SPEED,
             lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
             homing_target: Entity | None = None,
+            turn_coefficient: float = 1.
         ):
         super().__init__(
             pos=pos,
@@ -32,6 +33,7 @@ class Projectile(Entity):
             speed=speed,
             vel=vel,
             homing_target=homing_target,
+            turn_coefficient=turn_coefficient,
         )
         self.projectile_type = projectile_type
         self.damage = damage
@@ -104,6 +106,7 @@ class HomingProjectile(Projectile):
             speed: float = PROJECTILE_DEFAULT_SPEED,
             lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
             homing_target: Entity | None = None,
+            turn_coefficient: float = 1.
         ):
         super().__init__(
             pos=pos,
@@ -113,6 +116,7 @@ class HomingProjectile(Projectile):
             speed=speed,
             lifetime=lifetime,
             homing_target=homing_target,
+            turn_coefficient=turn_coefficient,
         )
         self.homing_target = homing_target
         self.render_trail = True

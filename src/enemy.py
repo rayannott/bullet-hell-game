@@ -134,6 +134,7 @@ class Enemy(Entity):
                 damage=self.damage + random.uniform(-self.damage_spread, self.damage_spread),
                 speed=(self.speed + PROJECTILE_DEFAULT_SPEED * 0.8) * speed_mult,
                 homing_target=self.homing_target,
+                turn_coefficient=0.15,
             )
         )
 
