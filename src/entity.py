@@ -7,10 +7,11 @@ from typing import Optional
 import pygame
 
 from pygame import Vector2, Color
+from front.utils import ColorGradient
 
 from src.enums import EntityType
-from config import TRAIL_MAX_LENGTH, MINE_SIZE, MINE_LIFETIME, MINE_DEFAULT_DAMAGE
 from src.utils import Timer
+from config import TRAIL_MAX_LENGTH, MINE_SIZE, MINE_LIFETIME, MINE_DEFAULT_DAMAGE, BACKGROUND_COLOR_HEX, MINE_AOE_EFFECT_SIZE
 
 
 class Entity(ABC):
@@ -72,11 +73,12 @@ class Entity(ABC):
 
     def get_color(self) -> pygame.Color: return self.color
 
+    def set_color(self, color: pygame.Color): self.color = color
+
     def is_alive(self) -> bool: return self._is_alive
 
     def kill(self):
         self._is_alive = False
-        print(f'Killed {self}')
 
     def __str__(self) -> str:
         return f'{self.type.name}(pos={self.pos})'
@@ -112,36 +114,60 @@ class Mine(Entity):
     def __init__(self,
         pos: Vector2,
         damage: float = MINE_DEFAULT_DAMAGE,
+        aoe_damage: float = MINE_DEFAULT_DAMAGE // 2,
     ):
         super().__init__(
             pos=pos,
             type=EntityType.MINE,
             size=MINE_SIZE,
-            color=Color('red'),
+            color=Color('#851828'),
+            can_spawn_entities=True
         )
         self.damage = damage
+        self.aoe_damage = aoe_damage
         self.lifetime_timer = Timer(max_time=MINE_LIFETIME)
 
     def update(self, time_delta: float):
         self.lifetime_timer.tick(time_delta)
         if not self.lifetime_timer.running(): self.kill()
         return super().update(time_delta)
+    
+    def kill(self):
+        self.entities_buffer.append(
+            AOEEffect(
+                pos=self.pos,
+                size=MINE_AOE_EFFECT_SIZE,
+                damage=self.aoe_damage,
+                color=self.color,
+                animation_lingering_time=0.8
+            )
+        )
+        return super().kill()
 
 
-class Crater(Entity):
+class AOEEffect(Entity):
     def __init__(self,
         pos: Vector2,
         size: float,
+        damage: float,
+        color: Color = Color('black'),
+        animation_lingering_time: float = 0.5,
     ):
         super().__init__(
             pos=pos,
             type=EntityType.CRATER,
             size=size,
-            color=Color('black'),
+            color=color,
         )
-        self.lifetime_timer = Timer(max_time=5.)
+        self.color_gradient = ColorGradient(color, Color(BACKGROUND_COLOR_HEX))
+        self.damage = damage
+        self.lifetime_timer = Timer(max_time=animation_lingering_time)
+
+        self.applied_effect_player = False
+        self.applied_effect_enemies = False
 
     def update(self, time_delta: float):
         self.lifetime_timer.tick(time_delta)
+        self.set_color(self.color_gradient(self.lifetime_timer.get_percent_full()))
         if not self.lifetime_timer.running(): self.kill()
-        return super().update(time_delta) 
+        return super().update(time_delta)
