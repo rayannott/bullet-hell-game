@@ -41,6 +41,7 @@ class GameScreen(Screen):
         self.setup_game(surface)
     
     def setup_game(self, surface: pygame.Surface):
+        play_sfx('start_game')
         self.screen_rectangle = self.surface.get_rect()
         self.game = Game(self.screen_rectangle, self.settings)
         self.stats_panel = StatsPanel(surface, self.manager, self.game)

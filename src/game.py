@@ -288,7 +288,7 @@ class Game:
                 projectile.kill()
                 self.feedback_buffer.append(Feedback(f'blocked', 1., color=pygame.Color('yellow')))
                 self.player.get_stats().BULLET_SHIELD_BULLETS_BLOCKED += 1
-                # play_sfx('bullet_blocked') # TODO: add this sound effect
+                play_sfx('shield_blocked')
                 continue
             if not projectile.intersects(self.player): continue
             self.player_get_damage(projectile.damage)
@@ -316,7 +316,7 @@ class Game:
             mine.kill()
             self.feedback_buffer.append(Feedback('mine!', 3.5, color=pygame.Color('pink')))
             self.reason_of_death = f'stepped on a mine'
-            # play_sfx('explosion') # TODO: add this sound effect
+            play_sfx('explosion')
         for aoe_effect in self.aoe_effects():
             if not aoe_effect.intersects(self.player): continue
             if aoe_effect.applied_effect_player: continue
@@ -355,6 +355,7 @@ class Game:
             for enemy in self.enemies():
                 if not mine.intersects(enemy): continue
                 self.deal_damage_to_enemy(enemy, mine.damage)
+                play_sfx('explosion')
                 mine.kill()
         
         # enemy-aoe_effect collisions
