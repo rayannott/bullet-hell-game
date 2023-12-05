@@ -151,4 +151,5 @@ class Notification(Label):
         self.rect.y -= 3. * time_delta # type: ignore
         if not self.lifetime_timer.running():
             self._is_alive = False
-        return super().update()
+        if self._is_alive:
+            super().update()
