@@ -3,6 +3,7 @@ import math
 import pygame
 from pygame import Color, Vector2, freetype
 from src.enemy import Enemy
+from src.enums import ArtifactType, EnemyType
 
 from src.game import Game
 from src.entity import Entity
@@ -36,12 +37,15 @@ class RenderManager:
     def render(self):
         for oil_spill in self.game.oil_spills():
             self.draw_entity_basics(oil_spill)
+        for aoe_effect in self.game.aoe_effects():
+            self.draw_entity_basics(aoe_effect)
         for projectile in self.game.projectiles():
             self.draw_entity_basics(projectile)
         for enemy in self.game.enemies():
             self.draw_entity_basics(enemy)
             self.draw_circular_status_bar(enemy.get_pos(), enemy.get_health(),
-                enemy.get_size() * 1.5, color=NICER_GREEN, draw_full=True, width=2)
+                enemy.get_size() * 1.5, 
+                color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
             if self.debug: self.draw_enemy_health_debug(enemy)
         for energy_orb in self.game.energy_orbs():
             self.draw_entity_basics(energy_orb)
@@ -49,6 +53,8 @@ class RenderManager:
                 energy_orb.get_size() * 2., color=MAGENTA, draw_full=True, width=1)
         for corpse in self.game.corpses():
             self.draw_entity_basics(corpse)
+        for mine in self.game.mines():
+            self.draw_mine(mine)
         self.draw_player()
 
         # "boss spawns in 5 seconds" indicator
@@ -114,17 +120,18 @@ class RenderManager:
                 player.get_size() + 4,
                 width=2
             )
-        # TODO: fix using artifact handler
-        # if player.is_shield_on():
-        #     pygame.draw.circle(
-        #         self.surface,
-        #         Color('yellow'),
-        #         player.get_pos(),
-        #         ARTIFACT_SHIELD_SIZE,
-        #         width=2
-        #     )
-        #     self.draw_circular_status_bar(player.get_pos(), 
-        #         player.shield_duration_timer.get_slider(reverse=True), ARTIFACT_SHIELD_SIZE + 5., draw_full=True)
+        # bullet shield:
+        if (player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD) and 
+            player.artifacts_handler.get_bullet_shield().is_on()):
+            pygame.draw.circle(
+                self.surface,
+                Color('yellow'),
+                player.get_pos(),
+                ARTIFACT_SHIELD_SIZE,
+                width=2
+            )
+            self.draw_circular_status_bar(player.get_pos(), 
+                player.artifacts_handler.get_bullet_shield().duration_timer.get_slider(reverse=True), ARTIFACT_SHIELD_SIZE + 5., draw_full=True)
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)
@@ -144,6 +151,17 @@ class RenderManager:
         if entity.render_trail:
             self.draw_entity_trail(entity)
         if self.debug: self.draw_entity_debug(entity)
+
+    def draw_mine(self, mine: Entity):
+        """Draws two crossing ellipses"""
+        ms = mine.get_size()
+        r1 = pygame.Rect(0, 0, ms, 2*ms)
+        r2 = pygame.Rect(0, 0, 2*ms, ms)
+        r1.center = mine.get_pos()
+        r2.center = mine.get_pos()
+        pygame.draw.ellipse(self.surface, mine.get_color(), r1, width=2)
+        pygame.draw.ellipse(self.surface, mine.get_color(), r2, width=2)
+        self.entities_drawn += 1
 
     def set_debug(self, debug: bool):
         self.debug = debug
