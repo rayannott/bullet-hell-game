@@ -26,6 +26,7 @@ class RenderManager:
         self.surface = surface
         self.debug = debug
         self.game = game
+        self.screen_center = Vector2(*surface.get_rect().center)
         debug_rel_rect = pygame.Rect(0, 0, *GAME_DEBUG_RECT_SIZE)
         debug_rel_rect.topright = surface.get_rect().topright
         self.entities_drawn = 0
@@ -60,8 +61,8 @@ class RenderManager:
         # "boss spawns in 5 seconds" indicator
         if self.game.one_wave_timer.get_value() > WAVE_DURATION - 5.:
             self.boss_soon_slider.set_percent_full(1. - (self.game.one_wave_timer.get_value() - (WAVE_DURATION - 5.)) / 5.)
-            self.draw_circular_status_bar(self.game.player.get_gravity_point(), self.boss_soon_slider,
-                self.game.player.get_size() * 4., color=LIGHTER_MAGENTA, draw_full=True, width=6)
+            self.draw_circular_status_bar(self.screen_center, self.boss_soon_slider,
+                80., color=LIGHTER_MAGENTA, draw_full=True, width=8)
             
         if self.debug:
             ROWS = ['fps', 'entities drawn', 'speed', 'avg damage', 'accuracy', 'orbs collected']

@@ -130,7 +130,12 @@ class Game:
         )
 
     def spawn_enemy(self, enemy_type: EnemyType):
-        position = self.get_random_screen_position_for_entity(entity_size=ENEMY_SIZE_MAP[enemy_type])
+        # TODO: rewrite this so that the enemies are spawned behind the player
+        # except the boss -- it should be spawned in the center of the screen
+        if enemy_type == EnemyType.BOSS:
+            position = self.screen_rectangle.center
+        else:
+            position = self.get_random_screen_position_for_entity(entity_size=ENEMY_SIZE_MAP[enemy_type])
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
                 pos=position,
@@ -423,6 +428,7 @@ class Game:
         Get a random position inside the screen.
         Try a position and return it if it doesn't collide with any other entity.
         """
+        # TODO: rewrite this
         while True:
             pos_candidate = self.get_random_screen_position()
             dummy = DummyEntity(pos_candidate, entity_size)
