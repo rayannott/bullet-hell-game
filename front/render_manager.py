@@ -18,6 +18,7 @@ font = freetype.SysFont('Arial', 20)
 NICER_GREEN = Color('#3ce870')
 MAGENTA = Color(NICER_MAGENTA_HEX)
 LIGHTER_MAGENTA = Color('#a22ac9')
+YELLOW = Color('yellow')
 
 
 class RenderManager:
@@ -124,6 +125,14 @@ class RenderManager:
     def draw_player(self):
         player = self.game.player
         self.draw_entity_basics(player)
+        if player.energy.get_value() > PLAYER_SHOT_COST:
+            pygame.draw.circle(
+                self.surface,
+                YELLOW,
+                player.get_pos(),
+                player.get_size(),
+                width=6
+            )
         self.draw_circular_status_bar(player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
         # bullet shield:
         if (player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD) and 
