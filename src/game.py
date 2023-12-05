@@ -135,7 +135,7 @@ class Game:
         if enemy_type == EnemyType.BOSS:
             position = self.screen_rectangle.center
         else:
-            position = self.get_random_screen_position_for_entity(entity_size=ENEMY_SIZE_MAP[enemy_type])
+            position = self.get_random_screen_position_for_enemy(enemy_size=ENEMY_SIZE_MAP[enemy_type])
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
                 pos=position,
@@ -432,14 +432,21 @@ class Game:
         while True:
             pos_candidate = self.get_random_screen_position()
             dummy = DummyEntity(pos_candidate, entity_size)
-            if (pos_candidate - self.player.get_pos()).magnitude_squared() > 400.**2 and\
-                not any(entity.intersects(dummy) for entity in self.all_entities_iter()):
+            if ((pos_candidate - self.player.get_pos()).magnitude_squared() > 400.**2 and
+                not any(entity.intersects(dummy) for entity in self.all_entities_iter())):
                     return pos_candidate
     
+    def get_random_screen_position_for_enemy(self, enemy_size: float) -> Vector2:
+        """Give a position behind the player.
+        If it is outside of the screen, return a random position inside the screen."""
+        pos = self.player.get_pos() + Vector2(0., -200.)
+        if self.screen_rectangle.collidepoint(pos): return pos
+        return self.get_random_screen_position_for_entity(enemy_size)
 
     def get_random_screen_position(self) -> Vector2:
-        x = random.uniform(self.screen_rectangle.left + BM * 10, self.screen_rectangle.right - BM * 10)
-        y = random.uniform(self.screen_rectangle.top + BM * 10, self.screen_rectangle.bottom - BM * 10)
+        MARGIN = BM * 15
+        x = random.uniform(self.screen_rectangle.left + MARGIN, self.screen_rectangle.right - MARGIN)
+        y = random.uniform(self.screen_rectangle.top + MARGIN, self.screen_rectangle.bottom - MARGIN)
         return Vector2(x, y)
     
     def set_last_fps(self, fps: float):
