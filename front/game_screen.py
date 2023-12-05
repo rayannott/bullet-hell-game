@@ -5,6 +5,7 @@ from typing import Literal
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
+from src.enums import ArtifactType
 
 from src.utils import Feedback
 from src.game import Game
@@ -81,11 +82,13 @@ class GameScreen(Screen):
             if event.button == 1:
                 self.game.player_try_shooting()
             elif event.button == 3:
-                # TODO: pressing opens a wheel menu with options
-                self.game.player_try_ultimate()
+                # TODO: ??
+                pass
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self.game.player_try_spawning_energy_orb()
+            elif event.key == pygame.K_s:
+                self.game.player_try_ultimate(artifact_type=ArtifactType.BULLET_SHIELD)
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
