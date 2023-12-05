@@ -157,7 +157,7 @@ class ArtifactsHandler:
             raise ArtifactMissing('[!] bait spawn is missing')
         return self.bait_spawn
     
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         active_artivacts = ' | '.join(map(str, self.iterate_active()))
         return f'ArtifactsHandler({active_artivacts}; {self.inactive_artifacts})'
     
