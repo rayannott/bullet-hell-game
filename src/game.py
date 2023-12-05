@@ -101,6 +101,12 @@ class Game:
         self.player.new_level()
         # the higher the difficulty, the faster the spawn cooldown shrinks
         self.current_spawn_enemy_cooldown *= (1. - 0.02 * self.settings.difficulty)
+
+        if self.level == 5 and not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES:
+            print('new achievement: reach level 5 without corpses')
+            self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES = True
+            self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=pygame.Color('blue')))
+
         return True
 
     def kill_projectiles(self):
@@ -324,7 +330,7 @@ class Game:
                     if is_ricochet and not self.player.get_achievements().KILL_BOSS_RICOCHET:
                         print('new achievement: killed boss with ricochet')
                         self.player.get_achievements().KILL_BOSS_RICOCHET = True
-                        self.feedback_buffer.append(Feedback('killed boss with ricochet!', 3., color=pygame.Color('blue')))
+                        self.feedback_buffer.append(Feedback('[A] killed boss with ricochet!', 3., color=pygame.Color('blue')))
                 print(f'enemy killed: {enemy.enemy_type.name}')
                 self.feedback_buffer.append(Feedback(f'+{reward:.0f}e', 2., color=pygame.Color('magenta')))
                 play_sfx('enemy_killed')

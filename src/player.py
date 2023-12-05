@@ -38,6 +38,7 @@ class Achievements:
     Achievement flags.
     """
     KILL_BOSS_RICOCHET: bool = False
+    REACH_LEVEL_5_WITHOUT_CORPSES: bool = False
 
 
 class Player(Entity):
