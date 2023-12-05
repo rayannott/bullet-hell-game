@@ -17,7 +17,7 @@ from src.energy_orb import EnergyOrb
 from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 
-from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE,
+from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, NICER_MAGENTA_HEX,
     WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from front.sounds import play_sfx
 
@@ -264,13 +264,11 @@ class Game:
             if not eo.intersects(self.player): continue
             energy_collected: float = eo.energy_left()
             self.player.energy.change(energy_collected)
-            if not eo.spawned_by_player:
-                # count stats only for env energy orbs
-                self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
-                self.player.get_stats().ENERGY_COLLECTED += energy_collected
-                play_sfx('energy_collected')
+            self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
+            self.player.get_stats().ENERGY_COLLECTED += energy_collected
+            play_sfx('energy_collected')
             eo.kill()
-            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color('magenta')))
+            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))
         for oil_spill in self.oil_spills():
             if not oil_spill.intersects(self.player): continue
             self.player.effect_flags.OIL_SPILL = True
@@ -376,7 +374,7 @@ class Game:
             # killed the boss
             self.new_level()
             self.kill_projectiles()
-        self.feedback_buffer.append(Feedback(f'+{reward:.0f}e', 2., color=pygame.Color('magenta')))
+        self.feedback_buffer.append(Feedback(f'+{reward:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
         play_sfx('enemy_killed')
     
     def player_get_damage(self, damage: float) -> float:

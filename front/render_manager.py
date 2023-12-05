@@ -9,14 +9,14 @@ from src.game import Game
 from src.entity import Entity
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
-from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE
+from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE, NICER_MAGENTA_HEX
 
 freetype.init()
 font = freetype.SysFont('Arial', 20)
 
 
 NICER_GREEN = Color('#3ce870')
-MAGENTA = Color('magenta')
+MAGENTA = Color(NICER_MAGENTA_HEX)
 LIGHTER_MAGENTA = Color('#a22ac9')
 
 

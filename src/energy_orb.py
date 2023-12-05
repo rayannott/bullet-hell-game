@@ -2,7 +2,7 @@ from pygame import Color, Vector2
 
 from src.entity import Entity, EntityType
 from src.utils import Timer
-from config import ENERGY_ORB_SIZE
+from config import ENERGY_ORB_SIZE, NICER_MAGENTA_HEX
 
 
 class EnergyOrb(Entity): # TODO: change this to EntityLifetime
@@ -13,11 +13,9 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
             pos: Vector2,
             energy: float,
             lifetime: float,
-            spawned_by_player: bool = False,
         ) -> None:
-        self.spawned_by_player = spawned_by_player
-        size = ENERGY_ORB_SIZE * 2 if spawned_by_player else ENERGY_ORB_SIZE
-        color = Color('#e880df') if spawned_by_player else Color('#f014a0')
+        size = ENERGY_ORB_SIZE
+        color = Color(NICER_MAGENTA_HEX)
         super().__init__(
             pos=pos,
             type=EntityType.ENERGY_ORB,
