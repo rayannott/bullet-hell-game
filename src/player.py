@@ -6,8 +6,8 @@ from config.settings import Settings
 
 from src.energy_orb import EnergyOrb
 from src.entity import Entity
-from src.enums import EntityType, ProjectileType
-from src.exceptions import NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ShieldRunning
+from src.enums import ArtifactType, EntityType, ProjectileType
+from src.exceptions import ArtifactMissing, NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ShieldRunning
 from src.projectile import ExplosiveProjectile, Projectile
 from src.utils import Stats, Slider, Timer
 
@@ -16,8 +16,7 @@ from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED
     PLAYER_SPAWN_ENERGY_ORB_COST, PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST,
-    PLAYER_ULT_SHIELD_SIZE, PLAYER_ULT_SHIELD_COOLDOWN, PLAYER_ULT_SHIELD_DURATION, PLAYER_ULT_SHIELD_COST,
-    PLAYER_ULT_SHIELD_SIZE, 
+    ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN, ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST,
 )
 
 
@@ -39,6 +38,7 @@ class Achievements:
     """
     KILL_BOSS_RICOCHET: bool = False
     REACH_LEVEL_5_WITHOUT_CORPSES: bool = False
+    # TODO: add achievements handler
 
 
 class Player(Entity):
@@ -65,22 +65,24 @@ class Player(Entity):
         self.damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
-
-        self.shield_duration_timer = Timer(max_time=PLAYER_ULT_SHIELD_DURATION)
-        self.shield_duration_timer.turn_off()
-        self.shield_cooldown_timer = Timer(max_time=PLAYER_ULT_SHIELD_COOLDOWN)
-        self.shield_cooldown_timer.set_percent_full(0.8)
+        self.artifacts_handler = ... # TODO create class
 
     def update(self, time_delta: float):
         super().update(time_delta)
         if not self._is_alive: return
         if not self.health.is_alive(): self.kill()
 
+        self.speed_velocity_evolution()
+        self.health_energy_evolution(time_delta)
+        self.shoot_cooldown_timer.tick(time_delta)
+        self.effect_flags.reset()
+    
+    def speed_velocity_evolution(self):
         # this t is a parameter that controls the speed of the player based on the distance from the gravity point
         # it is non-linear so that it's the player is not too slow when close to the gravity point
         towards_gravity_point = (self.gravity_point - self.pos)
         dist_to_gravity_point = towards_gravity_point.magnitude()
-        t = (dist_to_gravity_point / 1500.) ** 0.75
+        t = (dist_to_gravity_point / 1500.) ** 0.8
         self.speed = self.speed_range[0] + (self.speed_range[1] - self.speed_range[0]) * t *\
             (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.)
 
@@ -91,10 +93,6 @@ class Player(Entity):
         else:
             self.vel = Vector2()
             self.speed = 0.
-        self.health_energy_evolution(time_delta)
-        self.shield_duration_timer.tick(time_delta)
-        self.shield_cooldown_timer.tick(time_delta)
-        self.effect_flags.reset()
 
     def health_energy_evolution(self, time_delta: float):
         e_percent = self.energy.get_percent_full()
@@ -128,7 +126,6 @@ class Player(Entity):
         if self.effect_flags.OIL_SPILL:
             self.health.change(-OIL_SPILL_DAMAGE_PER_SECOND * time_delta)
             self.get_stats().OIL_SPILL_TIME_SPENT += time_delta
-        self.shoot_cooldown_timer.tick(time_delta)
 
     def is_on_cooldown(self) -> bool:
         return self.shoot_cooldown_timer.running()
@@ -166,23 +163,9 @@ class Player(Entity):
             spawned_by_player=True
         )
 
-    def shield_on(self):
-        if self.energy.get_value() < PLAYER_ULT_SHIELD_COST:
-            raise NotEnoughEnergy('not enough energy for shield')
-        if self.is_shield_on():
-            raise ShieldRunning('shield already running')
-        if self.shield_cooldown_timer.running():
-            raise OnCooldown('shield on cooldown')
-        self.energy.change(-PLAYER_ULT_SHIELD_COST)
-        self.shield_duration_timer.reset(with_max_time=5.)
-        self.shield_cooldown_timer.reset()
-
-    def inside_shield(self, pos: Vector2) -> bool:
-        return self.is_shield_on() and (pos - self.pos).magnitude_squared() < PLAYER_ULT_SHIELD_SIZE ** 2
-
-    def ultimate_ability(self):
+    def ultimate_ability(self, artifact_type: ArtifactType):
         # TODO: implement different ultimates
-        self.shield_on()
+        raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
     
     def new_level(self):
         self.level += 1
@@ -211,8 +194,6 @@ class Player(Entity):
     def get_level(self) -> int: return self.level
 
     def get_gravity_point(self) -> Vector2: return self.gravity_point
-
-    def is_shield_on(self) -> bool: return self.shield_duration_timer.running()
 
     def __repr__(self) -> str:
         def pretty_vector2(v: Vector2) -> str:
