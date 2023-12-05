@@ -85,7 +85,7 @@ class GameScreen(Screen):
                 pass
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                self.game.player_try_spawning_energy_orb()
+                self.game.player_try_ultimate(artifact_type=ArtifactType.MINE_SPAWN)
             elif event.key == pygame.K_s:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.BULLET_SHIELD)
     
