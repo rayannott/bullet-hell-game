@@ -65,6 +65,7 @@ class Player(Entity):
         self.shield_duration_timer = Timer(max_time=5.)
         self.shield_duration_timer.turn_off()
         self.shield_cooldown_timer = Timer(max_time=20.)
+        self.shield_cooldown_timer.set_percent_full(0.8)
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -171,6 +172,9 @@ class Player(Entity):
         self.energy.change(-300.)
         self.shield_duration_timer.reset(with_max_time=5.)
         self.shield_cooldown_timer.reset()
+
+    def inside_shield(self, pos: Vector2) -> bool:
+        return self.is_shield_on() and (pos - self.pos).magnitude_squared() < 100. ** 2
 
     def ultimate_ability(self):
         # TODO: implement different ultimates

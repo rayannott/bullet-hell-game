@@ -262,6 +262,10 @@ class Game:
             self.reason_of_death = 'slipped on oil to death'
             play_sfx('in_oil_spill')
         for projectile in self.projectiles():
+            if projectile.projectile_type != ProjectileType.PLAYER_BULLET and self.player.inside_shield(projectile.get_pos()):
+                projectile.kill()
+                self.feedback_buffer.append(Feedback(f'blocked', 1., color=pygame.Color('yellow')))
+                continue
             if not projectile.intersects(self.player): continue
             damage_taken_actual = -self.player.health.change(-projectile.damage)
             self.player.get_stats().BULLETS_CAUGHT += 1
