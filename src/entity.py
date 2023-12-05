@@ -9,7 +9,8 @@ import pygame
 from pygame import Vector2, Color
 
 from src.enums import EntityType
-from config import TRAIL_MAX_LENGTH
+from config import TRAIL_MAX_LENGTH, MINE_SIZE, MINE_LIFETIME, MINE_DEFAULT_DAMAGE
+from src.utils import Timer
 
 
 class Entity(ABC):
@@ -75,7 +76,6 @@ class Entity(ABC):
 
     def kill(self):
         self._is_alive = False
-        # logging.debug(f'Killed {self}')
         print(f'Killed {self}')
 
     def __str__(self) -> str:
@@ -106,3 +106,42 @@ class Corpse(Entity):
         self._damage_on_collision = 70.
 
     def update(self, time_delta: float): return super().update(time_delta)
+
+
+class Mine(Entity):
+    def __init__(self,
+        pos: Vector2,
+        damage: float = MINE_DEFAULT_DAMAGE,
+    ):
+        super().__init__(
+            pos=pos,
+            type=EntityType.MINE,
+            size=MINE_SIZE,
+            color=Color('red'),
+        )
+        self.damage = damage
+        self.lifetime_timer = Timer(max_time=MINE_LIFETIME)
+
+    def update(self, time_delta: float):
+        self.lifetime_timer.tick(time_delta)
+        if not self.lifetime_timer.running(): self.kill()
+        return super().update(time_delta)
+
+
+class Crater(Entity):
+    def __init__(self,
+        pos: Vector2,
+        size: float,
+    ):
+        super().__init__(
+            pos=pos,
+            type=EntityType.CRATER,
+            size=size,
+            color=Color('black'),
+        )
+        self.lifetime_timer = Timer(max_time=5.)
+
+    def update(self, time_delta: float):
+        self.lifetime_timer.tick(time_delta)
+        if not self.lifetime_timer.running(): self.kill()
+        return super().update(time_delta) 
