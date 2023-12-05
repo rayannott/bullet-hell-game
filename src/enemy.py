@@ -169,12 +169,12 @@ class BasicEnemy(Enemy):
             player=player,
             color=Color('#e82337'),
             speed=ENEMY_DEFAULT_SPEED,
-            health=ENEMY_DEFAULT_MAX_HEALTH + 12. * (player.get_level() - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH // 2,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
             reward=ENEMY_DEFAULT_REWARD,
             lifetime=ENEMY_DEFAULT_LIFETIME,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE,
-            damage=ENEMY_DEFAULT_DAMAGE,
+            damage=ENEMY_DEFAULT_DAMAGE + 10. * (player.get_level() - 1),
             damage_spread=ENEMY_DEFAULT_DAMAGE_SPREAD,
         )
 

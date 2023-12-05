@@ -190,6 +190,7 @@ class Player(Entity):
         old_percentage = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
+        self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.15 * (self.level - 1)
         self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self.level - 1))
         self.energy.set_percent_full(0.6) # energy sets to 60%
         self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.2)
