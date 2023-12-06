@@ -6,10 +6,9 @@ from pygame import Vector2, Color
 from src.entity import Entity, Corpse
 from src.enums import EntityType, EnemyType, ProjectileType
 from src.player import Player
-from src.utils import Slider, Timer
+from src.utils import Slider, Timer, random_unit_vector
 from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile
 from src.oil_spill import OilSpill
-from front.utils import random_unit_vector
 
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_RATE,
     PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,

@@ -7,13 +7,13 @@ from pygame import Color, Vector2
 import pygame_gui
 from src.enums import ArtifactType, EnemyType
 
-from src.utils import Feedback
+from src.utils import Feedback, random_unit_vector
 from src.game import Game
 
 from front.sounds import play_sfx
 from front.screen import Screen
 from front.render_manager import RenderManager
-from front.utils import Notification, random_unit_vector
+from front.utils import Notification
 from front.stats_panel import StatsPanel
 
 from config.paths import SAVES_FILE, SAVES_DIR

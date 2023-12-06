@@ -6,14 +6,13 @@ import itertools
 import pygame
 from pygame import Vector2, Color
 from config.settings import Settings
-from front.utils import random_unit_vector
 
 from src.entity import Corpse, AOEEffect, Entity, DummyEntity, Mine
 from src.oil_spill import OilSpill
 from src.player import Player
 from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType
 from src.projectile import Projectile, ProjectileType
-from src.utils import Timer, Feedback
+from src.utils import Timer, Feedback, random_unit_vector
 from src.energy_orb import EnergyOrb
 from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy

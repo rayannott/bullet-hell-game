@@ -35,11 +35,6 @@ class ColorGradient:
     )
 
 
-def random_unit_vector() -> Vector2:
-    alpha = random.uniform(0, 2 * math.pi)
-    return Vector2(math.cos(alpha), math.sin(alpha))
-
-
 class Label:
     def __init__(self,
             text: str,

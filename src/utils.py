@@ -1,7 +1,13 @@
 from dataclasses import dataclass, field
 from typing import Literal
+import random, math
 
 from pygame import Color, Vector2
+
+
+def random_unit_vector() -> Vector2:
+    alpha = random.random() * 2 * math.pi
+    return Vector2(math.cos(alpha), math.sin(alpha))
 
 
 @dataclass
@@ -110,9 +116,12 @@ class Timer:
 def default_color() -> Color:
     return Color('white')
 
+
 @dataclass
 class Feedback:
     text: str
     duration: float = 1.5
     at_pos: Literal['player', 'cursor'] | Vector2 = 'player'
     color: Color = field(default_factory=default_color)
+
+

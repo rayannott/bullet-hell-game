@@ -1,12 +1,11 @@
 from abc import ABC, abstractmethod
 
 from pygame import Vector2
-from front.utils import random_unit_vector
 
 from src.entity import Mine
 from src.enums import ArtifactType
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing
-from src.utils import Timer
+from src.utils import Timer, random_unit_vector
 from config import (ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN,
     ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE
 )
