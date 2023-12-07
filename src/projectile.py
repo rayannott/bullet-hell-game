@@ -123,31 +123,22 @@ class HomingProjectile(Projectile):
         self.homing_target = homing_target
         self.render_trail = True
 
-    # def update(self, time_delta: float):
-    #     super().update(time_delta)
-    #     if not self._is_alive: return
-    #     self.life_timer.tick(time_delta)
-    #     if not self.life_timer.running():
-    #         self.kill()
-
 
 class DefinedTrajectoryProjectile(Projectile):
     """A projectile that follows 
     a defined trajectory (e.g. a Bezier curve, an arc, ...)."""
     def __init__(self, 
-            pos_start: Vector2,
-            pos_end: Vector2,
+            points: list[Vector2],
             damage: float = PROJECTILE_DEFAULT_DAMAGE,
             lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
-            turn_coefficient: float = 1.
+            turn_coefficient: float = 1.,
         ):
 
-        interm_points = [Vector2(600., 600.)] # TODO: generate these somehow
-        self.traj = Interpolate2D([pos_start, *interm_points, pos_end])
+        self.traj = Interpolate2D(points)
         self.render_traj_points = [self.traj(t*0.01) for t in range(101)]
 
         super().__init__(
-            pos=pos_start,
+            pos=points[0],
             vel=self.traj.derivative(0.),
             projectile_type=ProjectileType.DEF_TRAJECTORY,
             damage=damage,

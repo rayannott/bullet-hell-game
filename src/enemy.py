@@ -153,10 +153,13 @@ class Enemy(Entity):
         )
     
     def shoot_def_trajectory(self):
+        points_around_player = [ # TODO: fix this
+            self.homing_target.get_pos() + Vector2(0., 1.).rotate(i * 360. / 5) * random.uniform(20, 400) 
+            for i in range(5)
+        ]
         self.entities_buffer.append(
             DefinedTrajectoryProjectile(
-                pos_start=self.pos.copy() + self.vel.normalize() * self.size * 1.5,
-                pos_end=self.homing_target.get_pos(),
+                points=[self.pos.copy(), *points_around_player],
                 damage=self.damage,
             )
         )
