@@ -3,7 +3,8 @@ from typing import Literal
 import random, math
 
 from pygame import Color, Vector2
-
+from scipy.interpolate import make_interp_spline
+import numpy as np
 
 def random_unit_vector() -> Vector2:
     alpha = random.random() * 2 * math.pi
@@ -125,3 +126,19 @@ class Feedback:
     color: Color = field(default_factory=default_color)
 
 
+class Interpolate2D:
+    """
+    A cubic interpolator for a sequence of 2D points.
+
+    Usage:
+    >>> path = Interpolate2D(points)
+    >>> path(0.5) # get the point in the middle of the path
+    """
+
+    def __init__(self, points: list[Vector2]):
+        self.ts = np.linspace(0, 1, len(points))
+        self.spline = make_interp_spline(self.ts, points, bc_type='natural')
+
+    def __call__(self, t: float) -> Vector2:
+        assert 0 <= t <= 1
+        return Vector2(*self.spline(t))
