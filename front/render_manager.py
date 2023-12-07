@@ -87,16 +87,16 @@ class RenderManager:
 
     @staticmethod
     def soon_shooting_coef_function(x: float) -> float:
-        return -3.125*x**2 + 2.125 * x+1
+        return -5.625*x**2 + 4.625 * x+1
 
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)
         self.draw_circular_status_bar(enemy.get_pos(), enemy.get_health(),
             enemy.get_size() * 1.5, 
             color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
-        # if less than 1.5 sec left on the cooldown timer, indicate shooting intent
-        if enemy.cooldown.get_time_left() < 1.5:
-            t = enemy.cooldown.get_time_left() / 1.5
+        # if less than 1. sec left on the cooldown timer, indicate shooting intent
+        if enemy.cooldown.get_time_left() < 1.:
+            t = enemy.cooldown.get_time_left()
             pygame.draw.circle(
                 self.surface,
                 Color('white'),
