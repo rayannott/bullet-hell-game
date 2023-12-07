@@ -7,7 +7,7 @@ from src.entity import Entity, Corpse
 from src.enums import EntityType, EnemyType, ProjectileType
 from src.player import Player
 from src.utils import Slider, Timer, random_unit_vector
-from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile
+from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile, DefinedTrajectoryProjectile
 from src.oil_spill import OilSpill
 
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_RATE,
@@ -152,6 +152,15 @@ class Enemy(Entity):
             )
         )
     
+    def shoot_def_trajectory(self):
+        self.entities_buffer.append(
+            DefinedTrajectoryProjectile(
+                pos_start=self.pos.copy() + self.vel.normalize() * self.size * 1.5,
+                pos_end=self.homing_target.get_pos(),
+                damage=self.damage,
+            )
+        )
+
     def on_natural_death(self):
         self.entities_buffer.append(Corpse(self))
 

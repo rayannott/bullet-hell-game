@@ -3,7 +3,7 @@ from typing import Literal
 import random, math
 
 from pygame import Color, Vector2
-from scipy.interpolate import make_interp_spline
+from scipy.interpolate import make_interp_spline, BSpline
 import numpy as np
 
 def random_unit_vector() -> Vector2:
@@ -138,6 +138,12 @@ class Interpolate2D:
     def __init__(self, points: list[Vector2]):
         self.ts = np.linspace(0, 1, len(points))
         self.spline = make_interp_spline(self.ts, points, bc_type='natural')
+        self.d = BSpline.derivative(self.spline)
+
+    def derivative(self, t: float) -> Vector2:
+        """Get the derivative at point t."""
+        assert 0 <= t <= 1
+        return Vector2(*self.d(t))
 
     def __call__(self, t: float) -> Vector2:
         assert 0 <= t <= 1

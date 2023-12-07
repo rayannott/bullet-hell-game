@@ -1,8 +1,9 @@
+import numpy as np
 from pygame import Vector2, Color
 
 from src.entity import Entity
 from src.enums import EntityType, ProjectileType
-from src.utils import Timer
+from src.utils import Timer, Interpolate2D
 from config import (PROJECTILE_DEFAULT_SIZE, PROJECTILE_DEFAULT_DAMAGE,
                         PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME)
 
@@ -12,6 +13,7 @@ PROJECTILE_COLOR_MAP = {
     ProjectileType.NORMAL: Color('#d3dbc8'),
     ProjectileType.HOMING: Color('#46c6e3'),
     ProjectileType.EXPLOSIVE: Color('#598c15'),
+    ProjectileType.DEF_TRAJECTORY: Color('#e3b146'),
 }
 
 
@@ -121,15 +123,48 @@ class HomingProjectile(Projectile):
         self.homing_target = homing_target
         self.render_trail = True
 
-    def update(self, time_delta: float):
-        super().update(time_delta)
-        if not self._is_alive: return
-        self.life_timer.tick(time_delta)
-        if not self.life_timer.running():
-            self.kill()
+    # def update(self, time_delta: float):
+    #     super().update(time_delta)
+    #     if not self._is_alive: return
+    #     self.life_timer.tick(time_delta)
+    #     if not self.life_timer.running():
+    #         self.kill()
 
 
 class DefinedTrajectoryProjectile(Projectile):
     """A projectile that follows 
     a defined trajectory (e.g. a Bezier curve, an arc, ...)."""
-    # TODO: implement this
+    def __init__(self, 
+            pos_start: Vector2,
+            pos_end: Vector2,
+            damage: float = PROJECTILE_DEFAULT_DAMAGE,
+            lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
+            turn_coefficient: float = 1.
+        ):
+
+        interm_points = [Vector2(600., 600.)] # TODO: generate these somehow
+        self.traj = Interpolate2D([pos_start, *interm_points, pos_end])
+        self.render_traj_points = [self.traj(t*0.01) for t in range(101)]
+
+        super().__init__(
+            pos=pos_start,
+            vel=self.traj.derivative(0.),
+            projectile_type=ProjectileType.DEF_TRAJECTORY,
+            damage=damage,
+            speed=PROJECTILE_DEFAULT_SPEED,
+            lifetime=lifetime,
+            turn_coefficient=turn_coefficient,
+        )
+        self.render_trail = True
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        if not self._is_alive: return
+        self.life_timer.tick(time_delta)
+        t = min(self.life_timer.get_percent_full(), 1.)
+        self.pos = self.traj(t)
+        self.vel = self.traj.derivative(t)
+        self.speed = self.vel.magnitude()
+        if not self.life_timer.running():
+            self.kill()
+        

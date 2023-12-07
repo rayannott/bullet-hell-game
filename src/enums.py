@@ -35,6 +35,7 @@ class ProjectileType(Enum):
     NORMAL = auto()
     HOMING = auto()
     EXPLOSIVE = auto()
+    DEF_TRAJECTORY = auto()
 
 
 class ArtifactType(Enum):

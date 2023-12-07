@@ -3,7 +3,7 @@ import math
 import pygame
 from pygame import Color, Vector2, freetype
 from src.enemy import Enemy
-from src.enums import ArtifactType, EnemyType
+from src.enums import ArtifactType, EnemyType, ProjectileType
 
 from src.game import Game
 from src.entity import Entity
@@ -42,6 +42,9 @@ class RenderManager:
         for aoe_effect in self.game.aoe_effects():
             self.draw_entity_basics(aoe_effect)
         for projectile in self.game.projectiles():
+            if projectile.projectile_type == ProjectileType.DEF_TRAJECTORY:
+                for def_traj_pos in projectile.render_traj_points: # type: ignore
+                    pygame.draw.circle(self.surface, '#202020', def_traj_pos, 2)
             self.draw_entity_basics(projectile)
         for enemy in self.game.enemies():
             self.draw_enemy(enemy)
