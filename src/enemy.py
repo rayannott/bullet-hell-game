@@ -152,17 +152,22 @@ class Enemy(Entity):
             )
         )
     
-    def shoot_def_trajectory(self):
+    def shoot_def_trajectory_one(self):
         points_around_player = [ # TODO: fix this
-            self.homing_target.get_pos() + Vector2(0., 1.).rotate(i * 360. / 5) * random.uniform(200, 400) 
+            self.homing_target.get_pos() + Vector2(0., 1.).rotate(i * 360. / 5) * random.uniform(200, 700) 
             for i in range(5)
         ]
+        random.shuffle(points_around_player)
         self.entities_buffer.append(
             DefinedTrajectoryProjectile(
                 points=[self.pos.copy(), *points_around_player, self.homing_target.get_pos()],
                 damage=self.damage,
             )
         )
+    
+    def shoot_def_trajectory(self, num_of_projectiles=3):
+        for _ in range(num_of_projectiles):
+            self.shoot_def_trajectory_one()
 
     def on_natural_death(self):
         self.entities_buffer.append(Corpse(self))
@@ -178,6 +183,7 @@ class BasicEnemy(Enemy):
             pos: Vector2,
             player: Player,
         ):
+        self.difficulty = player.settings.difficulty
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.BASIC,
@@ -189,9 +195,17 @@ class BasicEnemy(Enemy):
             reward=ENEMY_DEFAULT_REWARD,
             lifetime=ENEMY_DEFAULT_LIFETIME,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE,
-            damage=ENEMY_DEFAULT_DAMAGE + 10. * (player.get_level() - 1),
+            damage=ENEMY_DEFAULT_DAMAGE + 12. * (player.get_level() - 1),
             damage_spread=ENEMY_DEFAULT_DAMAGE_SPREAD,
         )
+
+    def shoot(self):
+        if self.difficulty == 5:
+            self.shoot_explosive()
+        if self.difficulty >= 4:
+            self.shoot_def_trajectory()
+        else:
+            self.shoot_normal()
 
 
 class FastEnemy(Enemy):
@@ -284,6 +298,9 @@ class ArtilleryEnemy(Enemy):
         self.cooldown.set_percent_full(0.2)
     
     def shoot(self):
+        if random.random() < 0.5:
+            self.shoot_def_trajectory(num_of_projectiles=2 + random.randint(1, 4))
+            return
         self.shoot_homing(speed_mult=1.2 + 0.05 * self._player_level)
     
     def on_natural_death(self):
@@ -316,7 +333,7 @@ class BossEnemy(Enemy):
             player=player,
             color=Color('#510e78'),
             speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 25 * (self._player_level - 1),
-            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 80. * self._player_level * self.difficulty_mult**2,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 70. * self._player_level * self.difficulty_mult**2,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.15 * self._player_level),
             lifetime=math.inf,
@@ -330,9 +347,9 @@ class BossEnemy(Enemy):
             0.2 * (self._player_level - 1))
         self.PROJECTILE_TYPES_TO_WEIGHTS = {
             ProjectileType.NORMAL: 200,
-            ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty],
-            ProjectileType.EXPLOSIVE: 20 + 30 * DIFF_MULT[self.difficulty],
-            ProjectileType.DEF_TRAJECTORY: 10 + 10 * DIFF_MULT[self.difficulty],
+            ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty] + 20 * (self._player_level - 1),
+            ProjectileType.EXPLOSIVE: 20 + 30 * DIFF_MULT[self.difficulty] + 30 * (self._player_level - 1),
+            ProjectileType.DEF_TRAJECTORY: 10 + 10 * DIFF_MULT[self.difficulty] + 40 * (self._player_level - 1),
         }
 
     def update(self, time_delta: float):
@@ -357,7 +374,7 @@ class BossEnemy(Enemy):
         elif projectile_type_to_shoot == ProjectileType.EXPLOSIVE:
             self.shoot_explosive(num_of_subprojectiles=4)
         elif projectile_type_to_shoot == ProjectileType.DEF_TRAJECTORY:
-            self.shoot_def_trajectory()
+            self.shoot_def_trajectory(num_of_projectiles=2 + self._player_level // 2)
     
     def on_natural_death(self):
         raise ValueError('Bosses should not die naturally.')
