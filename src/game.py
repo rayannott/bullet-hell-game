@@ -152,7 +152,7 @@ class Game:
             list(type_weights.values()), 
         k=1)[0]
         if enemy_type == EnemyType.BASIC and self.level > 3:
-            num = random.randint(1, self.level)
+            num = random.randint(1, self.level//2)
         else: num = 1
         for _ in range(num):
             self.spawn_enemy(enemy_type)
@@ -241,29 +241,30 @@ class Game:
         for ent in new_ent:
             self.add_entity(ent)
 
-    def reflect_entities_vel(self,) -> None:
+    def reflect_projectiles_vel(self) -> None:
         """
-        Reflect the velocity of all entities that are outside of the screen.
-        Add some delta to the position to prevent the entity from getting stuck.
+        Reflect the velocity of all projectiles that are outside of the screen.
+        Add some delta to the position to prevent the projectile from getting stuck.
         """
         delta = 10.
-        for entity in self.all_entities_iter(with_player=False):
-            pos_ = entity.get_pos()
-            if entity.is_alive() and not self.screen_rectangle.collidepoint(pos_):
-                if entity.get_type() == EntityType.PROJECTILE:
-                    entity.ricochet_count += 1 # type: ignore
-                if pos_.x < self.screen_rectangle.left:
-                    entity.vel.x *= -1.
-                    entity.pos.x += delta
-                if pos_.x > self.screen_rectangle.right:
-                    entity.vel.x *= -1.
-                    entity.pos.x -= delta
-                if pos_.y < self.screen_rectangle.top:
-                    entity.vel.y *= -1.
-                    entity.pos.y += delta
-                if pos_.y > self.screen_rectangle.bottom:
-                    entity.vel.y *= -1.
-                    entity.pos.y -= delta
+        for projectile in self.projectiles():
+            pos_ = projectile.get_pos()
+            if (not projectile.is_alive() or self.screen_rectangle.collidepoint(pos_) or 
+                projectile.projectile_type == ProjectileType.DEF_TRAJECTORY):
+                continue
+            projectile.ricochet_count += 1
+            if pos_.x < self.screen_rectangle.left:
+                projectile.vel.x *= -1.
+                projectile.pos.x += delta
+            if pos_.x > self.screen_rectangle.right:
+                projectile.vel.x *= -1.
+                projectile.pos.x -= delta
+            if pos_.y < self.screen_rectangle.top:
+                projectile.vel.y *= -1.
+                projectile.pos.y += delta
+            if pos_.y > self.screen_rectangle.bottom:
+                projectile.vel.y *= -1.
+                projectile.pos.y -= delta
     
     def process_collisions(self) -> None:
         # player collides with anything:
