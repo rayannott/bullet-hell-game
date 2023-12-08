@@ -333,6 +333,7 @@ class Game:
             if not artifact_chest.intersects(self.player): continue
             artifact = artifact_chest.get_artifact()
             print(f'collected artifact {artifact}')
+            self.player.artifacts_handler.add_artifact(artifact)
             # TODO: play_sfx('artifact_collected')
             # remove all artifacts:
             for ac in self.artifact_chests(): ac.kill()
