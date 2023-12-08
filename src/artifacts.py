@@ -19,6 +19,18 @@ class StatsBoost:
     damage: float = 0.
     speed: float = 0.
     cooldown: float = 0.
+    size: float = 0.
+
+    def __iter__(self):
+        yield from (self.health, self.regen, self.damage,
+            self.speed, self.cooldown, self.size)
+
+    def __str__(self) -> str:
+        formats = ('+{:.0f}hp', '+{:.2f}reg', '+{:.0f}dmg', '+{:.0f}spd', '-{:.3f}cd', '-{:.0f}size')
+        res = '|'.join(
+            format_.format(val) for format_, val in zip(formats, self) if val
+        )
+        return res if res else 'default'
 
     def __add__(self, other: 'StatsBoost'):
         return StatsBoost(
@@ -27,6 +39,7 @@ class StatsBoost:
             damage=self.damage + other.damage,
             speed=self.speed + other.speed,
             cooldown=self.cooldown + other.cooldown,
+            size=self.size + other.size,
         )
 
 
@@ -115,6 +128,12 @@ class InactiveArtifact(Artifact):
     
     def update(self, time_delta: float):
         ...
+    
+    def __repr__(self) -> str:
+        return f'InactiveArtifact({self.stats_boost})'
+    
+    def __str__(self) -> str:
+        return f'Amulet({self.stats_boost})'
 
 
 class ArtifactsHandler:
