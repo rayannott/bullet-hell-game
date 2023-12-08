@@ -16,6 +16,7 @@ from src.utils import Timer, Feedback, random_unit_vector
 from src.energy_orb import EnergyOrb
 from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
+from src.artifact_chest import ArtifactChest
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, NICER_MAGENTA_HEX,
     WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
@@ -55,6 +56,7 @@ class Game:
         self.e_enemies: list[Enemy] = []
         self.e_mines: list[Mine] = []
         self.e_aoe_effects: list[AOEEffect] = []
+        self.e_artifact_chests: list[ArtifactChest] = []
 
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
         self.one_wave_timer = Timer(max_time=WAVE_DURATION)
@@ -75,6 +77,7 @@ class Game:
         yield from self.dummies(include_dead)
         yield from self.mines(include_dead)
         yield from self.aoe_effects(include_dead)
+        yield from self.artifact_chests(include_dead)
         if with_player: yield self.player
 
     def oil_spills(self, include_dead: bool = False) -> Generator[OilSpill, None, None]:
@@ -93,6 +96,8 @@ class Game:
         yield from (ent for ent in self.e_mines if include_dead or ent.is_alive())
     def aoe_effects(self, include_dead: bool = False) -> Generator[AOEEffect, None, None]:
         yield from (ent for ent in self.e_aoe_effects if include_dead or ent.is_alive())
+    def artifact_chests(self, include_dead: bool = False) -> Generator[ArtifactChest, None, None]:
+        yield from (ent for ent in self.e_artifact_chests if include_dead or ent.is_alive())
 
     def is_running(self) -> bool:
         return self.player.is_alive()
@@ -324,6 +329,13 @@ class Game:
             self.player_get_damage(aoe_effect.damage)
             aoe_effect.applied_effect_player = True
             self.reason_of_death = f'aoe damage from a mine'
+        for artifact_chest in self.artifact_chests():
+            if not artifact_chest.intersects(self.player): continue
+            artifact = artifact_chest.get_artifact()
+            print(f'collected artifact {artifact}')
+            # TODO: play_sfx('artifact_collected')
+            # remove all artifacts:
+            for ac in self.artifact_chests(): ac.kill()
 
         # player bullets collide with enemies -> enemies get damage, player gets energy:
         player_bullets = [el for el in self.projectiles() if el.projectile_type == ProjectileType.PLAYER_BULLET]
@@ -412,6 +424,8 @@ class Game:
             self.e_mines.append(entity) # type: ignore
         elif ent_type == EntityType.CRATER:
             self.e_aoe_effects.append(entity) # type: ignore
+        elif ent_type == EntityType.ARTIFACT_CHEST:
+            self.e_artifact_chests.append(entity) # type: ignore
         else:
             raise ValueError(f'Unknown entity type {ent_type}')
 

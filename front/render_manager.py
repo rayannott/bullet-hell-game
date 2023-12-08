@@ -19,6 +19,7 @@ NICER_GREEN = Color('#3ce870')
 MAGENTA = Color(NICER_MAGENTA_HEX)
 LIGHTER_MAGENTA = Color('#a22ac9')
 YELLOW = Color('yellow')
+WHITE = Color('white')
 
 
 class RenderManager:
@@ -56,6 +57,13 @@ class RenderManager:
             self.draw_entity_basics(corpse)
         for mine in self.game.mines():
             self.draw_mine(mine)
+        for art_chest in self.game.artifact_chests():
+            self.draw_entity_basics(art_chest)
+            pos = art_chest.get_pos(); size = art_chest.get_size()
+            for i in range(3):
+                pygame.draw.circle(self.surface, WHITE, pos, size * i / 3 + 3, width=2)
+            self.draw_circular_status_bar(pos, art_chest.life_timer.get_slider(reverse=True),
+                size * 1.2, color=WHITE, width=2)
         self.draw_player()
 
         # "boss spawns in 5 seconds" indicator

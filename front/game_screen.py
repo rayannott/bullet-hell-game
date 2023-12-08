@@ -5,6 +5,8 @@ from typing import Literal
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
+from src.artifact_chest import ArtifactChest
+from src.artifacts import BulletShield
 from src.enums import ArtifactType, EnemyType
 
 from src.utils import Feedback, random_unit_vector
@@ -82,6 +84,8 @@ class GameScreen(Screen):
                     print('-'*10)
                 elif event.key == pygame.K_l:
                     self.game.new_level()
+                elif event.key == pygame.K_a:
+                    self.game.add_entity(ArtifactChest(Vector2(*pygame.mouse.get_pos()), BulletShield(self.game.player)))
 
         super().process_ui_event(event)
 

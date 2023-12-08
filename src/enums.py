@@ -14,6 +14,7 @@ class EntityType(Enum):
     ENEMY = auto()
     MINE = auto()
     CRATER = auto()
+    ARTIFACT_CHEST = auto()
 
 
 class EnemyType(Enum):
@@ -39,6 +40,7 @@ class ProjectileType(Enum):
 
 
 class ArtifactType(Enum):
+    STATS = auto()
     BULLET_SHIELD = auto()
     DASH = auto()
     BAIT = auto()

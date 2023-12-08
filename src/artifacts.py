@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from pygame import Vector2
 
@@ -91,6 +92,33 @@ class MineSpawn(Artifact):
 class BaitSpawn(Artifact):
     def __init__(self, player):
         super().__init__(active=True, artifact_type=ArtifactType.BAIT, player=player, cooldown=12.)
+
+
+@dataclass
+class StatsBoost:
+    health: float = 0.
+    regen: float = 0.
+    damage: float = 0.
+    speed: float = 0.
+    cooldown: float = 0.
+
+    def __add__(self, other: 'StatsBoost'):
+        return StatsBoost(
+            health=self.health + other.health,
+            regen=self.regen + other.regen,
+            damage=self.damage + other.damage,
+            speed=self.speed + other.speed,
+            cooldown=self.cooldown + other.cooldown,
+        )
+
+
+class InactiveArtifact(Artifact):
+    def __init__(self, player, stats_boost: StatsBoost):
+        super().__init__(active=False, artifact_type=ArtifactType.STATS, player=player, cooldown=0)
+        
+    
+    def update(self, time_delta: float):
+        ...
 
 
 class ArtifactsHandler:
