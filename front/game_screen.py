@@ -106,7 +106,7 @@ class GameScreen(Screen):
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
-        self.game.reflect_entities_vel()
+        self.game.reflect_projectiles_vel()
         self.stats_panel.update(time_delta=time_delta)
         self.render()
         if not self.game.is_running() and not self.game_is_over_window_shown:
