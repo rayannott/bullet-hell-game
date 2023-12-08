@@ -334,7 +334,8 @@ class Game:
             artifact = artifact_chest.get_artifact()
             print(f'collected artifact {artifact}')
             self.player.artifacts_handler.add_artifact(artifact)
-            # TODO: play_sfx('artifact_collected')
+            self.feedback_buffer.append(Feedback(f'collected {artifact}', 3., color=pygame.Color('blue')))
+            play_sfx('artifact_collected')
             # remove all artifacts:
             for ac in self.artifact_chests(): ac.kill()
 
