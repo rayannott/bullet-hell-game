@@ -154,12 +154,12 @@ class Enemy(Entity):
     
     def shoot_def_trajectory(self):
         points_around_player = [ # TODO: fix this
-            self.homing_target.get_pos() + Vector2(0., 1.).rotate(i * 360. / 5) * random.uniform(20, 400) 
+            self.homing_target.get_pos() + Vector2(0., 1.).rotate(i * 360. / 5) * random.uniform(200, 400) 
             for i in range(5)
         ]
         self.entities_buffer.append(
             DefinedTrajectoryProjectile(
-                points=[self.pos.copy(), *points_around_player],
+                points=[self.pos.copy(), *points_around_player, self.homing_target.get_pos()],
                 damage=self.damage,
             )
         )
@@ -243,19 +243,19 @@ class TankEnemy(Enemy):
     def shoot(self):
         """Shoots in bursts with probability 0.5 and explosive projectiles with probability 0.5."""
         if random.random() < 0.5:
-            num_shots = 3 + self._player_level
-            self.shoot_explosive(num_of_subprojectiles=num_shots)
+            num_subproj = 3 + int(self._player_level * 1.5)
+            self.shoot_explosive(num_of_subprojectiles=num_subproj)
             return
-        num_shots = random.randint(2, 3 + int(self._player_level // 2))
+        num_shots = random.randint(2, 3 + int(self._player_level))
         for _ in range(num_shots):
-            self.shoot_normal(speed_mult=1.4)
+            self.shoot_normal(speed_mult=1.2 + 0.05 * self._player_level)
     
     def on_natural_death(self):
         super().on_natural_death()
-        for _ in range(random.randint(1, 4)):
+        for _ in range(random.randint(3, 7)):
             self.entities_buffer.append(
                 BasicEnemy(
-                    pos=self.pos + random_unit_vector() * self.size * 1.5,
+                    pos=self.pos + random_unit_vector() * 150,
                     player=self.homing_target, # type: ignore
                 )
             )
@@ -267,30 +267,36 @@ class ArtilleryEnemy(Enemy):
             pos: Vector2,
             player: Player,
         ):
-        _player_level = player.get_level()
+        self._player_level = player.get_level()
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.ARTILLERY,
             player=player,
             color=Color('#005c22'),
             speed=10.,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 2. + 30. * (_player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2. + 30. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,
-            reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * _player_level),
-            lifetime=ENEMY_DEFAULT_LIFETIME + 3. * _player_level,
+            reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * self._player_level),
+            lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.3,
             damage=ENEMY_DEFAULT_DAMAGE * 1.35,
         )
         self.cooldown.set_percent_full(0.2)
     
     def shoot(self):
-        self.shoot_homing(speed_mult=1.4)
+        self.shoot_homing(speed_mult=1.2 + 0.05 * self._player_level)
     
     def on_natural_death(self):
         super().on_natural_death()
         self.spread = math.pi / 2.
         for _ in range(random.randint(1, 5)):
             self.shoot_homing(speed_mult=1.4)
+        self.entities_buffer.append(
+            FastEnemy(
+                pos=self.pos + random_unit_vector() * 150,
+                player=self.homing_target, # type: ignore
+            )
+        )
 
 
 class BossEnemy(Enemy):
@@ -310,7 +316,7 @@ class BossEnemy(Enemy):
             player=player,
             color=Color('#510e78'),
             speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 25 * (self._player_level - 1),
-            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 50. * self._player_level,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 80. * self._player_level * self.difficulty_mult**2,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.5,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.15 * self._player_level),
             lifetime=math.inf,
@@ -326,6 +332,7 @@ class BossEnemy(Enemy):
             ProjectileType.NORMAL: 200,
             ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty],
             ProjectileType.EXPLOSIVE: 20 + 30 * DIFF_MULT[self.difficulty],
+            ProjectileType.DEF_TRAJECTORY: 10 + 10 * DIFF_MULT[self.difficulty],
         }
 
     def update(self, time_delta: float):
@@ -346,9 +353,11 @@ class BossEnemy(Enemy):
         if projectile_type_to_shoot == ProjectileType.NORMAL:
             self.shoot_normal()
         elif projectile_type_to_shoot == ProjectileType.HOMING:
-            self.shoot_homing(speed_mult=0.65)
+            self.shoot_homing(speed_mult=0.7)
         elif projectile_type_to_shoot == ProjectileType.EXPLOSIVE:
             self.shoot_explosive(num_of_subprojectiles=4)
+        elif projectile_type_to_shoot == ProjectileType.DEF_TRAJECTORY:
+            self.shoot_def_trajectory()
     
     def on_natural_death(self):
         raise ValueError('Bosses should not die naturally.')

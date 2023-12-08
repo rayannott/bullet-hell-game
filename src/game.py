@@ -151,7 +151,7 @@ class Game:
             list(type_weights.values()), 
         k=1)[0]
         if enemy_type == EnemyType.BASIC and self.level > 3:
-            num = random.randint(1, 2 + self.level // 3)
+            num = random.randint(1, self.level)
         else: num = 1
         for _ in range(num):
             self.spawn_enemy(enemy_type)
