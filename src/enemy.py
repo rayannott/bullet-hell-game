@@ -67,7 +67,7 @@ class Enemy(Entity):
         self.homing_target: Player # to avoid typing errors (this is always a player)
         self.health = Slider(health)
         self.cooldown = Timer(max_time=shoot_cooldown)
-        self.cooldown.set_percent_full(0.5) # enemies start with half of the cooldown
+        self.cooldown.set_percent_full(random.random())
         self.lifetime_cooldown = Timer(max_time=lifetime)
         self.reward = reward
         self.enemy_type = enemy_type
