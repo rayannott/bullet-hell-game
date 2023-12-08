@@ -12,14 +12,30 @@ from config import (ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN,
 )
 
 
+@dataclass
+class StatsBoost:
+    health: float = 0.
+    regen: float = 0.
+    damage: float = 0.
+    speed: float = 0.
+    cooldown: float = 0.
+
+    def __add__(self, other: 'StatsBoost'):
+        return StatsBoost(
+            health=self.health + other.health,
+            regen=self.regen + other.regen,
+            damage=self.damage + other.damage,
+            speed=self.speed + other.speed,
+            cooldown=self.cooldown + other.cooldown,
+        )
+
+
 class Artifact(ABC):
     def __init__(self,
-        active: bool,
         artifact_type: ArtifactType,
         player,
-        cooldown: float
+        cooldown: float,
     ):
-        self.active = active
         self.artifact_type = artifact_type
         self.player = player
         self.cooldown = cooldown
@@ -27,7 +43,7 @@ class Artifact(ABC):
         self.cooldown_timer.set_percent_full(0.5)
 
     def update(self, time_delta: float):
-        self.cooldown_timer.tick(time_delta)        
+        self.cooldown_timer.tick(time_delta)
     
     def __str__(self) -> str:
         return 'Artifact::' + self.__class__.__name__
@@ -36,7 +52,6 @@ class Artifact(ABC):
 class BulletShield(Artifact):
     def __init__(self, player):
         super().__init__(
-            active=True, 
             artifact_type=ArtifactType.BULLET_SHIELD, 
             player=player,
             cooldown=ARTIFACT_SHIELD_COOLDOWN
@@ -69,7 +84,6 @@ class BulletShield(Artifact):
 class MineSpawn(Artifact):
     def __init__(self, player):
         super().__init__(
-            active=True, 
             artifact_type=ArtifactType.MINE_SPAWN, 
             player=player,
             cooldown=MINE_COOLDOWN
@@ -91,31 +105,13 @@ class MineSpawn(Artifact):
 
 class BaitSpawn(Artifact):
     def __init__(self, player):
-        super().__init__(active=True, artifact_type=ArtifactType.BAIT, player=player, cooldown=12.)
-
-
-@dataclass
-class StatsBoost:
-    health: float = 0.
-    regen: float = 0.
-    damage: float = 0.
-    speed: float = 0.
-    cooldown: float = 0.
-
-    def __add__(self, other: 'StatsBoost'):
-        return StatsBoost(
-            health=self.health + other.health,
-            regen=self.regen + other.regen,
-            damage=self.damage + other.damage,
-            speed=self.speed + other.speed,
-            cooldown=self.cooldown + other.cooldown,
-        )
+        super().__init__(artifact_type=ArtifactType.BAIT, player=player, cooldown=12.)
 
 
 class InactiveArtifact(Artifact):
     def __init__(self, player, stats_boost: StatsBoost):
-        super().__init__(active=False, artifact_type=ArtifactType.STATS, player=player, cooldown=0)
-        
+        super().__init__(artifact_type=ArtifactType.STATS, player=player, cooldown=0)
+        self.stats_boost = stats_boost
     
     def update(self, time_delta: float):
         ...
@@ -124,17 +120,14 @@ class InactiveArtifact(Artifact):
 class ArtifactsHandler:
     def __init__(self, player):
         self.player = player
-        self.inactive_artifacts: list[Artifact] = []
+        self.inactive_artifacts: list[InactiveArtifact] = []
 
         self.bullet_shield: BulletShield | None = None
         self.mine_spawn: MineSpawn | None = None
         self.bait_spawn: BaitSpawn | None = None
 
-        # self.artifact_flags = {
-        #     ArtifactType.BULLET_SHIELD: False,
-        #     ArtifactType.MINE_SPAWN: False,
-        #     ArtifactType.BAIT: False,
-        # }
+    def get_total_stats_boost(self) -> StatsBoost:
+        return sum((artifact.stats_boost for artifact in self.inactive_artifacts), StatsBoost())
     
     def update(self, time_delta: float):
         for artifact in self.iterate_active():
@@ -149,9 +142,8 @@ class ArtifactsHandler:
             yield self.bait_spawn
     
     def add_artifact(self, artifact: Artifact):
-        if not artifact.active:
+        if isinstance(artifact, InactiveArtifact):
             self.inactive_artifacts.append(artifact)
-            return
         if isinstance(artifact, BulletShield):
             self.bullet_shield = artifact
         elif isinstance(artifact, MineSpawn):
