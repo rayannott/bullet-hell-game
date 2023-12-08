@@ -109,12 +109,13 @@ class Game:
         # the higher the difficulty, the faster the spawn cooldown shrinks
         self.current_spawn_enemy_cooldown *= (1. - 0.02 * self.settings.difficulty)
 
-        if (self.level == 5 
-            and not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES
-            and not len(self.e_corpses)):
-            self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES = True
-            self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=pygame.Color('blue')))
-
+        if self.level == 5:
+            if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES and not len(self.e_corpses):
+                self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES = True
+                self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=pygame.Color('blue')))
+            if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE and not self.player.get_stats().DAMAGE_TAKEN:
+                self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE = True
+                self.feedback_buffer.append(Feedback('[A] reach level 5 without taking damage', 3., color=pygame.Color('blue')))
         return True
 
     def kill_projectiles(self):
