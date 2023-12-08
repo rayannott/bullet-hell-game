@@ -1,3 +1,4 @@
+import random
 import numpy as np
 from pygame import Vector2, Color
 
@@ -50,6 +51,10 @@ class Projectile(Entity):
         self.life_timer.tick(time_delta)
         if not self.life_timer.running():
             self.kill()
+            self.on_natural_death()
+
+    def on_natural_death(self):
+        pass
 
 
 class ExplosiveProjectile(Projectile):
@@ -74,20 +79,12 @@ class ExplosiveProjectile(Projectile):
         self.num_subprojectiles = num_subprojectiles
         self.can_spawn_entities = True
         self.homing_target = homing_target
-        self.render_trail = False
-
-    def update(self, time_delta: float):
-        super().update(time_delta)
-        if not self._is_alive: return
-        self.life_timer.tick(time_delta)
-        if not self.life_timer.running():
-            self.kill()
-            self.on_natural_death()
+        self.render_trail = True
     
     def on_natural_death(self):
         N = self.num_subprojectiles
         for i in range(N):
-            direction = Vector2(1., 0.).rotate(i * 360. / N)
+            direction = Vector2(1., 0.).rotate(i * 360. / N + random.uniform(-20, -20))
             self.entities_buffer.append(
                 Projectile(
                     pos=self.pos.copy() + direction * (self.size * 1.5),
@@ -146,16 +143,13 @@ class DefinedTrajectoryProjectile(Projectile):
             lifetime=lifetime,
             turn_coefficient=turn_coefficient,
         )
-        self.render_trail = True
+        # self.render_trail = True
 
     def update(self, time_delta: float):
-        super().update(time_delta)
         if not self._is_alive: return
-        self.life_timer.tick(time_delta)
+        super().update(time_delta)
         t = min(self.life_timer.get_percent_full(), 1.)
         self.pos = self.traj(t)
         self.vel = self.traj.derivative(t)
         self.speed = self.vel.magnitude()
-        if not self.life_timer.running():
-            self.kill()
         
