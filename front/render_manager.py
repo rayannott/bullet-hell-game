@@ -95,7 +95,7 @@ class RenderManager:
             enemy.get_size() * 1.5, 
             color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
         # if less than 1. sec left on the cooldown timer, indicate shooting intent
-        if enemy.cooldown.get_time_left() < 1.:
+        if enemy.shoots_player and enemy.cooldown.get_time_left() < 1.:
             t = enemy.cooldown.get_time_left()
             pygame.draw.circle(
                 self.surface,
