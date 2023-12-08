@@ -6,19 +6,16 @@ from config.settings import Settings
 from front.sounds import play_sfx
 from src.artifacts import ArtifactsHandler, BulletShield, MineSpawn
 
-from src.energy_orb import EnergyOrb
 from src.entity import Entity
 from src.enums import ArtifactType, EntityType, ProjectileType
 from src.exceptions import ArtifactMissing, NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ShieldRunning
-from src.projectile import ExplosiveProjectile, Projectile
+from src.projectile import Projectile
 from src.utils import Stats, Slider, Timer
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, ENERGY_ORB_SPAWNED_BY_PLAYER_LIFETIME,
-    PLAYER_SPAWN_ENERGY_ORB_COST, PLAYER_SPAWN_ENERGY_ORB_REQUIRED_ENERGY,
+    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST,
-    ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN, ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST,
 )
 
 
