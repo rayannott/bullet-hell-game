@@ -67,7 +67,7 @@ class Player(Entity):
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
         self.artifacts_handler = ArtifactsHandler(player=self)
-        self.artifacts_handler.add_artifact(BulletShield(player=self))
+        # self.artifacts_handler.add_artifact(BulletShield(player=self))
         self.artifacts_handler.add_artifact(MineSpawn(player=self))
 
     def update(self, time_delta: float):
