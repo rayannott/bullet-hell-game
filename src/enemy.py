@@ -165,7 +165,7 @@ class Enemy(Entity):
             )
         )
     
-    def shoot_def_trajectory(self, num_of_projectiles=3):
+    def shoot_def_trajectory(self, num_of_projectiles=2):
         for _ in range(num_of_projectiles):
             self.shoot_def_trajectory_one()
 
@@ -299,7 +299,7 @@ class ArtilleryEnemy(Enemy):
     
     def shoot(self):
         if random.random() < 0.5:
-            self.shoot_def_trajectory(num_of_projectiles=2 + random.randint(1, 4))
+            self.shoot_def_trajectory(num_of_projectiles=1 + random.randint(1, 3))
             return
         self.shoot_homing(speed_mult=1.2 + 0.05 * self._player_level)
     
@@ -349,7 +349,7 @@ class BossEnemy(Enemy):
             ProjectileType.NORMAL: 200,
             ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty] + 20 * (self._player_level - 1),
             ProjectileType.EXPLOSIVE: 20 + 30 * DIFF_MULT[self.difficulty] + 30 * (self._player_level - 1),
-            ProjectileType.DEF_TRAJECTORY: 10 + 10 * DIFF_MULT[self.difficulty] + 40 * (self._player_level - 1),
+            ProjectileType.DEF_TRAJECTORY: 10 + 30 * DIFF_MULT[self.difficulty] + 40 * (self._player_level - 1),
         }
 
     def update(self, time_delta: float):
