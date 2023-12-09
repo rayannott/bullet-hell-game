@@ -122,8 +122,8 @@ class BaitSpawn(Artifact):
 
 
 class InactiveArtifact(Artifact):
-    def __init__(self, player, stats_boost: StatsBoost):
-        super().__init__(artifact_type=ArtifactType.STATS, player=player, cooldown=0)
+    def __init__(self, stats_boost: StatsBoost):
+        super().__init__(artifact_type=ArtifactType.STATS, player=None, cooldown=0)
         self.stats_boost = stats_boost
     
     def update(self, time_delta: float):
@@ -163,7 +163,7 @@ class ArtifactsHandler:
     def add_artifact(self, artifact: Artifact):
         if isinstance(artifact, InactiveArtifact):
             self.inactive_artifacts.append(artifact)
-        if isinstance(artifact, BulletShield):
+        elif isinstance(artifact, BulletShield):
             self.bullet_shield = artifact
         elif isinstance(artifact, MineSpawn):
             self.mine_spawn = artifact
