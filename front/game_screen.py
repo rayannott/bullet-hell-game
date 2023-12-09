@@ -6,7 +6,7 @@ import pygame
 from pygame import Color, Vector2
 import pygame_gui
 from src.artifact_chest import ArtifactChest
-from src.artifacts import BulletShield, InactiveArtifact, StatsBoost
+from src.artifacts import BulletShield, InactiveArtifact, MineSpawn, StatsBoost
 from src.enums import ArtifactType, EnemyType
 
 from src.utils import Feedback, random_unit_vector
@@ -80,14 +80,19 @@ class GameScreen(Screen):
                     self.game.spawn_enemy(EnemyType.BOSS)
                 elif event.key == pygame.K_d:
                     print('--- debug ---')
-                    print(self.game.player.get_stats())
+                    print(self.game.get_info())
                     print('-'*10)
                 elif event.key == pygame.K_l:
                     self.game.new_level()
                 elif event.key == pygame.K_a:
-                    self.game.add_entity(ArtifactChest(Vector2(*pygame.mouse.get_pos()), BulletShield(self.game.player)))
+                    if random.random() < 0.5:
+                        to_spawn = BulletShield(self.game.player)
+                    else:
+                        to_spawn = MineSpawn(self.game.player)
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), to_spawn))
                 elif event.key == pygame.K_q:
-                    self.game.add_entity(ArtifactChest(Vector2(*pygame.mouse.get_pos()), InactiveArtifact(StatsBoost(damage=20, regen=1))))
+                    sb = StatsBoost(regen=1.5)
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), InactiveArtifact(sb)))
 
         super().process_ui_event(event)
 
@@ -95,15 +100,20 @@ class GameScreen(Screen):
         if self.game.paused: return
         if not self.game.is_running(): return
 
-        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = Vector2(pygame.mouse.get_pos())
         if event.type == pygame.MOUSEMOTION:
-            self.game.player.set_gravity_point(pygame.Vector2(mouse_pos))
+            self.game.player.set_gravity_point(mouse_pos)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 self.game.player_try_shooting()
             elif event.button == 3:
-                # TODO: ??
-                pass
+                self.render_manager.ult_picker.turn_on()
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 3:
+                option_picked = self.render_manager.ult_picker.get_turned_off()
+                print(f'picked {option_picked=}')
+                if option_picked is not None:
+                    self.game.player_try_ultimate(artifact_type=option_picked)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.MINE_SPAWN)
