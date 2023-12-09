@@ -3,6 +3,7 @@ import math
 import pygame
 from pygame import Color, Vector2, freetype
 from src.artifact_chest import ArtifactChest
+from src.artifacts import Artifact
 from src.enemy import Enemy
 from src.enums import ArtifactType, EnemyType, ProjectileType
 
@@ -21,6 +22,83 @@ MAGENTA = Color(NICER_MAGENTA_HEX)
 LIGHTER_MAGENTA = Color('#a22ac9')
 YELLOW = Color('yellow')
 WHITE = Color('white')
+RED = Color('#e31243')
+
+
+def draw_circular_status_bar(
+    surface: pygame.Surface, 
+    pos: Vector2,
+    slider: Slider, 
+    radius: float,
+    color: Color = Color('white'),
+    draw_full: bool = False,
+    width: int = 3
+):
+    arc_percent = slider.get_percent_full()
+    if draw_full or arc_percent < 1.:
+        angle = math.pi * (2 * arc_percent + 0.5)
+        rect = pygame.Rect(0, 0, radius * 2, radius * 2)
+        rect.center = pos
+        pygame.draw.arc(
+            surface,
+            color,
+            rect,
+            math.pi / 2,
+            angle,
+            width=width
+        )
+
+
+OPTION_CIRCLE_SIZE = 50.
+class UltimatePicker:
+    def __init__(self, surface: pygame.Surface):
+        self.surface = surface
+        self.is_on = False
+        self.options: list[Artifact] = []
+        self.option_circles_positions = []
+        self.options_labels = []
+
+    def set_mouse_pos(self, mouse_pos: Vector2):
+        self.mouse_pos = mouse_pos
+
+    def render(self):
+        if not self.is_on: return
+        pygame.draw.circle(self.surface, MAGENTA, self.pos_to_draw_at, 4, width=1)
+        for i in range(len(self.options)):
+            this_pos = self.option_circles_positions[i]
+            this_width = 5 if (this_pos - self.mouse_pos).magnitude_squared() < OPTION_CIRCLE_SIZE ** 2 else 2
+            pygame.draw.circle(self.surface, MAGENTA, this_pos, OPTION_CIRCLE_SIZE, width=this_width)
+            draw_circular_status_bar(self.surface, this_pos, self.options[i].cooldown_timer.get_slider(),
+                OPTION_CIRCLE_SIZE + 5., draw_full=True)
+            self.options_labels[i].update()
+    
+    def recompute_options(self):
+        _len = len(self.options); shift_render = Vector2(20., 0.)
+        if _len == 1:
+            self.option_circles_positions = [self.pos_to_draw_at]
+            self.options_labels = [Label(self.options[0].get_short_string(), self.surface, position=(self.pos_to_draw_at + shift_render))]
+        else:
+            self.option_circles_positions = [self.pos_to_draw_at + Vector2(OPTION_CIRCLE_SIZE * 1.1, 0.).rotate(360. * i / _len) 
+                for i in range(_len)]
+            self.options_labels = []
+            for art, pos in zip(self.options, self.option_circles_positions):
+                self.options_labels.append(Label(art.get_short_string(), self.surface, position=(pos + shift_render)))
+
+    def add_artifact(self, artifact: Artifact):
+        if artifact.artifact_type == ArtifactType.STATS: return
+        self.options.append(artifact)
+    
+    def turn_on(self):
+        self.is_on = True
+        self.pos_to_draw_at = self.mouse_pos.copy()
+        self.recompute_options()
+
+    def get_turned_off(self) -> ArtifactType | None:
+        self.is_on = False
+        for i in range(len(self.options)):
+            if (self.option_circles_positions[i] - self.mouse_pos).magnitude_squared() < OPTION_CIRCLE_SIZE ** 2:
+                return self.options[i].artifact_type
+        return None
 
 
 class RenderManager:
@@ -29,13 +107,14 @@ class RenderManager:
         self.surface = surface
         self.debug = debug
         self.game = game
-        self.screen_center = Vector2(*surface.get_rect().center)
+        self.screen_center = Vector2(surface.get_rect().center)
+        self.ult_picker = UltimatePicker(surface)
         debug_rel_rect = pygame.Rect(0, 0, *GAME_DEBUG_RECT_SIZE)
         debug_rel_rect.topright = surface.get_rect().topright
         self.entities_drawn = 0
         self.five_sec_timer = Timer(5.)
         self.boss_soon_slider = Slider(1., 0.)
-        top_right = Vector2(*self.surface.get_rect().topright)
+        top_right = Vector2(self.surface.get_rect().topright)
         self.debug_textbox = TextBox(['']*5, top_right - Vector2(310., -BM), self.surface)
     
     def render(self):
@@ -52,7 +131,7 @@ class RenderManager:
             self.draw_enemy(enemy)
         for energy_orb in self.game.energy_orbs():
             self.draw_entity_basics(energy_orb)
-            self.draw_circular_status_bar(energy_orb.get_pos(), energy_orb._life_timer.get_slider(reverse=True),
+            draw_circular_status_bar(self.surface, energy_orb.get_pos(), energy_orb._life_timer.get_slider(reverse=True),
                 energy_orb.get_size() * 2., color=MAGENTA, draw_full=True, width=1)
         for corpse in self.game.corpses():
             self.draw_entity_basics(corpse)
@@ -60,12 +139,13 @@ class RenderManager:
             self.draw_mine(mine)
         for art_chest in self.game.artifact_chests():
             self.draw_artifact_chest(art_chest)
+        self.ult_picker.render()
         self.draw_player()
 
         # "boss spawns in 5 seconds" indicator
         if self.game.one_wave_timer.get_value() > WAVE_DURATION - 5.:
             self.boss_soon_slider.set_percent_full(1. - (self.game.one_wave_timer.get_value() - (WAVE_DURATION - 5.)) / 5.)
-            self.draw_circular_status_bar(self.screen_center, self.boss_soon_slider,
+            draw_circular_status_bar(self.surface, self.screen_center, self.boss_soon_slider,
                 80., color=LIGHTER_MAGENTA, draw_full=True, width=8)
             
         if self.debug:
@@ -96,16 +176,17 @@ class RenderManager:
     def draw_artifact_chest(self, art_chest: ArtifactChest):
         self.draw_entity_basics(art_chest)
         pos = art_chest.get_pos(); size = art_chest.get_size()
+        _color = WHITE if art_chest.artifact.artifact_type == ArtifactType.STATS else RED
         for i in range(3):
-            pygame.draw.circle(self.surface, WHITE, pos, size * i / 3 + 3, width=2)
-        self.draw_circular_status_bar(pos, art_chest.life_timer.get_slider(reverse=True),
+            pygame.draw.circle(self.surface, _color, pos, size * i / 3 + 3, width=3)
+        draw_circular_status_bar(self.surface, pos, art_chest.life_timer.get_slider(reverse=True),
             size * 1.2, color=WHITE, width=2)
         label = Label(str(art_chest.artifact), self.surface, position=pos + Vector2(-size * 1.5, -size * 1.5))
         label.update()
 
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)
-        self.draw_circular_status_bar(enemy.get_pos(), enemy.get_health(),
+        draw_circular_status_bar(self.surface, enemy.get_pos(), enemy.get_health(),
             enemy.get_size() * 1.5, 
             color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
         # if less than 1. sec left on the cooldown timer, indicate shooting intent
@@ -124,23 +205,6 @@ class RenderManager:
                 position=enemy.get_pos() + Vector2(enemy.get_size(), -enemy.get_size() * 1.5))
             label.update()
 
-    def draw_circular_status_bar(self, pos: Vector2, slider: Slider, 
-                                        radius: float, color: Color = Color('white'),
-                                        draw_full: bool = False, width: int = 3):
-        arc_percent = slider.get_percent_full()
-        if draw_full or arc_percent < 1.:
-            angle = math.pi * (2 * arc_percent + 0.5)
-            rect = pygame.Rect(0, 0, radius * 2, radius * 2)
-            rect.center = pos
-            pygame.draw.arc(
-                self.surface,
-                color,
-                rect,
-                math.pi / 2,
-                angle,
-                width=width
-            )
-
     def draw_player(self):
         player = self.game.player
         self.draw_entity_basics(player)
@@ -152,7 +216,7 @@ class RenderManager:
                 player.get_size(),
                 width=6
             )
-        self.draw_circular_status_bar(player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
+        draw_circular_status_bar(self.surface, player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
         # bullet shield:
         if (player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD) and 
             player.artifacts_handler.get_bullet_shield().is_on()):
@@ -163,7 +227,7 @@ class RenderManager:
                 ARTIFACT_SHIELD_SIZE,
                 width=2
             )
-            self.draw_circular_status_bar(player.get_pos(), 
+            draw_circular_status_bar(self.surface, player.get_pos(), 
                 player.artifacts_handler.get_bullet_shield().duration_timer.get_slider(reverse=True), ARTIFACT_SHIELD_SIZE + 5., draw_full=True)
 
     def draw_entity_trail(self, entity: Entity):
