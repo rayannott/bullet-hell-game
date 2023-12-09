@@ -253,6 +253,7 @@ class TankEnemy(Enemy):
             damage=ENEMY_DEFAULT_DAMAGE * (1. + 0.1 * self._player_level),
         )
         self._spread = 1. + 0.03 * (self._player_level + player.settings.difficulty)
+        self.cooldown.set_percent_full(0.8)
     
     def shoot(self):
         """Shoots in bursts with probability 0.5 and explosive projectiles with probability 0.5."""
