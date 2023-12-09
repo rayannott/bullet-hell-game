@@ -112,6 +112,10 @@ class GameScreen(Screen):
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
+        if self.game.collected_artifact_cache: # this adds the artifact to the ult picker
+            self.render_manager.ult_picker.add_artifact(self.game.collected_artifact_cache.pop())
+            self.game.collected_artifact_cache.clear()
+        self.render_manager.ult_picker.set_mouse_pos(Vector2(pygame.mouse.get_pos()))
         self.game.reflect_projectiles_vel()
         self.stats_panel.update(time_delta=time_delta)
         self.render()

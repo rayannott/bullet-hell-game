@@ -6,6 +6,7 @@ import itertools
 import pygame
 from pygame import Vector2, Color
 from config.settings import Settings
+from src.artifacts import Artifact
 
 from src.entity import Corpse, AOEEffect, Entity, DummyEntity, Mine
 from src.oil_spill import OilSpill
@@ -64,6 +65,7 @@ class Game:
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
         self.reason_of_death = ''
+        self.collected_artifact_cache: list[Artifact] = []
 
     def all_entities_iter(self, 
             with_player: bool = True,
@@ -333,7 +335,8 @@ class Game:
             if not artifact_chest.intersects(self.player): continue
             artifact = artifact_chest.get_artifact()
             print(f'collected artifact {artifact}')
-            self.player.artifacts_handler.add_artifact(artifact)
+            self.player.add_artifact(artifact)
+            self.collected_artifact_cache.append(artifact)
             self.feedback_buffer.append(Feedback(f'+{artifact}', 3., color=Color('#edf069')))
             play_sfx('artifact_collected')
             # remove all artifacts:
