@@ -60,6 +60,7 @@ class Slider:
         """Change the current value by delta. Return by how much it actually changed."""
         cache_current_value = self.current_value
         self.current_value += delta
+        self.current_value = round(self.current_value)
         self.current_value = min(self.current_value, self.max_value)
         self.current_value = max(self.current_value, 0.)
         return self.current_value - cache_current_value
