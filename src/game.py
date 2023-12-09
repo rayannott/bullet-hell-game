@@ -386,6 +386,7 @@ class Game:
 
     def deal_damage_to_enemy(self, enemy: Enemy, damage: float, get_damage_feedback: bool = True) -> None:
         damage_dealt_actual = -enemy.get_health().change(-damage)
+        enemy.get_health().current_value = round(enemy.get_health().current_value)
         self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
         if get_damage_feedback:
             self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.0f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
