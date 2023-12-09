@@ -42,7 +42,6 @@ class ProjectileType(Enum):
 class ArtifactType(Enum):
     STATS = auto()
     BULLET_SHIELD = auto()
-    DASH = auto()
-    BAIT = auto()
-    ROTATING_BULLETS = auto()
     MINE_SPAWN = auto()
+    DASH = auto()
+    ROTATING_BULLETS = auto()
