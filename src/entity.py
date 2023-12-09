@@ -1,6 +1,3 @@
-"""
-Abstract classes and enumerators for the game.
-"""
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import Optional
@@ -53,7 +50,8 @@ class Entity(ABC):
         """
         if not self.is_alive(): return
         if self.homing_target is not None:
-            self.vel = (self.homing_target.get_pos() - self.pos).normalize() * self.turn_coefficient + self.vel * (1 - self.turn_coefficient)
+            self.vel = ((self.homing_target.get_pos() - self.pos).normalize() * self.turn_coefficient + 
+                        self.vel * (1 - self.turn_coefficient))
         if self.speed > 0. and self.vel.magnitude_squared() > 0.:
             self.vel.scale_to_length(self.speed * time_delta)
             self.pos += self.vel
@@ -63,7 +61,7 @@ class Entity(ABC):
         """
         Check if this entity intersects with another entity.
         """
-        return self.is_alive() and other.is_alive() and (self.pos - other.pos).magnitude_squared() < (self.size + other.size) ** 2
+        return self.is_alive() and other.is_alive() and (self.pos - other.pos).magnitude_squared() < (self.get_size() + other.get_size()) ** 2
     
     def get_pos(self) -> Vector2: return self.pos
     
@@ -83,7 +81,7 @@ class Entity(ABC):
         self._is_alive = False
 
     def __str__(self) -> str:
-        return f'{self.type.name}(pos={self.pos})'
+        return f'{self.type.name.title()}(pos={self.pos})'
 
 
 class DummyEntity(Entity):
