@@ -20,13 +20,18 @@ class StatsBoost:
     speed: float = 0.
     cooldown: float = 0.
     size: float = 0.
+    bullet_shield_size: float = 0.
+    bullet_shield_duration: float = 0.
+    mine_cooldown: float = 0.
 
     def __iter__(self):
         yield from (self.health, self.regen, self.damage,
-            self.speed, self.cooldown, self.size)
+            self.speed, self.cooldown, self.size, self.bullet_shield_size, 
+            self.bullet_shield_duration, self.mine_cooldown)
 
     def __str__(self) -> str:
-        formats = ('+{:.0f}hp', '+{:.2f}reg', '+{:.0f}dmg', '+{:.0f}spd', '-{:.3f}cd', '-{:.0f}size')
+        formats = ('+{:.0f}hp', '+{:.1f}reg', '+{:.0f}dmg', 
+            '+{:.0f}spd', '-{:.2f}cd', '-{:.0f}size, +{:.0f}shld size, +{:.1f}shld dur, -{:.1f}mine cd')
         res = '|'.join(
             format_.format(val) for format_, val in zip(formats, self) if val
         )
