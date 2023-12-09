@@ -12,7 +12,7 @@ from config import (ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN,
 )
 
 
-@dataclass
+@dataclass(frozen=True)
 class StatsBoost:
     health: float = 0.
     regen: float = 0.
@@ -45,6 +45,9 @@ class StatsBoost:
             speed=self.speed + other.speed,
             cooldown=self.cooldown + other.cooldown,
             size=self.size + other.size,
+            bullet_shield_size=self.bullet_shield_size + other.bullet_shield_size,
+            bullet_shield_duration=self.bullet_shield_duration + other.bullet_shield_duration,
+            mine_cooldown=self.mine_cooldown + other.mine_cooldown,
         )
 
 
@@ -56,6 +59,8 @@ class Artifact(ABC):
     ):
         self.artifact_type = artifact_type
         self.player = player
+        if player:
+            self.total_stats_boost: StatsBoost = player.boosts
         self.cooldown = cooldown
         self.cooldown_timer = Timer(max_time=self.cooldown)
         self.cooldown_timer.set_percent_full(0.5)
@@ -65,6 +70,9 @@ class Artifact(ABC):
     
     def __str__(self) -> str:
         return 'Artifact::' + self.__class__.__name__
+    
+    def get_short_string(self) -> str:
+        raise NotImplementedError(f'{self} doesn\'t implement get_short_string()')
 
 
 class BulletShield(Artifact):
@@ -74,8 +82,12 @@ class BulletShield(Artifact):
             player=player,
             cooldown=ARTIFACT_SHIELD_COOLDOWN
         )
-        self.duration_timer = Timer(max_time=ARTIFACT_SHIELD_DURATION)
+        self.duration_timer = Timer(max_time=ARTIFACT_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration)
         self.duration_timer.turn_off()
+    
+    @staticmethod
+    def get_artifact_type():
+        return ArtifactType.BULLET_SHIELD
         
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -95,8 +107,14 @@ class BulletShield(Artifact):
         self.duration_timer.reset()
         self.cooldown_timer.reset()
 
+    def get_size(self) -> float:
+        return ARTIFACT_SHIELD_SIZE + self.total_stats_boost.bullet_shield_size
+
     def point_inside_shield(self, pos: Vector2) -> bool:
-        return self.is_on() and (pos - self.player.pos).magnitude_squared() < ARTIFACT_SHIELD_SIZE ** 2
+        return self.is_on() and (pos - self.player.pos).magnitude_squared() < self.get_size() ** 2
+    
+    def get_short_string(self):
+        return 'Shield'
 
 
 class MineSpawn(Artifact):
@@ -106,6 +124,11 @@ class MineSpawn(Artifact):
             player=player,
             cooldown=MINE_COOLDOWN
         )
+        self.cooldown -= self.total_stats_boost.mine_cooldown
+    
+    @staticmethod
+    def get_artifact_type():
+        return ArtifactType.MINE_SPAWN
 
     def spawn(self):
         if self.cooldown_timer.running():
@@ -119,11 +142,14 @@ class MineSpawn(Artifact):
         self.player.entities_buffer.append(Mine(pos=pos-vel, 
                                     damage=MINE_DEFAULT_DAMAGE + 10. * (self.player.level - 1)))
         self.cooldown_timer.reset()
+    
+    def get_short_string(self):
+        return 'Mine'
 
 
-class BaitSpawn(Artifact):
+class Dash(Artifact):
     def __init__(self, player):
-        super().__init__(artifact_type=ArtifactType.BAIT, player=player, cooldown=12.)
+        super().__init__(artifact_type=ArtifactType.DASH, player=player, cooldown=12.)
 
 
 class InactiveArtifact(Artifact):
@@ -148,7 +174,7 @@ class ArtifactsHandler:
 
         self.bullet_shield: BulletShield | None = None
         self.mine_spawn: MineSpawn | None = None
-        self.bait_spawn: BaitSpawn | None = None
+        self.dash: Dash | None = None
 
     def get_total_stats_boost(self) -> StatsBoost:
         return sum((artifact.stats_boost for artifact in self.inactive_artifacts), StatsBoost())
@@ -162,8 +188,8 @@ class ArtifactsHandler:
             yield self.bullet_shield
         if self.mine_spawn is not None:
             yield self.mine_spawn
-        if self.bait_spawn is not None:
-            yield self.bait_spawn
+        if self.dash is not None:
+            yield self.dash
     
     def add_artifact(self, artifact: Artifact):
         if isinstance(artifact, InactiveArtifact):
@@ -172,8 +198,8 @@ class ArtifactsHandler:
             self.bullet_shield = artifact
         elif isinstance(artifact, MineSpawn):
             self.mine_spawn = artifact
-        elif isinstance(artifact, BaitSpawn):
-            self.bait_spawn = artifact
+        elif isinstance(artifact, Dash):
+            self.dash = artifact
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact.artifact_type}')
     
@@ -182,23 +208,23 @@ class ArtifactsHandler:
             return self.bullet_shield is not None
         elif artifact_type == ArtifactType.MINE_SPAWN:
             return self.mine_spawn is not None
-        elif artifact_type == ArtifactType.BAIT:
-            return self.bait_spawn is not None
+        elif artifact_type == ArtifactType.DASH:
+            return self.dash is not None
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact_type}')
     
     def get_bullet_shield(self) -> BulletShield:
         if self.bullet_shield is None:
-            raise ArtifactMissing('[!] bullet shield is missing')
+            raise ArtifactMissing('[?] bullet shield is missing')
         return self.bullet_shield
     def get_mine_spawn(self) -> MineSpawn:
         if self.mine_spawn is None:
-            raise ArtifactMissing('[!] mine spawn is missing')
+            raise ArtifactMissing('[?] mine spawn is missing')
         return self.mine_spawn
-    def get_bait(self) -> BaitSpawn:
-        if self.bait_spawn is None:
-            raise ArtifactMissing('[!] bait spawn is missing')
-        return self.bait_spawn
+    def get_bait(self) -> Dash:
+        if self.dash is None:
+            raise ArtifactMissing('[?] dash is missing')
+        return self.dash
     
     def __repr__(self) -> str:
         active_artivacts = ' | '.join(map(str, self.iterate_active()))
