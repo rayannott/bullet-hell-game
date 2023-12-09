@@ -4,11 +4,12 @@ import random
 from pygame import Vector2
 from config.settings import Settings
 from front.sounds import play_sfx
-from src.artifacts import ArtifactsHandler, BulletShield, MineSpawn
+from src.artifacts import ArtifactsHandler, MineSpawn, Artifact
+from src.artifact_chest import ArtifactChest, ArtifactChestGenerator
 
 from src.entity import Entity
 from src.enums import ArtifactType, EntityType, ProjectileType
-from src.exceptions import ArtifactMissing, NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ShieldRunning
+from src.exceptions import ArtifactMissing, NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ArtifactCollected
 from src.projectile import Projectile
 from src.utils import Stats, Slider, Timer
 
@@ -67,13 +68,16 @@ class Player(Entity):
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
         self.artifacts_handler = ArtifactsHandler(player=self)
-        # self.artifacts_handler.add_artifact(BulletShield(player=self))
-        self.artifacts_handler.add_artifact(MineSpawn(player=self))
+        self.artifacts_generator = ArtifactChestGenerator()
+        self.boosts = self.artifacts_handler.get_total_stats_boost()
+        # self.add_artifact(BulletShield(player=self))
+        # self.add_artifact(MineSpawn(player=self))
 
     def update(self, time_delta: float):
         super().update(time_delta)
         if not self._is_alive: return
         if not self.health.is_alive(): self.kill()
+        self.boosts = self.artifacts_handler.get_total_stats_boost()
 
         self.speed_velocity_evolution()
         self.health_energy_evolution(time_delta)
@@ -85,10 +89,10 @@ class Player(Entity):
         towards_gravity_point = (self.gravity_point - self.pos)
         dist_to_gravity_point = towards_gravity_point.magnitude()
         t = (dist_to_gravity_point / 1500.) ** 0.8
-        self.speed = self.speed_range[0] + (self.speed_range[1] - self.speed_range[0]) * t *\
-            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.)
+        self.speed = (self.speed_range[0] + (self.get_max_speed() - self.speed_range[0]) * t *
+            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.))
 
-        if dist_to_gravity_point > self.size * 0.2:
+        if dist_to_gravity_point > self.get_size() * 0.2:
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:
             self.vel = Vector2()
@@ -112,9 +116,7 @@ class Player(Entity):
             low_health_multiplier = 2. if e_percent < 0.6 else 3.
             energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * low_health_multiplier
         # decay energy and regenerate health faster when health is low
-        if e_percent > 0.: self.health.change(
-            self.regeneration_rate * low_health_multiplier * time_delta
-        )
+        if e_percent > 0.: self.health.change(self.get_regen() * low_health_multiplier * time_delta)
         self.energy.change(
             -(energy_decay_rate_velocity + energy_decay_rate_health) * time_delta
         )
@@ -137,13 +139,13 @@ class Player(Entity):
             if self.vel.magnitude_squared() == 0.:
                 raise ShootingDirectionUndefined('direction undefined')
         self.energy.change(-PLAYER_SHOT_COST)
-        self.shoot_cooldown_timer.reset(with_max_time=self.shoot_cooldown)
+        self.shoot_cooldown_timer.reset(with_max_time=self.get_shoot_coolodown())
         self.stats.PROJECTILES_FIRED += 1
         direction = self.vel.normalize()
         return Projectile(
-            pos=self.pos.copy() + direction * self.size * 1.5,
+            pos=self.pos.copy() + direction * self.get_size() * 1.5,
             vel=direction,
-            damage=self.damage + self.damage_spread * random.uniform(-1, 1),
+            damage=self.get_damage() + self.damage_spread * random.uniform(-1, 1),
             projectile_type=ProjectileType.PLAYER_BULLET,
             speed=self.speed + PROJECTILE_DEFAULT_SPEED,
         )
@@ -157,8 +159,17 @@ class Player(Entity):
         if artifact_type == ArtifactType.MINE_SPAWN:
             self.artifacts_handler.get_mine_spawn().spawn()
             self.get_stats().MINES_PLANTED += 1
+            # TODO: play_sfx('mine_planted')
             return
+        if artifact_type == ArtifactType.DASH:
+            raise NotImplementedError('dash not implemented')
         raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
+    
+    def add_artifact(self, artifact: Artifact):
+        is_successful = self.artifacts_generator.check_artifact(artifact)
+        if not is_successful:
+            raise ArtifactCollected(f'artifact {artifact} already collected')
+        self.artifacts_handler.add_artifact(artifact)
     
     def new_level(self):
         self.level += 1
@@ -179,6 +190,16 @@ class Player(Entity):
     def get_health(self) -> Slider: return self.health
 
     def get_energy(self) -> Slider: return self.energy
+
+    def get_damage(self) -> float: return self.damage + self.boosts.damage
+
+    def get_regen(self) -> float: return self.regeneration_rate + self.boosts.regen
+
+    def get_shoot_coolodown(self) -> float: return self.shoot_cooldown - self.boosts.cooldown
+
+    def get_size(self) -> float: return self.size - self.boosts.size
+
+    def get_max_speed(self) -> float: return self.speed_range[1] + self.boosts.speed
     
     def get_stats(self) -> Stats: return self.stats
 
