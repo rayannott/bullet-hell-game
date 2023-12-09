@@ -2,6 +2,7 @@ import math
 
 import pygame
 from pygame import Color, Vector2, freetype
+from src.artifact_chest import ArtifactChest
 from src.enemy import Enemy
 from src.enums import ArtifactType, EnemyType, ProjectileType
 
@@ -58,12 +59,7 @@ class RenderManager:
         for mine in self.game.mines():
             self.draw_mine(mine)
         for art_chest in self.game.artifact_chests():
-            self.draw_entity_basics(art_chest)
-            pos = art_chest.get_pos(); size = art_chest.get_size()
-            for i in range(3):
-                pygame.draw.circle(self.surface, WHITE, pos, size * i / 3 + 3, width=2)
-            self.draw_circular_status_bar(pos, art_chest.life_timer.get_slider(reverse=True),
-                size * 1.2, color=WHITE, width=2)
+            self.draw_artifact_chest(art_chest)
         self.draw_player()
 
         # "boss spawns in 5 seconds" indicator
@@ -97,6 +93,16 @@ class RenderManager:
     def soon_shooting_coef_function(x: float) -> float:
         return -5.625*x**2 + 4.625 * x+1
 
+    def draw_artifact_chest(self, art_chest: ArtifactChest):
+        self.draw_entity_basics(art_chest)
+        pos = art_chest.get_pos(); size = art_chest.get_size()
+        for i in range(3):
+            pygame.draw.circle(self.surface, WHITE, pos, size * i / 3 + 3, width=2)
+        self.draw_circular_status_bar(pos, art_chest.life_timer.get_slider(reverse=True),
+            size * 1.2, color=WHITE, width=2)
+        label = Label(str(art_chest.artifact), self.surface, position=pos + Vector2(-size * 1.5, -size * 1.5))
+        label.update()
+
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)
         self.draw_circular_status_bar(enemy.get_pos(), enemy.get_health(),
@@ -112,14 +118,11 @@ class RenderManager:
                 enemy.get_size() * self.soon_shooting_coef_function(1. - t),
                 width=1
             )
-        if self.debug: self.draw_enemy_health_debug(enemy)
-
-    def draw_enemy_health_debug(self, enemy: Enemy):
-        health_text = f'{enemy.get_health()}'
-        label = Label(health_text, self.surface, 
-            position=enemy.get_pos() + Vector2(enemy.get_size(), -enemy.get_size() * 1.5))
-        label.update()
-        # TODO: check if this is expensive; if so, cache it
+        if self.debug:
+            health_text = f'{enemy.get_health()}'
+            label = Label(health_text, self.surface, 
+                position=enemy.get_pos() + Vector2(enemy.get_size(), -enemy.get_size() * 1.5))
+            label.update()
 
     def draw_circular_status_bar(self, pos: Vector2, slider: Slider, 
                                         radius: float, color: Color = Color('white'),
