@@ -12,3 +12,6 @@ class ShieldRunning(Exception):
 
 class ArtifactMissing(Exception):
     pass
+
+class ArtifactCollected(Exception):
+    pass
