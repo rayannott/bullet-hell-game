@@ -6,7 +6,7 @@ import pygame
 from pygame import Color, Vector2
 import pygame_gui
 from src.artifact_chest import ArtifactChest
-from src.artifacts import BulletShield
+from src.artifacts import BulletShield, InactiveArtifact, StatsBoost
 from src.enums import ArtifactType, EnemyType
 
 from src.utils import Feedback, random_unit_vector
@@ -86,6 +86,8 @@ class GameScreen(Screen):
                     self.game.new_level()
                 elif event.key == pygame.K_a:
                     self.game.add_entity(ArtifactChest(Vector2(*pygame.mouse.get_pos()), BulletShield(self.game.player)))
+                elif event.key == pygame.K_q:
+                    self.game.add_entity(ArtifactChest(Vector2(*pygame.mouse.get_pos()), InactiveArtifact(StatsBoost(damage=20, regen=1))))
 
         super().process_ui_event(event)
 
