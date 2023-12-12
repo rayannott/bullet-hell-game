@@ -208,10 +208,16 @@ class RenderManager:
     def draw_player(self):
         player = self.game.player
         self.draw_entity_basics(player)
+        if player.invulnerability_timer.running():
+            _indicator_color = RED
+        elif player.energy.get_value() > PLAYER_SHOT_COST:
+            _indicator_color = YELLOW
+        else:
+            _indicator_color = WHITE
         if player.energy.get_value() > PLAYER_SHOT_COST:
             pygame.draw.circle(
                 self.surface,
-                YELLOW,
+                _indicator_color,
                 player.get_pos(),
                 player.get_size(),
                 width=6

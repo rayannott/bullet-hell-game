@@ -305,21 +305,21 @@ class Game:
             self.reason_of_death = f'caught Bullet::{projectile.projectile_type.name.title()}'
         for enemy in self.enemies():
             if not enemy.intersects(self.player): continue
-            self.player_get_damage(enemy.damage_on_collision)
+            self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=True)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             enemy.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
             self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
-            self.player_get_damage(corpse._damage_on_collision)
+            self.player_get_damage(corpse._damage_on_collision, ignore_invul_timer=True)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             corpse.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
             self.reason_of_death = f'collided with Corpse'
         for mine in self.mines():
             if not mine.intersects(self.player): continue
-            self.player_get_damage(mine.damage)
+            self.player_get_damage(mine.damage, ignore_invul_timer=True)
             self.player.get_stats().MINES_STEPPED_ON += 1
             mine.kill()
             self.feedback_buffer.append(Feedback('mine!', 3.5, color=pygame.Color('pink')))
@@ -404,7 +404,9 @@ class Game:
         self.feedback_buffer.append(Feedback(f'+{reward:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
         play_sfx('enemy_killed')
     
-    def player_get_damage(self, damage: float) -> float:
+    def player_get_damage(self, damage: float, ignore_invul_timer: bool = False) -> float:
+        if not ignore_invul_timer and self.player.invulnerability_timer.running(): return 0.
+        self.player.invulnerability_timer.reset()
         damage_taken_actual = -self.player.health.change(-damage)
         self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
         self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=pygame.Color('orange'), at_pos='player'))

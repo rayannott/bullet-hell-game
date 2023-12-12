@@ -14,7 +14,7 @@ from src.projectile import Projectile
 from src.utils import Stats, Slider, Timer
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER,
+    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST,
 )
@@ -63,6 +63,7 @@ class Player(Entity):
         self.stats = Stats()
         self.shoot_cooldown = PLAYER_DEFAULT_SHOOT_COOLDOWN
         self.shoot_cooldown_timer = Timer(max_time=self.shoot_cooldown)
+        self.invulnerability_timer = Timer(max_time=PLAYER_INVULNERABILITY_TIME)
         self.damage = PLAYER_DEFAULT_DAMAGE_AVG
         self.damage_spread = PLAYER_DEFAULT_DAMAGE_SPREAD
         self.effect_flags = EffectFlags()
@@ -82,6 +83,7 @@ class Player(Entity):
         self.speed_velocity_evolution()
         self.health_energy_evolution(time_delta)
         self.shoot_cooldown_timer.tick(time_delta)
+        self.invulnerability_timer.tick(time_delta)
         self.artifacts_handler.update(time_delta)
         self.effect_flags.reset()
     
