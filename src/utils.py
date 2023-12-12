@@ -122,7 +122,7 @@ def default_color() -> Color:
 class Feedback:
     text: str
     duration: float = 1.5
-    at_pos: Literal['player', 'cursor'] | Vector2 = 'player'
+    at_pos: Literal['player', 'cursor', 'center'] | Vector2 = 'player'
     color: Color = field(default_factory=default_color)
 
 

@@ -162,7 +162,7 @@ class GameScreen(Screen):
     def spawn_notification(self,
             text: str = '', 
             duration: float = 3., 
-            at_pos: Literal['player', 'cursor'] | Vector2 = 'cursor',
+            at_pos: Literal['player', 'cursor', 'center'] | Vector2 = 'cursor',
             color: Color = Color('white'),
             feedback: Feedback | None = None,
         ):
@@ -174,6 +174,7 @@ class GameScreen(Screen):
         random_vector = random_unit_vector() * random.random() * 50
         if at_pos == 'player': at_pos = self.game.player.get_pos() + random_vector
         elif at_pos == 'cursor': at_pos = Vector2(pygame.mouse.get_pos()) + random_vector
+        elif at_pos == 'center': at_pos = self.surface.get_rect().center + random_vector
         self.notifications.append(
             Notification(
                 text=text,
