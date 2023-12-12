@@ -197,7 +197,7 @@ class RenderManager:
                 Color('white'),
                 enemy.get_pos(),
                 enemy.get_size() * self.soon_shooting_coef_function(1. - t),
-                width=1
+                width=2
             )
         if self.debug:
             health_text = f'{enemy.get_health()}'
