@@ -53,9 +53,6 @@ class GameScreen(Screen):
         self.game_is_over_window_shown = False
         self.notifications: list[Notification] = []
 
-        # TODO: create a class for this
-        self.ability_picker = ...
-
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p: self.game.toggle_pause()

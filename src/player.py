@@ -39,7 +39,6 @@ class Achievements:
     KILL_BOSS_RICOCHET: bool = False
     REACH_LEVEL_5_WITHOUT_CORPSES: bool = False
     REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE: bool = False
-    # TODO: add achievements handler
 
 
 class Player(Entity):

@@ -15,7 +15,6 @@ class Entity(ABC):
     """
     Abstract class for all entities in the game.
     """
-    # TODO: change field names (remove the underscores)
     def __init__(self,
         pos: Vector2,
         type: EntityType,
