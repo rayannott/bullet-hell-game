@@ -172,12 +172,12 @@ class Game:
             self.remove_dead_entities_timer.reset()
         self.one_wave_timer.tick(time_delta)
         if not self.one_wave_timer.running():
+            self.one_wave_timer.reset()
             # spawn boss at the end of the wave unless one is already alive
             if any(ent.enemy_type == EnemyType.BOSS for ent in self.enemies()):
                 self.feedback_buffer.append(Feedback('boss is still alive!', 2., color=Color('red')))
                 return
             self.spawn_enemy(EnemyType.BOSS)
-            self.one_wave_timer.reset()
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
             self.spawn_energy_orb()
