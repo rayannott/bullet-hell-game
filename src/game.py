@@ -116,6 +116,12 @@ class Game:
         # the higher the difficulty, the faster the spawn cooldown shrinks
         self.current_spawn_enemy_cooldown *= (1. - 0.02 * self.settings.difficulty)
 
+        art_chests_to_spawn = self.player.artifacts_generator.get_artifact_chests(self.level)
+        print(f'spawning artifact chests: {art_chests_to_spawn}')
+        for ac in art_chests_to_spawn:
+            self.add_entity(ac)
+
+        # achievements:
         if self.level == 5:
             if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES and not len(self.e_corpses):
                 self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES = True
