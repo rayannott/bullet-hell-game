@@ -381,7 +381,7 @@ class BossEnemy(Enemy):
         elif projectile_type_to_shoot == ProjectileType.EXPLOSIVE:
             self.shoot_explosive(num_of_subprojectiles=4)
         elif projectile_type_to_shoot == ProjectileType.DEF_TRAJECTORY:
-            self.shoot_def_trajectory(num_of_projectiles=2 + self._player_level // 2)
+            self.shoot_def_trajectory(num_of_projectiles=1 + self._player_level // 3)
     
     def on_natural_death(self):
         raise ValueError('Bosses should not die naturally.')
