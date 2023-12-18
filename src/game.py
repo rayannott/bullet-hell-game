@@ -311,6 +311,7 @@ class Game:
             if not enemy.intersects(self.player): continue
             if player_in_dash:
                 self.deal_damage_to_enemy(enemy, self.player.get_damage())
+                # TODO: play_sfx('dash_hit')
             else:
                 self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=True)
                 self.player.get_stats().ENEMIES_COLLIDED_WITH += 1

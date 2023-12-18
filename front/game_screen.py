@@ -49,6 +49,7 @@ class GameScreen(Screen):
         self.stats_panel = StatsPanel(surface, self.manager, self.game)
         self.debug = False
         self.render_manager = RenderManager(surface=surface, debug=self.debug, game=self.game)
+        # TODO: self.inventory_panel = ...
 
         self.game_is_over_window_shown = False
         self.notifications: list[Notification] = []
