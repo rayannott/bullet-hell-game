@@ -35,7 +35,7 @@ class StatsBoost:
         res = '|'.join(
             format_.format(val) for format_, val in zip(formats, self, strict=True) if val
         )
-        return res if res else 'default'
+        return res if res else 'no-boosts'
 
     def __add__(self, other: 'StatsBoost'):
         return StatsBoost(

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import random
 
-from pygame import Vector2
+from pygame import Vector2, Color
 from config.settings import Settings
 from front.sounds import play_sfx
 from src.artifacts import ArtifactsHandler, MineSpawn, Artifact
@@ -16,8 +16,12 @@ from src.utils import Stats, Slider, Timer
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
-    PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST, PLAYER_EXTRA_BULLET_SHOT_MULT
+    PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST, PLAYER_EXTRA_BULLET_SHOT_MULT,
+    NICER_GREEN_HEX
 )
+
+WHITE = Color('white')
+NICER_GREEN = Color(NICER_GREEN_HEX)
 
 
 @dataclass
@@ -88,6 +92,7 @@ class Player(Entity):
         self.effect_flags.reset()
         self.effect_flags.IN_DASH = self.artifacts_handler.is_present(ArtifactType.DASH) and \
             self.artifacts_handler.get_dash().is_on()
+        self.color = NICER_GREEN if self.effect_flags.IN_DASH else WHITE
     
     def add_extra_bullets(self, num_to_add: int):
         self.extra_bullets += num_to_add
