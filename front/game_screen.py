@@ -6,7 +6,7 @@ import pygame
 from pygame import Color, Vector2
 import pygame_gui
 from src.artifact_chest import ArtifactChest
-from src.artifacts import BulletShield, InactiveArtifact, MineSpawn, StatsBoost
+from src.artifacts import BulletShield, Dash, InactiveArtifact, MineSpawn, StatsBoost
 from src.enums import ArtifactType, EnemyType
 
 from src.utils import Feedback, random_unit_vector
@@ -75,18 +75,18 @@ class GameScreen(Screen):
                     self.game.spawn_enemy(EnemyType.ARTILLERY)
                 elif event.key == pygame.K_5:
                     self.game.spawn_enemy(EnemyType.BOSS)
-                elif event.key == pygame.K_d:
-                    print('--- debug ---')
+                elif event.key == pygame.K_i:
+                    print('--- debug info ---')
                     print(self.game.get_info())
                     print('-'*10)
                 elif event.key == pygame.K_l:
                     self.game.new_level()
-                elif event.key == pygame.K_a:
-                    if random.random() < 0.5:
-                        to_spawn = BulletShield(self.game.player)
-                    else:
-                        to_spawn = MineSpawn(self.game.player)
-                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), to_spawn))
+                elif event.key == pygame.K_s:
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), BulletShield(self.game.player)))
+                elif event.key == pygame.K_SPACE:
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), MineSpawn(self.game.player)))
+                elif event.key == pygame.K_d:
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Dash(self.game.player)))
                 elif event.key == pygame.K_q:
                     sb = StatsBoost(regen=1.5)
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), InactiveArtifact(sb)))
@@ -116,6 +116,8 @@ class GameScreen(Screen):
                 self.game.player_try_ultimate(artifact_type=ArtifactType.MINE_SPAWN)
             elif event.key == pygame.K_s:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.BULLET_SHIELD)
+            elif event.key == pygame.K_d:
+                self.game.player_try_ultimate(artifact_type=ArtifactType.DASH)
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
