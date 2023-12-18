@@ -15,7 +15,7 @@ from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType
 from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback, random_unit_vector
 from src.energy_orb import EnergyOrb
-from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning
+from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, DashRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.artifact_chest import ArtifactChest
 
@@ -171,7 +171,7 @@ class Game:
             list(type_weights.values()), 
         k=1)[0]
         if enemy_type == EnemyType.BASIC and self.level > 3:
-            num = random.randint(1, self.level//2)
+            num = random.randint(1, self.level//3 + 1)
         else: num = 1
         for _ in range(num):
             self.spawn_enemy(enemy_type)
@@ -229,19 +229,7 @@ class Game:
 
     def player_try_ultimate(self, artifact_type: ArtifactType):
         try: self.player.ultimate_ability(artifact_type)
-        except ArtifactMissing as e:
-            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
-            play_sfx('warning')
-            print(e)
-        except OnCooldown as e:
-            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
-            play_sfx('warning')
-            print(e)
-        except NotEnoughEnergy as e:
-            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
-            play_sfx('warning')
-            print(e)
-        except ShieldRunning as e:
+        except (ArtifactMissing, OnCooldown, NotEnoughEnergy, ShieldRunning, DashRunning) as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
             print(e)
@@ -294,6 +282,7 @@ class Game:
             self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
             if eo.gives_extra_bullet:
+                self.feedback_buffer.append(Feedback(f'+1eb', color=Color('white')))
                 self.player.add_extra_bullet()
             play_sfx('energy_collected')
             eo.kill()
