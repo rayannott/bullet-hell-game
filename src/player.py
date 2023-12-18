@@ -68,10 +68,10 @@ class Player(Entity):
         self.effect_flags = EffectFlags()
         self.achievements = Achievements()
         self.artifacts_handler = ArtifactsHandler(player=self)
-        self.artifacts_generator = ArtifactChestGenerator()
+        self.artifacts_generator = ArtifactChestGenerator(self)
         self.boosts = self.artifacts_handler.get_total_stats_boost()
-        # self.add_artifact(BulletShield(player=self))
-        # self.add_artifact(MineSpawn(player=self))
+
+        self.extra_bullets = 0
 
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -85,6 +85,9 @@ class Player(Entity):
         self.invulnerability_timer.tick(time_delta)
         self.artifacts_handler.update(time_delta)
         self.effect_flags.reset()
+    
+    def add_extra_bullet(self):
+        self.extra_bullets += 1
     
     def speed_velocity_evolution(self):
         towards_gravity_point = (self.gravity_point - self.pos)
@@ -131,17 +134,24 @@ class Player(Entity):
         return self.shoot_cooldown_timer.running()
 
     def shoot(self) -> Projectile:
-        if self.is_on_cooldown():
-            raise OnCooldown('on cooldown')
+        used_extra_bullet = False
         if self.energy.get_value() < PLAYER_SHOT_COST:
             raise NotEnoughEnergy('not enough energy')
+        if self.is_on_cooldown():
+            if self.extra_bullets > 0:
+                if self.energy.get_value() < PLAYER_SHOT_COST * 1.6:
+                    raise NotEnoughEnergy('not enough energy')
+                self.extra_bullets -= 1
+                used_extra_bullet = True
+            else:
+                raise OnCooldown('on cooldown')
         if self.vel == Vector2():
             self.vel = self.gravity_point - self.pos
             if self.vel.magnitude_squared() == 0.:
                 raise ShootingDirectionUndefined('direction undefined')
-        self.energy.change(-PLAYER_SHOT_COST)
+        self.energy.change(-PLAYER_SHOT_COST * (1.6 if used_extra_bullet else 1.))
         self.shoot_cooldown_timer.reset(with_max_time=self.get_shoot_coolodown())
-        self.stats.PROJECTILES_FIRED += 1
+        self.get_stats().PROJECTILES_FIRED += 1
         direction = self.vel.normalize()
         return Projectile(
             pos=self.pos.copy() + direction * self.get_size() * 1.5,
