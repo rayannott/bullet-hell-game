@@ -86,4 +86,4 @@ class ArtifactChestGenerator:
         """
         Returns a list of ArtifactChests with the artifacts that player does not yet have.
         """
-        ...
+        return []

@@ -56,6 +56,7 @@ class Artifact(ABC):
         artifact_type: ArtifactType,
         player,
         cooldown: float,
+        cost: float
     ):
         self.artifact_type = artifact_type
         self.player = player
@@ -64,6 +65,7 @@ class Artifact(ABC):
         self.cooldown = cooldown
         self.cooldown_timer = Timer(max_time=self.cooldown)
         self.cooldown_timer.set_percent_full(0.5)
+        self.cost = cost
 
     def update(self, time_delta: float):
         self.cooldown_timer.tick(time_delta)
@@ -80,7 +82,8 @@ class BulletShield(Artifact):
         super().__init__(
             artifact_type=ArtifactType.BULLET_SHIELD, 
             player=player,
-            cooldown=ARTIFACT_SHIELD_COOLDOWN
+            cooldown=ARTIFACT_SHIELD_COOLDOWN,
+            cost=ARTIFACT_SHIELD_COST
         )
         self.duration_timer = Timer(max_time=ARTIFACT_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration)
         self.duration_timer.turn_off()
@@ -97,13 +100,13 @@ class BulletShield(Artifact):
         return self.duration_timer.running()
 
     def turn_on(self):
-        if self.player.energy.get_value() < ARTIFACT_SHIELD_COST:
+        if self.player.energy.get_value() < self.cost:
             raise NotEnoughEnergy('not enough energy for shield')
         if self.is_on():
             raise ShieldRunning('shield already running')
         if self.cooldown_timer.running():
             raise OnCooldown(f'shield on cooldown: {self.cooldown_timer.get_time_left():.1f}')
-        self.player.energy.change(-ARTIFACT_SHIELD_COST)
+        self.player.energy.change(-self.cost)
         self.duration_timer.reset()
         self.cooldown_timer.reset()
 
@@ -122,7 +125,8 @@ class MineSpawn(Artifact):
         super().__init__(
             artifact_type=ArtifactType.MINE_SPAWN, 
             player=player,
-            cooldown=MINE_COOLDOWN
+            cooldown=MINE_COOLDOWN,
+            cost=MINE_COST
         )
         self.cooldown -= self.total_stats_boost.mine_cooldown
     
@@ -133,9 +137,9 @@ class MineSpawn(Artifact):
     def spawn(self):
         if self.cooldown_timer.running():
             raise OnCooldown(f'mine spawner on cooldown: {self.cooldown_timer.get_time_left():.1f}')
-        if self.player.energy.get_value() < MINE_COST:
+        if self.player.energy.get_value() < self.cost:
             raise NotEnoughEnergy('not enough energy for a mine')
-        self.player.energy.change(-MINE_COST)
+        self.player.energy.change(-self.cost)
         vel: Vector2 = self.player.get_vel() + random_unit_vector()
         vel.scale_to_length(20.)
         pos: Vector2 = self.player.get_pos()
@@ -149,12 +153,17 @@ class MineSpawn(Artifact):
 
 class Dash(Artifact):
     def __init__(self, player):
-        super().__init__(artifact_type=ArtifactType.DASH, player=player, cooldown=12.)
+        super().__init__(
+            artifact_type=ArtifactType.DASH,
+            player=player,
+            cooldown=12.,
+            cost=300,
+        )
 
 
 class InactiveArtifact(Artifact):
     def __init__(self, stats_boost: StatsBoost):
-        super().__init__(artifact_type=ArtifactType.STATS, player=None, cooldown=0)
+        super().__init__(artifact_type=ArtifactType.STATS, player=None, cooldown=0, cost=0)
         self.stats_boost = stats_boost
     
     def update(self, time_delta: float):

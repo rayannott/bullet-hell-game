@@ -63,13 +63,16 @@ class UltimatePicker:
 
     def render(self):
         if not self.is_on: return
+        if not self.options: return
+        player_energy: Slider = self.options[0].player.energy
         pygame.draw.circle(self.surface, MAGENTA, self.pos_to_draw_at, 4, width=1)
         for i in range(len(self.options)):
             this_pos = self.option_circles_positions[i]
             this_width = 5 if (this_pos - self.mouse_pos).magnitude_squared() < OPTION_CIRCLE_SIZE ** 2 else 2
             pygame.draw.circle(self.surface, MAGENTA, this_pos, OPTION_CIRCLE_SIZE, width=this_width)
+            color = NICER_GREEN if player_energy.get_value() >= self.options[i].cost else WHITE
             draw_circular_status_bar(self.surface, this_pos, self.options[i].cooldown_timer.get_slider(),
-                OPTION_CIRCLE_SIZE + 5., draw_full=True)
+                OPTION_CIRCLE_SIZE + 15., draw_full=True, color=color, width=5)
             self.options_labels[i].update()
     
     def recompute_options(self):
