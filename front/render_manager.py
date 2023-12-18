@@ -11,13 +11,14 @@ from src.game import Game
 from src.entity import Entity
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
-from config import PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE, NICER_MAGENTA_HEX
+from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, 
+    WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX)
 
 freetype.init()
 font = freetype.SysFont('Arial', 20)
 
 
-NICER_GREEN = Color('#3ce870')
+NICER_GREEN = Color(NICER_GREEN_HEX)
 MAGENTA = Color(NICER_MAGENTA_HEX)
 LIGHTER_MAGENTA = Color('#a22ac9')
 YELLOW = Color('yellow')
@@ -187,7 +188,7 @@ class RenderManager:
         if can_be_picked_up:
             draw_circular_status_bar(self.surface, pos, art_chest.life_timer.get_slider(reverse=True),
                 size * 1.2, color=WHITE, width=2)
-            label = Label(str(art_chest.artifact), self.surface, position=pos + Vector2(-size * 1.5, -size * 1.5))
+            label = Label(str(art_chest.artifact), self.surface, position=pos + Vector2(-size, -size * 1.5))
             label.update()
 
     def draw_enemy(self, enemy: Enemy):
@@ -220,6 +221,8 @@ class RenderManager:
             _indicator_color = YELLOW
         else:
             _indicator_color = WHITE
+        if player.effect_flags.IN_DASH:
+            _indicator_color = NICER_GREEN
         if player.energy.get_value() > PLAYER_SHOT_COST:
             pygame.draw.circle(
                 self.surface,
