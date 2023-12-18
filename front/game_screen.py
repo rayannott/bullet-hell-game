@@ -87,10 +87,6 @@ class GameScreen(Screen):
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), MineSpawn(self.game.player)))
                 elif event.key == pygame.K_d:
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Dash(self.game.player)))
-                elif event.key == pygame.K_q:
-                    sb = StatsBoost(regen=1.5)
-                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), InactiveArtifact(sb)))
-
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
