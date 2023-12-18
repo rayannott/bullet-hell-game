@@ -118,7 +118,12 @@ class Game:
 
         art_chests_to_spawn = self.player.artifacts_generator.get_artifact_chests(self.level)
         print(f'spawning artifact chests: {art_chests_to_spawn}')
-        for ac in art_chests_to_spawn:
+        _len = len(art_chests_to_spawn)
+        _positions = [
+            Vector2(500 + (self.screen_rectangle.width - 1000) * i / _len, self.screen_rectangle.height//2)
+            for i in range(_len)]
+        for _pos, ac in zip(_positions, art_chests_to_spawn):
+            ac.set_pos(_pos)
             self.add_entity(ac)
 
         # achievements:
@@ -141,7 +146,8 @@ class Game:
             EnergyOrb(
                 pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
                 lifetime=random.uniform(*ENERGY_ORB_LIFETIME_RANGE) + 1. * (self.level - 1),
-                energy=ENERGY_ORB_DEFAULT_ENERGY * difficulty_mult + 20. * (self.level - 1)
+                energy=ENERGY_ORB_DEFAULT_ENERGY * difficulty_mult + 20. * (self.level - 1),
+                gives_extra_bullet=random.random() < 0.05
             )
         )
 
@@ -341,6 +347,7 @@ class Game:
             self.reason_of_death = f'aoe damage from a mine'
         for artifact_chest in self.artifact_chests():
             if not artifact_chest.intersects(self.player): continue
+            if not artifact_chest.can_be_picked_up(): continue
             artifact = artifact_chest.get_artifact()
             print(f'collected artifact {artifact}')
             self.player.add_artifact(artifact)
@@ -479,10 +486,9 @@ class Game:
         if self.screen_rectangle.collidepoint(pos): return pos
         return self.get_random_screen_position_for_entity(enemy_size)
 
-    def get_random_screen_position(self) -> Vector2:
-        MARGIN = BM * 15
-        x = random.uniform(self.screen_rectangle.left + MARGIN, self.screen_rectangle.right - MARGIN)
-        y = random.uniform(self.screen_rectangle.top + MARGIN, self.screen_rectangle.bottom - MARGIN)
+    def get_random_screen_position(self, margin=BM*15) -> Vector2:
+        x = random.uniform(self.screen_rectangle.left + margin, self.screen_rectangle.right - margin)
+        y = random.uniform(self.screen_rectangle.top + margin, self.screen_rectangle.bottom - margin)
         return Vector2(x, y)
     
     def set_last_fps(self, fps: float):

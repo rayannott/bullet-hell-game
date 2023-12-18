@@ -44,4 +44,4 @@ class ArtifactType(Enum):
     BULLET_SHIELD = auto()
     MINE_SPAWN = auto()
     DASH = auto()
-    ROTATING_BULLETS = auto()
+    # ROTATING_BULLETS = auto()
