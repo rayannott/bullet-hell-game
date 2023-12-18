@@ -16,7 +16,7 @@ from src.utils import Stats, Slider, Timer
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
-    PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST,
+    PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST, PLAYER_EXTRA_BULLET_SHOT_MULT
 )
 
 
@@ -89,8 +89,8 @@ class Player(Entity):
         self.effect_flags.IN_DASH = self.artifacts_handler.is_present(ArtifactType.DASH) and \
             self.artifacts_handler.get_dash().is_on()
     
-    def add_extra_bullet(self):
-        self.extra_bullets += 1
+    def add_extra_bullets(self, num_to_add: int):
+        self.extra_bullets += num_to_add
     
     def speed_velocity_evolution(self):
         towards_gravity_point = (self.gravity_point - self.pos)
@@ -120,8 +120,8 @@ class Player(Entity):
         else:
             # unless health is low
             # then it contributes 160% of the energy decay if energy is low and 240% if high
-            low_health_multiplier = 2. if e_percent < 0.6 else 3.
-            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * low_health_multiplier
+            low_health_multiplier = 1.5 if e_percent < 0.6 else 2.5
+            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 1.5)
         # decay energy and regenerate health faster when health is low
         if e_percent > 0.: self.health.change(self.get_regen() * low_health_multiplier * time_delta)
         self.energy.change(
@@ -138,21 +138,21 @@ class Player(Entity):
 
     def shoot(self) -> Projectile:
         used_extra_bullet = False
-        if self.energy.get_value() < PLAYER_SHOT_COST:
-            raise NotEnoughEnergy('not enough energy')
         if self.is_on_cooldown():
             if self.extra_bullets > 0:
-                if self.energy.get_value() < PLAYER_SHOT_COST * 1.6:
-                    raise NotEnoughEnergy('not enough energy')
+                if self.energy.get_value() < PLAYER_SHOT_COST * PLAYER_EXTRA_BULLET_SHOT_MULT:
+                    raise NotEnoughEnergy('not enough energy for extra')
                 self.extra_bullets -= 1
                 used_extra_bullet = True
             else:
                 raise OnCooldown('on cooldown')
+        if self.energy.get_value() < PLAYER_SHOT_COST:
+            raise NotEnoughEnergy('not enough energy')
         if self.vel == Vector2():
             self.vel = self.gravity_point - self.pos
             if self.vel.magnitude_squared() == 0.:
                 raise ShootingDirectionUndefined('direction undefined')
-        self.energy.change(-PLAYER_SHOT_COST * (1.6 if used_extra_bullet else 1.))
+        self.energy.change(-PLAYER_SHOT_COST * (PLAYER_EXTRA_BULLET_SHOT_MULT if used_extra_bullet else 1.))
         self.shoot_cooldown_timer.reset(with_max_time=self.get_shoot_coolodown())
         self.get_stats().PROJECTILES_FIRED += 1
         direction = self.vel.normalize()
@@ -193,7 +193,7 @@ class Player(Entity):
         old_percentage = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
-        self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.15 * (self.level - 1)
+        self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.08 * (self.level - 1)
         self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self.level - 1))
         self.energy.set_percent_full(0.6) # energy sets to 60%
         self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.2)

@@ -13,11 +13,11 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
             pos: Vector2,
             energy: float,
             lifetime: float,
-            gives_extra_bullet: bool = False
+            num_extra_bullets: int = False
         ) -> None:
         size = ENERGY_ORB_SIZE
-        self.gives_extra_bullet = gives_extra_bullet
-        color = Color(LIGHT_MAGENTA_HEX if self.gives_extra_bullet else NICER_MAGENTA_HEX)
+        self.num_extra_bullets = num_extra_bullets
+        color = Color(LIGHT_MAGENTA_HEX if self.num_extra_bullets else NICER_MAGENTA_HEX)
         super().__init__(
             pos=pos,
             type=EntityType.ENERGY_ORB,

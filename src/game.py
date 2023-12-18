@@ -120,7 +120,7 @@ class Game:
         print(f'spawning artifact chests: {art_chests_to_spawn}')
         _len = len(art_chests_to_spawn)
         _positions = [
-            Vector2(500 + (self.screen_rectangle.width - 1000) * i / _len, self.screen_rectangle.height//2)
+            Vector2(500 + (self.screen_rectangle.width - 500) * i / _len, self.screen_rectangle.height//2)
             for i in range(_len)]
         for _pos, ac in zip(_positions, art_chests_to_spawn):
             ac.set_pos(_pos)
@@ -147,7 +147,7 @@ class Game:
                 pos=self.get_random_screen_position_for_entity(entity_size=ENERGY_ORB_SIZE),
                 lifetime=random.uniform(*ENERGY_ORB_LIFETIME_RANGE) + 1. * (self.level - 1),
                 energy=ENERGY_ORB_DEFAULT_ENERGY * difficulty_mult + 20. * (self.level - 1),
-                gives_extra_bullet=random.random() < 0.05
+                num_extra_bullets=int(random.random() < 0.05)
             )
         )
 
@@ -240,7 +240,7 @@ class Game:
         """
         new_ent = []
         # TODO: this is confusing: 
-        #       the player can spawn entities, but player._can_spawn_entities is False
+        #       the player can spawn entities, but player.can_spawn_entities is False
         for entity in self.all_entities_iter(with_player=True, include_dead=True):
             if entity.can_spawn_entities:
                 new_ent.extend(entity.entities_buffer)
@@ -282,9 +282,9 @@ class Game:
             self.player.energy.change(energy_collected)
             self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
-            if eo.gives_extra_bullet:
-                self.feedback_buffer.append(Feedback(f'+1eb', color=Color('white')))
-                self.player.add_extra_bullet()
+            if eo.num_extra_bullets:
+                self.feedback_buffer.append(Feedback(f'+{eo.num_extra_bullets}eb', color=Color('white')))
+                self.player.add_extra_bullets(eo.num_extra_bullets)
             play_sfx('energy_collected')
             eo.kill()
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))
@@ -418,7 +418,7 @@ class Game:
         self.player.invulnerability_timer.reset()
         damage_taken_actual = -self.player.health.change(-damage)
         self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
-        self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=pygame.Color('orange'), at_pos='player'))
+        self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=pygame.Color('red'), at_pos='player'))
         play_sfx('damage_taken')
         return damage_taken_actual
 

@@ -175,7 +175,7 @@ class Enemy(Entity):
     
     def on_killed_by_player(self):
         self.entities_buffer.append(
-            EnergyOrb(self.pos, self.reward, 0.25, gives_extra_bullet=True)
+            EnergyOrb(self.pos, self.reward * 0.5, 0.25, num_extra_bullets=int(self.reward / 100))
         )
 
     def get_health(self) -> Slider: return self.health
