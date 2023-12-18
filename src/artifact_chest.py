@@ -68,8 +68,8 @@ class ArtifactChestGenerator:
             StatsBoost(damage=15.),
             StatsBoost(regen=1., speed=200.),
             StatsBoost(size=2.),
-            StatsBoost(bullet_shield_duration=2.),
             StatsBoost(damage=20.),
+            StatsBoost(bullet_shield_duration=2.),
             StatsBoost(mine_cooldown=2.),
             StatsBoost(bullet_shield_size=20.),
             StatsBoost(cooldown=0.15),
@@ -79,7 +79,7 @@ class ArtifactChestGenerator:
         # Maps the player level to the artifact types to be spawned: S - stats, A - active.
         self.ARTIFACT_SCHEDULE = {
             2: 'SSS', 3: 'SAA', 4: 'SSS', 5: 'SSA',
-            6: 'SSS', 7: 'SSS', 8: 'SSA', 9: 'SSA', 10: 'SSA',
+            6: 'SSS', 7: 'SSA', 8: 'SSS', 9: 'SSA', 10: 'SSA',
         }
     
     def get_artifact(self, artifact_type: ArtifactType) -> Artifact:
