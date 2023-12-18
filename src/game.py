@@ -274,6 +274,7 @@ class Game:
                 projectile.pos.y -= delta
     
     def process_collisions(self) -> None:
+        player_in_dash = self.player.effect_flags.IN_DASH
         # player collides with anything:
         for eo in self.energy_orbs():
             if not eo.intersects(self.player): continue
@@ -308,11 +309,14 @@ class Game:
             self.reason_of_death = f'caught Bullet::{projectile.projectile_type.name.title()}'
         for enemy in self.enemies():
             if not enemy.intersects(self.player): continue
-            self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=True)
-            self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
-            enemy.kill()
-            self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
-            self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
+            if player_in_dash:
+                self.deal_damage_to_enemy(enemy, self.player.get_damage())
+            else:
+                self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=True)
+                self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
+                enemy.kill()
+                self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
+                self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
             self.player_get_damage(corpse._damage_on_collision, ignore_invul_timer=True)

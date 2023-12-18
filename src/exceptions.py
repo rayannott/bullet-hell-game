@@ -10,6 +10,9 @@ class ShootingDirectionUndefined(Exception):
 class ShieldRunning(Exception):
     pass
 
+class DashRunning(Exception):
+    pass
+
 class ArtifactMissing(Exception):
     pass
 

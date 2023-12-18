@@ -5,7 +5,7 @@ from pygame import Vector2
 
 from src.entity import Mine
 from src.enums import ArtifactType
-from src.exceptions import NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing
+from src.exceptions import DashRunning, NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing
 from src.utils import Timer, random_unit_vector
 from config import (ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN,
     ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE
@@ -73,8 +73,13 @@ class Artifact(ABC):
     def __str__(self) -> str:
         return 'Artifact::' + self.__class__.__name__
     
+    @abstractmethod
     def get_short_string(self) -> str:
         raise NotImplementedError(f'{self} doesn\'t implement get_short_string()')
+
+    @staticmethod
+    def get_artifact_type() -> ArtifactType:
+        raise NotImplementedError(f'This artifact doesn\'t implement get_artifact_type()')
 
 
 class BulletShield(Artifact):
@@ -156,12 +161,36 @@ class Dash(Artifact):
         super().__init__(
             artifact_type=ArtifactType.DASH,
             player=player,
-            cooldown=12.,
+            cooldown=5.,
             cost=300,
         )
+        self.duration_timer = Timer(max_time=0.5)
+        self.duration_timer.turn_off()
+    
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.duration_timer.tick(time_delta)
+    
+    @staticmethod
+    def get_artifact_type():
+        return ArtifactType.DASH
     
     def get_short_string(self) -> str:
         return 'Dash'
+
+    def dash(self):
+        if self.player.energy.get_value() < self.cost:
+            raise NotEnoughEnergy('not enough energy for dash')
+        if self.is_on():
+            raise DashRunning('dash already running')
+        if self.cooldown_timer.running():
+            raise OnCooldown(f'dash on cooldown: {self.cooldown_timer.get_time_left():.1f}')
+        self.player.energy.change(-self.cost)
+        self.duration_timer.reset()
+        self.cooldown_timer.reset()
+    
+    def is_on(self) -> bool:
+        return self.duration_timer.running()
 
 
 class InactiveArtifact(Artifact):
@@ -175,8 +204,11 @@ class InactiveArtifact(Artifact):
     def __repr__(self) -> str:
         return f'InactiveArtifact({self.stats_boost})'
     
+    def get_short_string(self) -> str:
+        return 'Stats'
+    
     def __str__(self) -> str:
-        return f'Amulet({self.stats_boost})'
+        return f'[{self.stats_boost}]'
 
 
 class ArtifactsHandler:
@@ -233,7 +265,7 @@ class ArtifactsHandler:
         if self.mine_spawn is None:
             raise ArtifactMissing('[?] mine spawn is missing')
         return self.mine_spawn
-    def get_bait(self) -> Dash:
+    def get_dash(self) -> Dash:
         if self.dash is None:
             raise ArtifactMissing('[?] dash is missing')
         return self.dash

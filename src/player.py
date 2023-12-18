@@ -26,6 +26,7 @@ class EffectFlags:
     Flags for effects that can be applied to the player.
     """
     OIL_SPILL: bool = False
+    IN_DASH: bool = False
 
     def reset(self):
         self.OIL_SPILL = False
@@ -85,6 +86,8 @@ class Player(Entity):
         self.invulnerability_timer.tick(time_delta)
         self.artifacts_handler.update(time_delta)
         self.effect_flags.reset()
+        self.effect_flags.IN_DASH = self.artifacts_handler.is_present(ArtifactType.DASH) and \
+            self.artifacts_handler.get_dash().is_on()
     
     def add_extra_bullet(self):
         self.extra_bullets += 1
@@ -94,8 +97,8 @@ class Player(Entity):
         dist_to_gravity_point = towards_gravity_point.magnitude()
         t = (dist_to_gravity_point / 1500.) ** 0.8
         self.speed = (self.speed_range[0] + (self.get_max_speed() - self.speed_range[0]) * t *
-            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.))
-
+            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.) * 
+            (3. if self.effect_flags.IN_DASH else 1.)) 
         if dist_to_gravity_point > self.get_size() * 0.2:
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:
@@ -173,7 +176,9 @@ class Player(Entity):
             # TODO: play_sfx('mine_planted')
             return
         if artifact_type == ArtifactType.DASH:
-            raise NotImplementedError('dash not implemented')
+            self.artifacts_handler.get_dash().dash()
+            self.get_stats().DASHES_ACTIVATED += 1
+            return
         raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
     
     def add_artifact(self, artifact: Artifact):

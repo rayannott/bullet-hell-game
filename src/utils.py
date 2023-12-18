@@ -26,6 +26,7 @@ class Stats:
     BULLET_SHIELD_BULLETS_BLOCKED: int = 0
     MINES_STEPPED_ON: int = 0
     MINES_PLANTED: int = 0
+    DASHES_ACTIVATED: int = 0
 
     DAMAGE_TAKEN: float = 0.
     DAMAGE_DEALT: float = 0.
