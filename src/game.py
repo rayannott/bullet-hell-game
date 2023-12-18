@@ -287,6 +287,8 @@ class Game:
             self.player.energy.change(energy_collected)
             self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
+            if eo.gives_extra_bullet:
+                self.player.add_extra_bullet()
             play_sfx('energy_collected')
             eo.kill()
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))
@@ -399,6 +401,7 @@ class Game:
         enemy.update(0.)
         if enemy.is_alive(): return
         enemy.kill()
+        enemy.on_killed_by_player()
         reward = enemy.get_reward()
         self.player.energy.change(reward)
         self.player.get_stats().ENEMIES_KILLED += 1

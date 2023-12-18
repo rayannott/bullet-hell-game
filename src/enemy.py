@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import math
 import random
 from pygame import Vector2, Color
+from src.energy_orb import EnergyOrb
 
 from src.entity import Entity, Corpse
 from src.enums import EntityType, EnemyType, ProjectileType
@@ -171,6 +172,11 @@ class Enemy(Entity):
 
     def on_natural_death(self):
         self.entities_buffer.append(Corpse(self))
+    
+    def on_killed_by_player(self):
+        self.entities_buffer.append(
+            EnergyOrb(self.pos, self.reward, 0.25, gives_extra_bullet=True)
+        )
 
     def get_health(self) -> Slider: return self.health
 
