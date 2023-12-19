@@ -63,11 +63,8 @@ class GameScreen(Screen):
             elif event.key == pygame.K_F1:
                 self.toggle_debug()
             elif event.key == pygame.K_F5:
+                self.post_run()
                 self.setup_game(self.surface)
-            # elif event.key == pygame.K_q:
-            #     self.game.toggle_pause()
-            #     self.ingame_shop = InGameShop(self.manager, self.surface, self.game)
-            # debug:
             elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 if event.key == pygame.K_1:
                     self.game.spawn_enemy(EnemyType.BASIC)
