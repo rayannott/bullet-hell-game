@@ -20,11 +20,12 @@ from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.artifact_chest import ArtifactChest
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, 
-    NICER_MAGENTA_HEX, NICER_BLUE_HEX,
+    NICER_MAGENTA_HEX, NICER_BLUE_HEX, NICER_YELLOW_HEX,
     WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from front.sounds import play_sfx
 
 
+NICER_YELLOW = pygame.Color(NICER_YELLOW_HEX)
 BLUE = pygame.Color(NICER_BLUE_HEX)
 
 
@@ -373,7 +374,7 @@ class Game:
             print(f'collected artifact {artifact}')
             self.player.add_artifact(artifact)
             self.collected_artifact_cache.append(artifact)
-            self.feedback_buffer.append(Feedback(f'+{artifact}', 3., color=Color('#edf069')))
+            self.feedback_buffer.append(Feedback(f'+{artifact}', 3., color=NICER_YELLOW))
             play_sfx('artifact_collected')
             # remove all artifacts:
             for ac in self.artifact_chests(): ac.kill()
