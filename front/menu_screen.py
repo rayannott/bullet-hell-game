@@ -58,11 +58,11 @@ class MenuScreen(Screen):
                 self.game_screen = GameScreen(self.surface, self.settings)
                 self.game_screen.run()
             elif event.ui_element == self.stats_btn:
-                StatsWindow(self.manager, self.surface)
+                self.sw = StatsWindow(self.manager, self.surface)
             elif event.ui_element == self.settings_btn:
                 self.settings_window = SettingsWindow(self.manager, self)
             elif event.ui_element == self.rules_btn:
-                RulesWindow(self.manager, self.surface)
+                self.rw = RulesWindow(self.manager, self.surface)
 
         super().process_ui_event(event)
 
