@@ -40,6 +40,12 @@ class MenuScreen(Screen):
         rules_btn_rect.topleft = settings_btn_rect.bottomleft
         self.rules_btn = pygame_gui.elements.UIButton(rules_btn_rect, 'RULES', self.manager)
 
+
+        self.console_window = None
+        self.stats_window = None
+        self.rules_window = None
+        self.settings_window = None
+
         self.game_screen = None
 
     def reload_settings(self):
@@ -52,18 +58,25 @@ class MenuScreen(Screen):
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED:
             if event.ui_element == self.settings_btn:
+                if self.console_window is not None:
+                    self.console_window.kill()
                 self.console_window = ConsoleWindow(self.manager, self)
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.start_game_btn:
                 self.game_screen = GameScreen(self.surface, self.settings)
                 self.game_screen.run()
             elif event.ui_element == self.stats_btn:
-                self.sw = StatsWindow(self.manager, self.surface)
+                if self.stats_window is not None:
+                    self.stats_window.kill()
+                self.stats_window = StatsWindow(self.manager, self.surface)
             elif event.ui_element == self.settings_btn:
+                if self.settings_window is not None:
+                    self.settings_window.kill()
                 self.settings_window = SettingsWindow(self.manager, self)
             elif event.ui_element == self.rules_btn:
-                self.rw = RulesWindow(self.manager, self.surface)
-
+                if self.rules_window is not None:
+                    self.rules_window.kill()
+                self.rules_window = RulesWindow(self.manager, self.surface)
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
