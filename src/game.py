@@ -313,7 +313,7 @@ class Game:
                 self.deal_damage_to_enemy(enemy, self.player.get_damage())
                 # TODO: play_sfx('dash_hit')
             else:
-                self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=True)
+                self.player_get_damage(enemy.damage_on_collision)
                 self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
                 enemy.kill()
                 self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
@@ -415,7 +415,9 @@ class Game:
         play_sfx('enemy_killed')
     
     def player_get_damage(self, damage: float, ignore_invul_timer: bool = False) -> float:
-        if not ignore_invul_timer and self.player.invulnerability_timer.running(): return 0.
+        if not ignore_invul_timer and self.player.invulnerability_timer.running(): 
+            self.player.invulnerability_timer.turn_off()
+            return 0.
         self.player.invulnerability_timer.reset()
         damage_taken_actual = -self.player.health.change(-damage)
         self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
