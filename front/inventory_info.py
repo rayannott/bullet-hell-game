@@ -19,15 +19,13 @@ class InventoryInfo:
     def rebuild_textbox_if(self):
         actives_list = list(self.player.artifacts_handler.iterate_active())
         N = len(actives_list) + 2
-        if N == self.N_old:
-            # rebuild only if number of actives changed
-            return
-        self.textbox = TextBox(['']*N, Vector2(), self.surface)
-        self.textbox.set_bottom_right(Vector2(self.surf_rect.bottomright) - Vector2(50, 10))
+        if N != self.N_old:
+            self.textbox = TextBox(['']*N, Vector2(), self.surface)
+            self.textbox.set_bottom_left(Vector2(self.surf_rect.bottomleft) + Vector2(10, -10))
+            self.N_old = N
         for i, active in enumerate(actives_list):
-            self.textbox.labels[i].set_text(f'{active}')
+            self.textbox.labels[i].set_text(f'{active.get_verbose_string()}')
             self.textbox.labels[i].set_color(ORANGE)
-        self.N_old = N
     
     def update(self, time_delta: float):
         self.rebuild_textbox_if()
