@@ -11,7 +11,8 @@ from src.entity import Entity
 from src.enums import ArtifactType, EntityType, ProjectileType
 from src.exceptions import ArtifactMissing, NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ArtifactCollected
 from src.projectile import Projectile
-from src.utils import Stats, Slider, Timer
+from src.utils import Slider, Timer
+from src.player_utils import Stats, Achievements, EffectFlags
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME, PLAYER_SPEED_INCREASE,
@@ -20,43 +21,9 @@ from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED
     NICER_GREEN_HEX, PLAYER_DEFAULT_MAX_EXTRA_BULLETS, PLAYER_ENERGY_INCREASE,
 )
 
+
 WHITE = Color('white')
 NICER_GREEN = Color(NICER_GREEN_HEX)
-
-
-@dataclass
-class EffectFlags:
-    """
-    Flags for effects that can be applied to the player.
-    """
-    OIL_SPILL: bool = False
-    IN_DASH: bool = False
-
-    def reset(self):
-        self.OIL_SPILL = False
-
-
-@dataclass
-class Achievements:
-    """
-    Achievement flags.
-    """
-    KILL_BOSS_WITH_RICOCHET: bool = False
-    REACH_LEVEL_5_WITH_NO_CORPSES: bool = False
-    REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE: bool = False
-    REACH_LEVEL_10: bool = False
-    RECEIVE_1000_DAMAGE: bool = False
-    FIRE_200_PROJECTILES: bool = False
-    KILL_100_ENEMIES: bool = False
-    BLOCK_100_BULLETS: bool = False
-    COLLECT_200_ENERGY_ORBS: bool = False
-
-    @staticmethod
-    def _snakecase_to_title(snakecase: str) -> str:
-        return ' '.join(snakecase.split('_')).title()
-    
-    def achievements_pretty(self) -> list[str]:
-        return [self._snakecase_to_title(k) for k, v in self.__dict__.items() if v]
 
 
 class Player(Entity):
