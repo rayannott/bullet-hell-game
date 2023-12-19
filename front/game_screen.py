@@ -1,6 +1,7 @@
 import datetime
 import random
 from typing import Literal
+from pprint import pformat
 
 import pygame
 from pygame import Color, Vector2
@@ -128,7 +129,7 @@ class GameScreen(Screen):
         self.inventory_info.update(time_delta)
         self.render()
         if not self.game.is_running() and not self.game_is_over_window_shown:
-            self.show_game_is_over_window(self.game.reason_of_death)
+            self.show_game_is_over_window()
             play_sfx('game_over') # TODO: move this to `on_game_over()`
             self.game_is_over_window_shown = True
         self.render_manager.reset()
@@ -150,12 +151,12 @@ class GameScreen(Screen):
         self.render_manager.set_debug(self.debug)
         print(f'changing debug mode: now {self.debug=}')
 
-    def show_game_is_over_window(self, death_message: str):
+    def show_game_is_over_window(self):
         self.game_is_over_window = pygame_gui.windows.UIConfirmationDialog(
-            rect=pygame.Rect(*self.surface.get_rect().center, 300, 200),
+            rect=pygame.Rect(*self.surface.get_rect().center, 600, 400),
             manager=self.manager,
             window_title='Game Over',
-            action_long_desc=death_message,
+            action_long_desc=f'{pformat(self.game.get_info())}',
             blocking=True
         )
         print('[game over]', self.game.get_info())
