@@ -13,10 +13,11 @@ from src.entity import Entity, Mine
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, LIGHT_MAGENTA_HEX, NICER_RED_HEX, GRAY_HEX, 
-    WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX)
+    WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX, BOSS_ENEMY_COLOR_HEX,
+)
+
 
 freetype.init()
-font = freetype.SysFont('Arial', 20)
 
 
 NICER_GREEN = Color(NICER_GREEN_HEX)
@@ -27,6 +28,7 @@ WHITE = Color('white')
 RED = Color(NICER_RED_HEX)
 GRAY = Color(GRAY_HEX)
 BLACK = Color('black')
+BOSS_ENEMY_COLOR = Color(BOSS_ENEMY_COLOR_HEX)
 
 
 def draw_circular_status_bar(
@@ -154,7 +156,7 @@ class RenderManager:
         if self.game.one_wave_timer.get_value() > WAVE_DURATION - 5.:
             self.boss_soon_slider.set_percent_full(1. - (self.game.one_wave_timer.get_value() - (WAVE_DURATION - 5.)) / 5.)
             draw_circular_status_bar(self.surface, self.screen_center, self.boss_soon_slider,
-                80., color=LIGHTER_MAGENTA, draw_full=True, width=8)
+                80., color=BOSS_ENEMY_COLOR, draw_full=True, width=8)
             
         if self.debug:
             ROWS = ['fps', 'entities drawn', 'speed', 'accuracy', 'orbs collected', 'damage received']
