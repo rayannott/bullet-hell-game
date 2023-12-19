@@ -248,6 +248,7 @@ class TankEnemy(Enemy):
             player: Player,
         ):
         self._player_level = player.get_level()
+        self._difficulty = player.settings.difficulty
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.TANK,
@@ -266,11 +267,12 @@ class TankEnemy(Enemy):
     
     def shoot(self):
         """Shoots in bursts with probability 0.5 and explosive projectiles with probability 0.5."""
+        delta_num_proj = [-2, -2, -1, 1, 2][self._difficulty - 1]
         if random.random() < 0.5:
-            num_subproj = 3 + int(self._player_level * 1.5)
+            num_subproj = 3 + self._player_level + delta_num_proj
             self.shoot_explosive(num_of_subprojectiles=num_subproj)
             return
-        num_shots = random.randint(2, 3 + int(self._player_level))
+        num_shots = random.randint(2, 3 + int(self._player_level) + delta_num_proj)
         for _ in range(num_shots):
             self.shoot_normal(speed_mult=1.2 + 0.05 * self._player_level)
     
@@ -292,6 +294,7 @@ class ArtilleryEnemy(Enemy):
             player: Player,
         ):
         self._player_level = player.get_level()
+        self._difficulty = player.settings.difficulty
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.ARTILLERY,
@@ -308,8 +311,9 @@ class ArtilleryEnemy(Enemy):
         self.cooldown.set_percent_full(0.2)
     
     def shoot(self):
+        delta_num_proj = [-1, -1, 0, 1, 1][self._difficulty - 1]
         if random.random() < 0.5:
-            self.shoot_def_trajectory(num_of_projectiles=1 + random.randint(1, 3))
+            self.shoot_def_trajectory(num_of_projectiles=1 + random.randint(1, 3) + delta_num_proj)
             return
         self.shoot_homing(speed_mult=1.2 + 0.05 * self._player_level)
     
