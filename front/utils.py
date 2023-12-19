@@ -84,20 +84,39 @@ class TextBox:
             position: Vector2,
             surface: pygame.Surface,
         ):
+        self.labels: list[Label]
         self.text_lines = text_lines
         self.position = position
         self.surface = surface
+        self.rebuild(self.position)
 
+    def rebuild(self, top_left: Vector2):
         r = pygame.Rect(0, 0, 200, 25)
-        r.topleft = position
+        r.topleft = top_left
         self.rects = [r]
-        for _ in range(len(text_lines) - 1):
+        for _ in range(len(self.text_lines) - 1):
             r = self.rects[-1].copy()
             r.topleft = r.bottomleft; r.y += 2.
             self.rects.append(r)
         assert len(self.rects) == len(self.text_lines)
+        self.labels = [Label(text, self.surface, rect) for text, rect in zip(self.text_lines, self.rects)]
+        for i, r in enumerate(self.rects):
+            self.labels[i].rect = r
 
-        self.labels = [Label(text, self.surface, rect) for text, rect in zip(self.text_lines, self.rects)]        
+    def total_size(self) -> Vector2:
+        return Vector2(self.rects[-1].bottomright) - Vector2(self.rects[0].topleft)
+    
+    def set_bottom_right(self, bottom_right: Vector2):
+        position = bottom_right - self.total_size()
+        self.rebuild(position)
+    
+    def set_top_right(self, top_right: Vector2):
+        position = top_right - Vector2(self.total_size().x, 0)
+        self.rebuild(position)
+    
+    def set_bottom_left(self, bottom_left: Vector2):
+        position = bottom_left - Vector2(0, self.total_size().y)
+        self.rebuild(position)
 
     def update(self):
         for label in self.labels:
