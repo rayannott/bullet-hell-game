@@ -1,10 +1,12 @@
 import datetime
 from pprint import pformat
+import shelve
 
 import pygame_gui
 import pygame
 
 from config import CONSOLE_WINDOW_SIZE
+# from config.paths import SAVES_FILE
 from config.settings import Settings
 
 
@@ -30,6 +32,7 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
             'settings': 'Shows the current settings',
             'settings default': 'Sets the settings to default',
             'settings <field> <value>': 'Changes the value of the <field> to <value>',
+            # 'saves delete <save_name>': 'Deletes the save with the given name',
         }
     
     def add_log(self, text: str):
@@ -94,5 +97,17 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
                     self.add_log(pformat(self.menu_screen.game_screen.game.get_info()))
                 else:
                     self.add_log('No game has been played yet')
+            # elif text.startswith('saves'):
+            #     args = text.split(maxsplit=2)[1:]
+            #     if args[0] == 'delete':
+            #         with shelve.open(str(SAVES_FILE)) as saves:
+            #             if args[0] in saves:
+            #                 del saves[args[1]]
+            #                 self.add_log(f'Save {args[1]} deleted')
+            #             else:
+            #                 self.add_log(f'[!] Save {args[1]} not found')
+            #     else:
+            #         self.add_log('[!] Usage: saves <save_name> delete')
+
             else:
                 self.add_log(f'[!] Unknown command: {text}. Type "help" for available commands')
