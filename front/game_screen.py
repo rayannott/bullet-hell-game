@@ -80,6 +80,8 @@ class GameScreen(Screen):
                     print('--- debug info ---')
                     print(self.game.get_info())
                     print('-'*10)
+                # elif event.key == pygame.K_t:
+                #     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), InactiveArtifact(StatsBoost(mine_cooldown=2.))))
                 elif event.key == pygame.K_l:
                     self.game.new_level()
                 elif event.key == pygame.K_s:
@@ -109,6 +111,7 @@ class GameScreen(Screen):
                 if option_picked is not None:
                     self.game.player_try_ultimate(artifact_type=option_picked)
         elif event.type == pygame.KEYDOWN:
+            if pygame.key.get_mods() & pygame.KMOD_SHIFT: return
             if event.key == pygame.K_SPACE:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.MINE_SPAWN)
             elif event.key == pygame.K_s:

@@ -147,8 +147,11 @@ class MineSpawn(Artifact):
             cooldown=MINE_COOLDOWN,
             cost=MINE_COST
         )
-        self.cooldown -= self.total_stats_boost.mine_cooldown
     
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.cooldown = MINE_COOLDOWN - self.total_stats_boost.mine_cooldown
+
     @staticmethod
     def get_artifact_type():
         return ArtifactType.MINE_SPAWN
