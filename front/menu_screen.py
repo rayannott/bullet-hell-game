@@ -32,7 +32,8 @@ class MenuScreen(Screen):
         settings_btn_rect = pygame.Rect(0, 0, 0, 0)
         settings_btn_rect.size = MENU_BUTTONS_SIZE
         settings_btn_rect.topleft = stats_btn_rect.bottomleft
-        self.settings_btn = pygame_gui.elements.UIButton(settings_btn_rect, 'SETTINGS', self.manager)
+        self.settings_btn = pygame_gui.elements.UIButton(settings_btn_rect, 
+            'SETTINGS', self.manager, allow_double_clicks=True, tool_tip_text='Double click to open console')
 
         rules_btn_rect = pygame.Rect(0, 0, 0, 0)
         rules_btn_rect.size = MENU_BUTTONS_SIZE
@@ -49,7 +50,10 @@ class MenuScreen(Screen):
             play_bg_music()
 
     def process_ui_event(self, event: pygame.event.Event):
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+        if event.type == pygame_gui.UI_BUTTON_DOUBLE_CLICKED:
+            if event.ui_element == self.settings_btn:
+                self.console_window = ConsoleWindow(self.manager, self)
+        elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.start_game_btn:
                 self.game_screen = GameScreen(self.surface, self.settings)
                 self.game_screen.run()
@@ -57,9 +61,9 @@ class MenuScreen(Screen):
                 StatsWindow(self.manager, self.surface)
             elif event.ui_element == self.settings_btn:
                 self.settings_window = SettingsWindow(self.manager, self)
-                self.console_window = ConsoleWindow(self.manager, self)
             elif event.ui_element == self.rules_btn:
                 RulesWindow(self.manager, self.surface)
+
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
