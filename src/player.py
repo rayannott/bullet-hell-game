@@ -178,7 +178,7 @@ class Player(Entity):
         if artifact_type == ArtifactType.MINE_SPAWN:
             self.artifacts_handler.get_mine_spawn().spawn()
             self.get_stats().MINES_PLANTED += 1
-            # TODO: play_sfx('mine_planted')
+            play_sfx('mine_planted')
             return
         if artifact_type == ArtifactType.DASH:
             self.artifacts_handler.get_dash().dash()
