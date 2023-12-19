@@ -63,14 +63,16 @@ class Artifact(ABC):
     ):
         self.artifact_type = artifact_type
         self.player = player
-        if player:
-            self.total_stats_boost: StatsBoost = player.boosts
+        if self.player:
+            self.total_stats_boost: StatsBoost = self.player.boosts
         self.cooldown = cooldown
         self.cooldown_timer = Timer(max_time=self.cooldown)
         self.cooldown_timer.set_percent_full(0.5)
         self.cost = cost
 
     def update(self, time_delta: float):
+        if self.player:
+            self.total_stats_boost: StatsBoost = self.player.boosts
         self.cooldown_timer.tick(time_delta)
     
     def __str__(self) -> str:
@@ -79,6 +81,10 @@ class Artifact(ABC):
     @abstractmethod
     def get_short_string(self) -> str:
         raise NotImplementedError(f'{self} doesn\'t implement get_short_string()')
+
+    @abstractmethod
+    def get_verbose_string(self) -> str:
+        raise NotImplementedError(f'{self} doesn\'t implement get_verbose_string()')
 
     @staticmethod
     def get_artifact_type() -> ArtifactType:
@@ -93,7 +99,8 @@ class BulletShield(Artifact):
             cooldown=ARTIFACT_SHIELD_COOLDOWN,
             cost=ARTIFACT_SHIELD_COST
         )
-        self.duration_timer = Timer(max_time=ARTIFACT_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration)
+        self.duration = ARTIFACT_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration
+        self.duration_timer = Timer(max_time=self.duration)
         self.duration_timer.turn_off()
     
     @staticmethod
@@ -102,6 +109,7 @@ class BulletShield(Artifact):
         
     def update(self, time_delta: float):
         super().update(time_delta)
+        self.duration = ARTIFACT_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration
         self.duration_timer.tick(time_delta)
 
     def is_on(self) -> bool:
@@ -115,7 +123,7 @@ class BulletShield(Artifact):
         if self.cooldown_timer.running():
             raise OnCooldown(f'shield on cooldown: {self.cooldown_timer.get_time_left():.1f}')
         self.player.energy.change(-self.cost)
-        self.duration_timer.reset()
+        self.duration_timer.reset(self.duration)
         self.cooldown_timer.reset()
 
     def get_size(self) -> float:
@@ -126,6 +134,9 @@ class BulletShield(Artifact):
     
     def get_short_string(self):
         return 'Shield'
+    
+    def get_verbose_string(self) -> str:
+        return f'Shield({self.duration:.0f}dur {self.get_size():.0f}size)'
 
 
 class MineSpawn(Artifact):
@@ -153,10 +164,13 @@ class MineSpawn(Artifact):
         pos: Vector2 = self.player.get_pos()
         self.player.entities_buffer.append(Mine(pos=pos-vel, 
                                     damage=MINE_DEFAULT_DAMAGE + 10. * (self.player.level - 1)))
-        self.cooldown_timer.reset()
+        self.cooldown_timer.reset(self.cooldown)
     
     def get_short_string(self):
         return 'Mine'
+
+    def get_verbose_string(self):
+        return f'MineSpawn({self.cooldown:.0f}cd)'
 
 
 class Dash(Artifact):
@@ -179,6 +193,9 @@ class Dash(Artifact):
         return ArtifactType.DASH
     
     def get_short_string(self) -> str:
+        return 'Dash'
+
+    def get_verbose_string(self) -> str:
         return 'Dash'
 
     def dash(self):
@@ -209,6 +226,9 @@ class InactiveArtifact(Artifact):
     
     def get_short_string(self) -> str:
         return 'Stats'
+    
+    def get_verbose_string(self) -> str:
+        return str(self)
     
     def __str__(self) -> str:
         return f'[{self.stats_boost}]'
