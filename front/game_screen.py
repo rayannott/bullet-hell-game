@@ -1,5 +1,6 @@
 import datetime
 import random
+import shelve
 from typing import Literal
 from pprint import pformat
 
@@ -196,5 +197,7 @@ class GameScreen(Screen):
             self.game.reason_of_death = ''
         if not SAVES_DIR.exists():
             SAVES_DIR.mkdir(exist_ok=True, parents=True)
-        with open(SAVES_FILE, 'a') as f:
-            print({datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S'): self.game.get_info()}, file=f)
+        # with open(SAVES_FILE, 'a') as f:
+        #     print({datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S'): self.game.get_info()}, file=f)
+        with shelve.open(str(SAVES_FILE)) as saves:
+            saves[datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S')] = self.game.get_info()

@@ -9,6 +9,7 @@ from front.rules_window import RulesWindow
 from front.sounds import set_sfx_volume, set_bg_music_vol, play_bg_music
 from config import MENU_BUTTONS_SIZE
 from config.settings import Settings
+from front.stats_window import StatsWindow
 
 
 class MenuScreen(Screen):
@@ -53,7 +54,7 @@ class MenuScreen(Screen):
                 self.game_screen = GameScreen(self.surface, self.settings)
                 self.game_screen.run()
             elif event.ui_element == self.stats_btn:
-                ...
+                StatsWindow(self.manager, self.surface)
             elif event.ui_element == self.settings_btn:
                 self.settings_window = SettingsWindow(self.manager, self)
                 self.console_window = ConsoleWindow(self.manager, self)
