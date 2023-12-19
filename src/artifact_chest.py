@@ -64,12 +64,13 @@ class ArtifactChestGenerator:
         # and these too
         _inactive_artifacts = [
             StatsBoost(speed=400.),
-            StatsBoost(regen=2.5),
+            StatsBoost(regen=2.),
             StatsBoost(damage=15.),
             StatsBoost(regen=1., speed=200.),
             StatsBoost(damage=20.),
             StatsBoost(add_max_extra_bullets=5),
             StatsBoost(bullet_shield_duration=2.),
+            StatsBoost(size=2., add_max_extra_bullets=2),
             StatsBoost(mine_cooldown=2.),
             StatsBoost(bullet_shield_size=20.),
             StatsBoost(cooldown=0.15),
