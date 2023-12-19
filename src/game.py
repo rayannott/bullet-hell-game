@@ -132,8 +132,8 @@ class Game:
 
         # achievements:
         if self.level == 5:
-            if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES and not len(self.e_corpses):
-                self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES = True
+            if not self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES and not len(self.e_corpses):
+                self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES = True
                 self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=BLUE))
             if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE and not self.player.get_stats().DAMAGE_TAKEN:
                 self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE = True
@@ -390,10 +390,10 @@ class Game:
                 damage_dealt = bullet.damage
                 self.deal_damage_to_enemy(enemy, damage_dealt)
                 play_sfx('accurate_shot')
-                if (not self.player.get_achievements().KILL_BOSS_RICOCHET and is_ricochet and
+                if (not self.player.get_achievements().KILL_BOSS_WITH_RICOCHET and is_ricochet and
                 not enemy.is_alive() and enemy.enemy_type == EnemyType.BOSS
                 ):
-                    self.player.get_achievements().KILL_BOSS_RICOCHET = True
+                    self.player.get_achievements().KILL_BOSS_WITH_RICOCHET = True
                     self.feedback_buffer.append(Feedback('[A] killed boss with ricochet!', 3., color=pygame.Color('blue')))
         
         # enemy-enemy collisions

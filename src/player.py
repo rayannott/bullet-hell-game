@@ -41,8 +41,8 @@ class Achievements:
     """
     Achievement flags.
     """
-    KILL_BOSS_RICOCHET: bool = False
-    REACH_LEVEL_5_WITHOUT_CORPSES: bool = False
+    KILL_BOSS_WITH_RICOCHET: bool = False
+    REACH_LEVEL_5_WITH_NO_CORPSES: bool = False
     REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE: bool = False
     REACH_LEVEL_10: bool = False
     RECEIVE_1000_DAMAGE: bool = False
@@ -50,6 +50,13 @@ class Achievements:
     KILL_100_ENEMIES: bool = False
     BLOCK_100_BULLETS: bool = False
     COLLECT_200_ENERGY_ORBS: bool = False
+
+    @staticmethod
+    def _snakecase_to_title(snakecase: str) -> str:
+        return ' '.join(snakecase.split('_')).title()
+    
+    def achievements_pretty(self) -> list[str]:
+        return [self._snakecase_to_title(k) for k, v in self.__dict__.items() if v]
 
 
 class Player(Entity):
