@@ -5,6 +5,7 @@ from typing import Literal
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
+from front.inventory_info import InventoryInfo
 from src.artifact_chest import ArtifactChest
 from src.artifacts import BulletShield, Dash, InactiveArtifact, MineSpawn, StatsBoost
 from src.enums import ArtifactType, EnemyType
@@ -47,9 +48,9 @@ class GameScreen(Screen):
         self.screen_rectangle = self.surface.get_rect()
         self.game = Game(self.screen_rectangle, self.settings)
         self.stats_panel = StatsPanel(surface, self.manager, self.game)
+        self.inventory_info = InventoryInfo(surface, self.game.player)
         self.debug = False
         self.render_manager = RenderManager(surface=surface, debug=self.debug, game=self.game)
-        # TODO: self.inventory_panel = ...
 
         self.game_is_over_window_shown = False
         self.notifications: list[Notification] = []
@@ -124,6 +125,7 @@ class GameScreen(Screen):
         self.render_manager.ult_picker.set_mouse_pos(Vector2(pygame.mouse.get_pos()))
         self.game.reflect_projectiles_vel()
         self.stats_panel.update(time_delta=time_delta)
+        self.inventory_info.update(time_delta)
         self.render()
         if not self.game.is_running() and not self.game_is_over_window_shown:
             self.show_game_is_over_window(self.game.reason_of_death)
