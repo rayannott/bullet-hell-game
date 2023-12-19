@@ -19,12 +19,13 @@ from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, Shootin
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.artifact_chest import ArtifactChest
 
-from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, NICER_MAGENTA_HEX,
+from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, 
+    NICER_MAGENTA_HEX, NICER_BLUE_HEX,
     WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from front.sounds import play_sfx
 
 
-BLUE = pygame.Color('blue')
+BLUE = pygame.Color(NICER_BLUE_HEX)
 
 
 def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, float]:
