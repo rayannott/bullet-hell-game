@@ -14,7 +14,7 @@ from src.projectile import Projectile
 from src.utils import Stats, Slider, Timer
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
-    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME,
+    OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME, PLAYER_SPEED_INCREASE,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST, PLAYER_EXTRA_BULLET_SHOT_MULT,
     NICER_GREEN_HEX, PLAYER_DEFAULT_MAX_EXTRA_BULLETS
@@ -44,6 +44,12 @@ class Achievements:
     KILL_BOSS_RICOCHET: bool = False
     REACH_LEVEL_5_WITHOUT_CORPSES: bool = False
     REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE: bool = False
+    REACH_LEVEL_10: bool = False
+    RECEIVE_1000_DAMAGE: bool = False
+    FIRE_200_PROJECTILES: bool = False
+    KILL_100_ENEMIES: bool = False
+    BLOCK_100_BULLETS: bool = False
+    COLLECT_200_ENERGY_ORBS: bool = False
 
 
 class Player(Entity):
@@ -109,7 +115,7 @@ class Player(Entity):
         t = (dist_to_gravity_point / 1500.) ** 0.8
         self.speed = (self.speed_range[0] + (self.get_max_speed() - self.speed_range[0]) * t *
             (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.) * 
-            (3. if self.effect_flags.IN_DASH else 1.)) 
+            (2. if self.effect_flags.IN_DASH else 1.)) 
         if dist_to_gravity_point > self.get_size() * 0.2:
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:
@@ -200,7 +206,8 @@ class Player(Entity):
     
     def new_level(self):
         self.level += 1
-        self.speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 300. * (self.level - 1))
+        self.speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 
+            PLAYER_SPEED_INCREASE * (self.level - 1))
         old_percentage = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
