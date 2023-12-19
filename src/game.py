@@ -8,7 +8,10 @@ from pygame import Vector2, Color
 from config.settings import Settings
 from src.artifacts import Artifact
 
-from src.entity import Corpse, AOEEffect, Entity, DummyEntity, Mine
+from src.entity import Entity, DummyEntity
+from src.corpse import Corpse
+from src.aoe_effect import AOEEffect
+from src.mine import Mine
 from src.oil_spill import OilSpill
 from src.player import Player
 from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType

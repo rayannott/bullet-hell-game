@@ -9,7 +9,8 @@ from src.enemy import Enemy
 from src.enums import ArtifactType, EnemyType, ProjectileType
 
 from src.game import Game
-from src.entity import Entity, Mine
+from src.entity import Entity
+from src.mine import Mine
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, LIGHT_MAGENTA_HEX, NICER_RED_HEX, GRAY_HEX, 

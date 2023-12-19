@@ -4,7 +4,8 @@ import random
 from pygame import Vector2, Color
 from src.energy_orb import EnergyOrb
 
-from src.entity import Entity, Corpse
+from src.entity import Entity
+from src.corpse import Corpse
 from src.enums import EntityType, EnemyType, ProjectileType
 from src.player import Player
 from src.utils import Slider, Timer, random_unit_vector

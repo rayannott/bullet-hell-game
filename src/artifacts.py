@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from pygame import Vector2
 
-from src.entity import Mine
+from src.mine import Mine
 from src.enums import ArtifactType
 from src.exceptions import DashRunning, NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing
 from src.utils import Timer, random_unit_vector
