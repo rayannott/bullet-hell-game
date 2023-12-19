@@ -44,7 +44,7 @@ class StatsPanel:
                 f'{"difficulty":<16} {self.game.settings.difficulty}',
                 f'{"level":<16} {self.game.level}',
                 f'{"time":<16} {self.game.time:.2f}',
-                f'{"extra bullets":<16} {player.extra_bullets}',
+                f'{"extra bullets":<16} {player.extra_bullets}/{player.max_extra_bullets}',
                 f'{"damage":<16} {player.get_damage():.0f}',
                 f'{"speed":<16} {player.get_max_speed():.1f}',
                 f'{"regen":<16} {player.get_regen():.1f}',

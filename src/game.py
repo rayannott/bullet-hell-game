@@ -283,8 +283,8 @@ class Game:
             self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
             if eo.num_extra_bullets:
-                self.feedback_buffer.append(Feedback(f'+{eo.num_extra_bullets}eb', color=Color('white')))
-                self.player.add_extra_bullets(eo.num_extra_bullets)
+                actually_added = self.player.add_extra_bullets(eo.num_extra_bullets)
+                self.feedback_buffer.append(Feedback(f'+{actually_added}eb', color=Color('white')))
             play_sfx('energy_collected')
             eo.kill()
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))

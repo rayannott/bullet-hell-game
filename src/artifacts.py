@@ -23,15 +23,17 @@ class StatsBoost:
     bullet_shield_size: float = 0.
     bullet_shield_duration: float = 0.
     mine_cooldown: float = 0.
+    add_max_extra_bullets: int = 0
 
     def __iter__(self):
         yield from (self.health, self.regen, self.damage,
             self.speed, self.cooldown, self.size, self.bullet_shield_size, 
-            self.bullet_shield_duration, self.mine_cooldown)
+            self.bullet_shield_duration, self.mine_cooldown, self.add_max_extra_bullets)
 
     def __str__(self) -> str:
         formats = ('+{:.0f}hp', '+{:.1f}reg', '+{:.0f}dmg', 
-            '+{:.0f}spd', '-{:.2f}cd', '-{:.0f}size', '+{:.0f}shld size', '+{:.1f}shld dur', '-{:.1f}mine cd')
+            '+{:.0f}spd', '-{:.2f}cd', '-{:.0f}size', 
+            '+{:.0f}shld size', '+{:.1f}shld dur', '-{:.1f}mine cd', '+{}max eb')
         res = '|'.join(
             format_.format(val) for format_, val in zip(formats, self, strict=True) if val
         )
@@ -48,6 +50,7 @@ class StatsBoost:
             bullet_shield_size=self.bullet_shield_size + other.bullet_shield_size,
             bullet_shield_duration=self.bullet_shield_duration + other.bullet_shield_duration,
             mine_cooldown=self.mine_cooldown + other.mine_cooldown,
+            add_max_extra_bullets=self.add_max_extra_bullets + other.add_max_extra_bullets,
         )
 
 

@@ -174,8 +174,9 @@ class Enemy(Entity):
         self.entities_buffer.append(Corpse(self))
     
     def on_killed_by_player(self):
+        reward, bullets = (self.reward * 0.5, int(self.reward / 100)) if random.random() < 0.6 else (self.reward, 0)
         self.entities_buffer.append(
-            EnergyOrb(self.pos, self.reward * 0.5, 0.25, num_extra_bullets=int(self.reward / 100))
+            EnergyOrb(self.pos, reward, 0.25, num_extra_bullets=bullets)
         )
 
     def get_health(self) -> Slider: return self.health

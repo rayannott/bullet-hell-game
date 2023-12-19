@@ -17,7 +17,7 @@ from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST, PLAYER_EXTRA_BULLET_SHOT_MULT,
-    NICER_GREEN_HEX
+    NICER_GREEN_HEX, PLAYER_DEFAULT_MAX_EXTRA_BULLETS
 )
 
 WHITE = Color('white')
@@ -75,6 +75,7 @@ class Player(Entity):
         self.artifacts_handler = ArtifactsHandler(player=self)
         self.artifacts_generator = ArtifactChestGenerator(self)
         self.boosts = self.artifacts_handler.get_total_stats_boost()
+        self.max_extra_bullets = PLAYER_DEFAULT_MAX_EXTRA_BULLETS + self.boosts.add_max_extra_bullets
 
         self.extra_bullets = 0
 
@@ -83,6 +84,7 @@ class Player(Entity):
         if not self._is_alive: return
         if not self.health.is_alive(): self.kill()
         self.boosts = self.artifacts_handler.get_total_stats_boost()
+        self.max_extra_bullets = PLAYER_DEFAULT_MAX_EXTRA_BULLETS + self.boosts.add_max_extra_bullets
 
         self.speed_velocity_evolution()
         self.health_energy_evolution(time_delta)
@@ -94,8 +96,12 @@ class Player(Entity):
             self.artifacts_handler.get_dash().is_on()
         self.color = NICER_GREEN if self.effect_flags.IN_DASH else WHITE
     
-    def add_extra_bullets(self, num_to_add: int):
+    def add_extra_bullets(self, num_to_add: int) -> int:
+        """Returns the number of extra bullets that were actually added."""
+        curr = self.extra_bullets
         self.extra_bullets += num_to_add
+        self.extra_bullets = min(self.extra_bullets, self.max_extra_bullets)
+        return self.extra_bullets - curr
     
     def speed_velocity_evolution(self):
         towards_gravity_point = (self.gravity_point - self.pos)
