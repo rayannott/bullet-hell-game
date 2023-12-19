@@ -1,4 +1,5 @@
 import math
+import random
 
 import pygame
 from pygame import Color, Vector2, freetype
@@ -8,7 +9,7 @@ from src.enemy import Enemy
 from src.enums import ArtifactType, EnemyType, ProjectileType
 
 from src.game import Game
-from src.entity import Entity
+from src.entity import Entity, Mine
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, 
@@ -120,7 +121,8 @@ class RenderManager:
         self.five_sec_timer = Timer(5.)
         self.boss_soon_slider = Slider(1., 0.)
         top_right = Vector2(self.surface.get_rect().topright)
-        self.debug_textbox = TextBox(['']*5, top_right - Vector2(310., -BM), self.surface)
+        self.debug_textbox = TextBox(['']*6, Vector2(), self.surface)
+        self.debug_textbox.set_top_right(top_right - Vector2(100., -BM))
     
     def render(self):
         for oil_spill in self.game.oil_spills():
@@ -154,10 +156,15 @@ class RenderManager:
                 80., color=LIGHTER_MAGENTA, draw_full=True, width=8)
             
         if self.debug:
-            ROWS = ['fps', 'entities drawn', 'speed', 'accuracy', 'orbs collected']
-            VALUES = [f'{self.game.get_last_fps():.1f}', f'{self.entities_drawn}',
+            ROWS = ['fps', 'entities drawn', 'speed', 'accuracy', 'orbs collected', 'damage received']
+            VALUES = [
+                f'{self.game.get_last_fps():.1f}', 
+                f'{self.entities_drawn}',
                 f'{self.game.player.speed:.1f}',
-                f'{self.game.player.stats.get_accuracy():.0%}', f'{self.game.player.stats.ENERGY_ORBS_COLLECTED}']
+                f'{self.game.player.get_stats().get_accuracy():.0%}', 
+                f'{self.game.player.get_stats().ENERGY_ORBS_COLLECTED}',
+                f'{self.game.player.get_stats().DAMAGE_TAKEN:.1f}'
+            ]
             self.debug_textbox.set_lines(
                 [f'[{row:<16} {value:>5}]' for row, value in zip(ROWS, VALUES)]
             )
@@ -264,15 +271,17 @@ class RenderManager:
             self.draw_entity_trail(entity)
         if self.debug: self.draw_entity_debug(entity)
 
-    def draw_mine(self, mine: Entity):
+    def draw_mine(self, mine: Mine):
         """Draws two crossing ellipses"""
         ms = mine.get_size()
-        r1 = pygame.Rect(0, 0, ms, 2*ms)
-        r2 = pygame.Rect(0, 0, 2*ms, ms)
+        r1 = pygame.Rect(0, 0, ms, 2.5*ms)
+        r2 = pygame.Rect(0, 0, 2.5*ms, ms)
         r1.center = mine.get_pos()
         r2.center = mine.get_pos()
-        pygame.draw.ellipse(self.surface, mine.get_color(), r1, width=2)
-        pygame.draw.ellipse(self.surface, mine.get_color(), r2, width=2)
+        is_activated = mine.is_activated()
+        color = mine.get_color() if is_activated else random.choice([GRAY, WHITE, RED])
+        pygame.draw.ellipse(self.surface, color, r1, width=2)
+        pygame.draw.ellipse(self.surface, color, r2, width=2)
         self.entities_drawn += 1
 
     def set_debug(self, debug: bool):
