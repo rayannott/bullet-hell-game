@@ -2,10 +2,11 @@ from pygame import Color, Surface, Rect
 import pygame_gui
 
 from front.utils import paint
+from config import (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, LIGHT_ORANGE_HEX)
 
-GREEN, RED, BLUE, YELLOW, ORANGE = map(Color, ('green', 'red', 'blue', 'yellow', 'orange'))
+LIGHT_MAGENTA, NICER_GREEN, LIGHT_ORANGE = map(Color, (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, LIGHT_ORANGE_HEX))
 
-TEXT = f'''Some <b>rules</b> {paint(("here"), GREEN)}.
+TEXT = f'''Some <b>rules</b> {paint(("here"), NICER_GREEN)}.
 '''
 
 
