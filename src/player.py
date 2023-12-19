@@ -17,7 +17,7 @@ from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME, PLAYER_SPEED_INCREASE,
     PLAYER_DEFAULT_ENERGY_DECAY_RATE, PLAYER_DEFAULT_SHOOT_COOLDOWN, PLAYER_DEFAULT_DAMAGE_AVG, PLAYER_DEFAULT_DAMAGE_SPREAD,
     PLAYER_DEFAULT_MAX_ENERGY, PLAYER_STARTING_ENERGY, PROJECTILE_DEFAULT_SPEED, PLAYER_SHOT_COST, PLAYER_EXTRA_BULLET_SHOT_MULT,
-    NICER_GREEN_HEX, PLAYER_DEFAULT_MAX_EXTRA_BULLETS
+    NICER_GREEN_HEX, PLAYER_DEFAULT_MAX_EXTRA_BULLETS, PLAYER_ENERGY_INCREASE,
 )
 
 WHITE = Color('white')
@@ -126,19 +126,19 @@ class Player(Entity):
         e_percent = self.energy.get_percent_full()
         h_percent = self.health.get_percent_full()
         # moving contributes 20% of the energy decay 
-        energy_decay_rate_velocity = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (self.vel.magnitude_squared() > 0.)
+        energy_decay_rate_velocity = 0.2 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (self.vel.magnitude_squared() > 0.)
         # regenerating health contributes 80% of the energy decay
         if h_percent == 1.:
             energy_decay_rate_health = 0.
             low_health_multiplier = 1.
         elif h_percent > 0.4:
-            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE
-            low_health_multiplier = 1.
+            low_health_multiplier = 1. if e_percent < 0.8 else 2.
+            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 2.)
         else:
             # unless health is low
-            # then it contributes 160% of the energy decay if energy is low and 240% if high
+            # then it depends on the energy levels
             low_health_multiplier = 1.5 if e_percent < 0.6 else 2.5
-            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 1.5)
+            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 2.)
         # decay energy and regenerate health faster when health is low
         if e_percent > 0.: self.health.change(self.get_regen() * low_health_multiplier * time_delta)
         self.energy.change(
@@ -212,7 +212,7 @@ class Player(Entity):
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
         self.health.set_percent_full(old_percentage)
         self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.08 * (self.level - 1)
-        self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + 100. * (self.level - 1))
+        self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + PLAYER_ENERGY_INCREASE * (self.level - 1))
         self.energy.set_percent_full(0.6) # energy sets to 60%
         self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.2)
         self.energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self.level - 1)
