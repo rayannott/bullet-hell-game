@@ -53,7 +53,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         active_artifacts = [el.get_verbose_string() for el in artifacts_handler.iterate_active()]
         active_artifacts_str = f'{paint(", ".join(active_artifacts), LIGHT_ORANGE)}' if active_artifacts else 'none'
 
-        stats_str = info['stats'].get_pretty_stats()
+        stats_str = info['stats'].get_pretty_stats() # TODO: formatting
 
 
         text = f'''<b>--- {paint('GAME', WHITE)} {paint(datetime_str.replace('/', '.'), LIGHT_BLUE)} ---</b>

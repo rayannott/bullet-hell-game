@@ -28,6 +28,13 @@ class Stats:
 
     def get_as_dict(self) -> dict:
         return self.__dict__
+    
+    @staticmethod
+    def _snakecase_to_title(snakecase: str) -> str:
+        return ' '.join(snakecase.split('_')).title()
+    
+    def get_pretty_stats(self) -> list[tuple[str, str]]:
+        return [(f'{self._snakecase_to_title(k)}', f'{str(v) if isinstance(v, int) else f"{v:.2f}"}') for k, v in self.__dict__.items() if v > 0]
 
 
 @dataclass
