@@ -12,7 +12,7 @@ from src.game import Game
 from src.entity import Entity, Mine
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
-from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, 
+from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, LIGHT_MAGENTA_HEX, NICER_RED_HEX, GRAY_HEX, 
     WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX)
 
 freetype.init()
@@ -21,11 +21,12 @@ font = freetype.SysFont('Arial', 20)
 
 NICER_GREEN = Color(NICER_GREEN_HEX)
 MAGENTA = Color(NICER_MAGENTA_HEX)
-LIGHTER_MAGENTA = Color('#a22ac9')
+LIGHTER_MAGENTA = Color(LIGHT_MAGENTA_HEX)
 YELLOW = Color('yellow')
 WHITE = Color('white')
-RED = Color('#e31243')
-GRAY = Color('#808080')
+RED = Color(NICER_RED_HEX)
+GRAY = Color(GRAY_HEX)
+BLACK = Color('black')
 
 
 def draw_circular_status_bar(
@@ -175,7 +176,7 @@ class RenderManager:
         if entity.speed and entity.vel.magnitude_squared():
             pygame.draw.line(
                 self.surface,
-                Color('white'),
+                WHITE,
                 entity.get_pos(),
                 entity.get_pos() + entity.vel.normalize() * entity.speed * 0.1,
                 width=2
@@ -208,7 +209,7 @@ class RenderManager:
             t = enemy.cooldown.get_time_left()
             pygame.draw.circle(
                 self.surface,
-                Color('white'),
+                WHITE,
                 enemy.get_pos(),
                 enemy.get_size() * self.soon_shooting_coef_function(1. - t),
                 width=2
@@ -244,7 +245,7 @@ class RenderManager:
             player.artifacts_handler.get_bullet_shield().is_on()):
             pygame.draw.circle(
                 self.surface,
-                Color('yellow'),
+                YELLOW,
                 player.get_pos(),
                 ARTIFACT_SHIELD_SIZE,
                 width=2
@@ -254,7 +255,7 @@ class RenderManager:
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)
-        color_gradient = ColorGradient(Color('black'), entity.get_color())
+        color_gradient = ColorGradient(BLACK, entity.get_color())
         for i, pos in enumerate(entity.trail):
             pygame.draw.circle(
                 self.surface,
