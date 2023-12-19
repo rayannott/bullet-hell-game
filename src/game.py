@@ -24,6 +24,9 @@ from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERG
 from front.sounds import play_sfx
 
 
+BLUE = pygame.Color('blue')
+
+
 def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, float]:
     DIFF_MULTS = {1: 0, 2: 1, 3: 2, 4: 5, 5: 8}
     # the higher the difficulty, the lower the probability of spawning a basic enemy
@@ -130,10 +133,14 @@ class Game:
         if self.level == 5:
             if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES and not len(self.e_corpses):
                 self.player.get_achievements().REACH_LEVEL_5_WITHOUT_CORPSES = True
-                self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=pygame.Color('blue')))
+                self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=BLUE))
             if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE and not self.player.get_stats().DAMAGE_TAKEN:
                 self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE = True
-                self.feedback_buffer.append(Feedback('[A] reach level 5 without taking damage', 3., color=pygame.Color('blue')))
+                self.feedback_buffer.append(Feedback('[A] reach level 5 without taking damage', 3., color=BLUE))
+        if self.level == 10:
+            if not self.player.get_achievements().REACH_LEVEL_10:
+                self.player.get_achievements().REACH_LEVEL_10 = True
+                self.feedback_buffer.append(Feedback('[A] you\'ve reached the last level!', 3., color=BLUE))
         return True
 
     def kill_projectiles(self):
@@ -207,7 +214,25 @@ class Game:
         self.process_timers(time_delta)
         self.process_collisions()
         self.spawn_buffered_entities()
+        self.register_new_achievements()
     
+    def register_new_achievements(self):
+        if not self.player.get_achievements().RECEIVE_1000_DAMAGE and self.player.get_stats().DAMAGE_TAKEN >= 1000:
+            self.player.get_achievements().RECEIVE_1000_DAMAGE = True
+            self.feedback_buffer.append(Feedback('[A] receive 1000 damage', 3., color=BLUE))
+        if not self.player.get_achievements().KILL_100_ENEMIES and self.player.get_stats().ENEMIES_KILLED >= 100:
+            self.player.get_achievements().KILL_100_ENEMIES = True
+            self.feedback_buffer.append(Feedback('[A] killed 100 enemies', 3., color=BLUE))
+        if not self.player.get_achievements().FIRE_200_PROJECTILES and self.player.get_stats().PROJECTILES_FIRED >= 200:
+            self.player.get_achievements().FIRE_200_PROJECTILES = True
+            self.feedback_buffer.append(Feedback('[A] fired 200 projectiles', 3., color=BLUE))
+        if not self.player.get_achievements().BLOCK_100_BULLETS and self.player.get_stats().BULLET_SHIELD_BULLETS_BLOCKED >= 100:
+            self.player.get_achievements().BLOCK_100_BULLETS = True
+            self.feedback_buffer.append(Feedback('[A] blocked 100 bullets', 3., color=BLUE))
+        if not self.player.get_achievements().COLLECT_200_ENERGY_ORBS and self.player.get_stats().ENERGY_ORBS_COLLECTED >= 200:
+            self.player.get_achievements().COLLECT_200_ENERGY_ORBS = True
+            self.feedback_buffer.append(Feedback('[A] collected 200 energy orbs', 3., color=BLUE))
+
     def player_try_shooting(self):
         try:
             new_projectile = self.player.shoot()
@@ -327,6 +352,7 @@ class Game:
             self.reason_of_death = f'collided with Corpse'
         for mine in self.mines():
             if not mine.intersects(self.player): continue
+            if not mine.is_activated(): continue
             self.player_get_damage(mine.damage, ignore_invul_timer=True)
             self.player.get_stats().MINES_STEPPED_ON += 1
             mine.kill()
@@ -379,6 +405,7 @@ class Game:
         
         # enemy-mine collisions
         for mine in self.mines():
+            if not mine.is_activated(): continue
             for enemy in self.enemies():
                 if not mine.intersects(enemy): continue
                 self.deal_damage_to_enemy(enemy, mine.damage)
