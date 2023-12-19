@@ -343,7 +343,7 @@ class Game:
                 self.deal_damage_to_enemy(enemy, self.player.get_damage())
                 # TODO: play_sfx('dash_hit')
             else:
-                self.player_get_damage(enemy.damage_on_collision)
+                self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=enemy.enemy_type == EnemyType.BOSS)
                 self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
                 enemy.kill()
                 self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
