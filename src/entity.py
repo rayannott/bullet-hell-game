@@ -8,7 +8,8 @@ from front.utils import ColorGradient
 
 from src.enums import EntityType
 from src.utils import Timer, random_unit_vector
-from config import TRAIL_MAX_LENGTH, MINE_SIZE, MINE_LIFETIME, MINE_DEFAULT_DAMAGE, BACKGROUND_COLOR_HEX, MINE_AOE_EFFECT_SIZE
+from config import (TRAIL_MAX_LENGTH, MINE_SIZE, MINE_ACTIVATION_TIME,
+    MINE_LIFETIME, MINE_DEFAULT_DAMAGE, BACKGROUND_COLOR_HEX, MINE_AOE_EFFECT_SIZE)
 
 
 class Entity(ABC):
@@ -123,11 +124,16 @@ class Mine(Entity):
             can_spawn_entities=True
         )
         self.damage = damage
+        self.activation_timer = Timer(max_time=MINE_ACTIVATION_TIME)
         self.aoe_damage = aoe_damage
         self.lifetime_timer = Timer(max_time=MINE_LIFETIME)
 
+    def is_activated(self) -> bool:
+        return not self.activation_timer.running()
+
     def update(self, time_delta: float):
         self.lifetime_timer.tick(time_delta)
+        self.activation_timer.tick(time_delta)
         if not self.lifetime_timer.running(): self.kill()
         return super().update(time_delta)
     
