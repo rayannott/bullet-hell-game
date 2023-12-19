@@ -6,6 +6,7 @@ from config import (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, LIGHT_ORANGE_HEX)
 
 LIGHT_MAGENTA, NICER_GREEN, LIGHT_ORANGE = map(Color, (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, LIGHT_ORANGE_HEX))
 
+# TODO !!!
 TEXT = f'''Some <b>rules</b> {paint(("here"), NICER_GREEN)}.
 '''
 
