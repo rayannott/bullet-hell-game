@@ -277,8 +277,6 @@ class Game:
         Spawn all entities that are in the buffer of the other entities.
         """
         new_ent = []
-        # TODO: this is confusing: 
-        #       the player can spawn entities, but player.can_spawn_entities is False
         for entity in self.all_entities_iter(with_player=True, include_dead=True):
             if entity.can_spawn_entities:
                 new_ent.extend(entity.entities_buffer)
