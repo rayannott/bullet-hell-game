@@ -10,6 +10,7 @@ from config import FONT_FILE
 
 freetype.init()
 FONT = freetype.Font(FONT_FILE, 20)
+HUGE_FONT = freetype.Font(FONT_FILE, 150)
 
 
 def paint(text: str, color: Color) -> str:

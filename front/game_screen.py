@@ -18,7 +18,7 @@ from src.game import Game
 from front.sounds import play_sfx
 from front.screen import Screen
 from front.render_manager import RenderManager
-from front.utils import Notification
+from front.utils import HUGE_FONT, Label, Notification
 from front.stats_panel import StatsPanel
 
 from config.paths import SAVES_FILE, SAVES_DIR
@@ -44,6 +44,13 @@ class GameScreen(Screen):
         super().__init__(surface)
         self.settings = settings
         self.setup_game(surface)
+        rect = pygame.Rect(0, 0, 400, 80); rect.center = surface.get_rect().center
+        self.paused_label = Label(
+            text='paused',
+            surface=surface,
+            rect=rect,
+            font=HUGE_FONT
+        )
     
     def setup_game(self, surface: pygame.Surface):
         play_sfx('start_game')
@@ -126,6 +133,7 @@ class GameScreen(Screen):
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
+        if self.game.paused: self.paused_label.update()
         if self.game.collected_artifact_cache: # this adds the artifact to the ult picker
             self.render_manager.ult_picker.add_artifact(self.game.collected_artifact_cache.pop())
             self.game.collected_artifact_cache.clear()
