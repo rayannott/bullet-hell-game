@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 import random
 
 from pygame import Vector2, Color
 from config.settings import Settings
 from front.sounds import play_sfx
-from src.artifacts import ArtifactsHandler, MineSpawn, Artifact
-from src.artifact_chest import ArtifactChest, ArtifactChestGenerator
+from src.artifacts import ArtifactsHandler, Artifact
+from src.artifact_chest import ArtifactChestGenerator
 
 from src.entity import Entity
 from src.enums import ArtifactType, EntityType, ProjectileType
