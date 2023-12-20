@@ -126,7 +126,10 @@ class ArtifactChestGenerator:
         to_spawn.extend([ArtifactChest(Vector2(), self.get_artifact(_type)) for _type in active_to_spawn])
     
         skip = player_level // 2 - 1
-        stats_to_spawn = random.sample(absent_stats[skip:skip+4], num_stats_to_spawn)
+        if num_stats_to_spawn <= 4:
+            stats_to_spawn = absent_stats[skip:skip+num_stats_to_spawn]
+        else:
+            stats_to_spawn = random.sample(absent_stats[skip:skip+4], num_stats_to_spawn)
         to_spawn.extend(
             [ArtifactChest(Vector2(), InactiveArtifact(stats_boost)) for stats_boost in stats_to_spawn]
         )
