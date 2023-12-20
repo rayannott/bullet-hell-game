@@ -18,7 +18,7 @@ from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_
     PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE,
-    BOSS_ENEMY_COLOR_HEX,    
+    BOSS_ENEMY_COLOR_HEX, PROBABILITY_SPAWN_EXTRA_BULLET_ORB,
 )
 
 
@@ -180,7 +180,7 @@ class Enemy(Entity):
         self.entities_buffer.append(Corpse(self))
     
     def on_killed_by_player(self):
-        reward, bullets = (self.reward * 0.5, int(self.reward / 100)) if random.random() < 0.6 else (self.reward, 0)
+        reward, bullets = (self.reward * 0.5, int(self.reward / 100)) if random.random() < PROBABILITY_SPAWN_EXTRA_BULLET_ORB else (self.reward, 0)
         self.entities_buffer.append(
             EnergyOrb(self.pos, reward, 0.25, num_extra_bullets=bullets)
         )
@@ -412,9 +412,9 @@ class BossEnemy(Enemy):
             player=player,
             color=Color(BOSS_ENEMY_COLOR_HEX),
             speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 25 * (self._player_level - 1),
-            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5 + 80. * self._player_level * self.difficulty_mult**2,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2.85 + 80. * (self._player_level - 1) * self.difficulty_mult**2,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.6,
-            reward=ENEMY_DEFAULT_REWARD * (3. + 0.15 * self._player_level),
+            reward=ENEMY_DEFAULT_REWARD * (3. + 0.2 * self._player_level),
             damage=ENEMY_DEFAULT_DAMAGE + 5 * self._player_level * self.difficulty_mult**2,
             lifetime=math.inf,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,

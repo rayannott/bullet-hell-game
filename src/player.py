@@ -182,15 +182,16 @@ class Player(Entity):
         self.level += 1
         self.speed_range = (PLAYER_DEFAULT_SPEED_RANGE[0], PLAYER_DEFAULT_SPEED_RANGE[1] + 
             PLAYER_SPEED_INCREASE * (self.level - 1))
-        old_percentage = self.health.get_percent_full()
+        old_percentage_health = self.health.get_percent_full()
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH + 10. * (self.level - 1)) # health keeps percentage full
-        self.health.set_percent_full(old_percentage)
+        self.health.set_percent_full(old_percentage_health)
         self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.08 * (self.level - 1)
+        old_percentage_energy = self.energy.get_percent_full()
         self.energy = Slider(PLAYER_DEFAULT_MAX_ENERGY + PLAYER_ENERGY_INCREASE * (self.level - 1))
-        self.energy.set_percent_full(0.6) # energy sets to 60%
-        self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.2)
+        self.energy.set_percent_full(old_percentage_energy)
+        self.shoot_cooldown = max(PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.25)
         self.energy_decay_rate = PLAYER_DEFAULT_ENERGY_DECAY_RATE + 1.5 * (self.level - 1)
-        self.damage = PLAYER_DEFAULT_DAMAGE_AVG + 10. * (self.level - 1)
+        self.damage = PLAYER_DEFAULT_DAMAGE_AVG + 15. * (self.level - 1)
 
     def set_gravity_point(self, gravity_point: Vector2):
         self.gravity_point = gravity_point
