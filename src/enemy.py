@@ -347,7 +347,7 @@ class MinerEnemy(Enemy):
             pos=pos,
             enemy_type=EnemyType.MINER,
             player=player,
-            color=Color('#31d6b0'),
+            color=Color('#103d9e'),
             speed=ENEMY_DEFAULT_SPEED * 1.2,
             health=ENEMY_DEFAULT_MAX_HEALTH + 40. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,

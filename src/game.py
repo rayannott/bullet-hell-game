@@ -386,7 +386,7 @@ class Game:
             if aoe_effect.applied_effect_player: continue
             self.player_get_damage(aoe_effect.damage)
             aoe_effect.applied_effect_player = True
-            self.reason_of_death = f'aoe damage from a mine'
+            self.reason_of_death = f'impact AOE damage'
         for artifact_chest in self.artifact_chests():
             if not artifact_chest.intersects(self.player): continue
             if not artifact_chest.can_be_picked_up(): continue
