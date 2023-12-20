@@ -230,21 +230,26 @@ class Game:
         self.register_new_achievements()
     
     def register_new_achievements(self):
-        if not self.player.get_achievements().RECEIVE_1000_DAMAGE and self.player.get_stats().DAMAGE_TAKEN >= 1000:
-            self.player.get_achievements().RECEIVE_1000_DAMAGE = True
+        ach = self.player.get_achievements()
+        st = self.player.get_stats()
+        if not ach.RECEIVE_1000_DAMAGE and st.DAMAGE_TAKEN >= 1000:
+            ach.RECEIVE_1000_DAMAGE = True
             self.feedback_buffer.append(Feedback('[A] receive 1000 damage', 3., color=BLUE))
-        if not self.player.get_achievements().KILL_100_ENEMIES and self.player.get_stats().ENEMIES_KILLED >= 100:
-            self.player.get_achievements().KILL_100_ENEMIES = True
+        if not ach.KILL_100_ENEMIES and st.ENEMIES_KILLED >= 100:
+            ach.KILL_100_ENEMIES = True
             self.feedback_buffer.append(Feedback('[A] killed 100 enemies', 3., color=BLUE))
-        if not self.player.get_achievements().FIRE_200_PROJECTILES and self.player.get_stats().PROJECTILES_FIRED >= 200:
-            self.player.get_achievements().FIRE_200_PROJECTILES = True
+        if not ach.FIRE_200_PROJECTILES and st.PROJECTILES_FIRED >= 200:
+            ach.FIRE_200_PROJECTILES = True
             self.feedback_buffer.append(Feedback('[A] fired 200 projectiles', 3., color=BLUE))
-        if not self.player.get_achievements().BLOCK_100_BULLETS and self.player.get_stats().BULLET_SHIELD_BULLETS_BLOCKED >= 100:
-            self.player.get_achievements().BLOCK_100_BULLETS = True
+        if not ach.BLOCK_100_BULLETS and st.BULLET_SHIELD_BULLETS_BLOCKED >= 100:
+            ach.BLOCK_100_BULLETS = True
             self.feedback_buffer.append(Feedback('[A] blocked 100 bullets', 3., color=BLUE))
-        if not self.player.get_achievements().COLLECT_200_ENERGY_ORBS and self.player.get_stats().ENERGY_ORBS_COLLECTED >= 200:
-            self.player.get_achievements().COLLECT_200_ENERGY_ORBS = True
+        if not ach.COLLECT_200_ENERGY_ORBS and st.ENERGY_ORBS_COLLECTED >= 200:
+            ach.COLLECT_200_ENERGY_ORBS = True
             self.feedback_buffer.append(Feedback('[A] collected 200 energy orbs', 3., color=BLUE))
+        if not ach.COLLIDE_WITH_15_ENEMIES and st.ENEMIES_COLLIDED_WITH >= 15:
+            ach.COLLIDE_WITH_15_ENEMIES = True
+            self.feedback_buffer.append(Feedback('[A] collided with 15 enemies', 3., color=BLUE))
 
     def player_try_shooting(self):
         try:
