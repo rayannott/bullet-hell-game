@@ -38,9 +38,10 @@ def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, 
     # the higher the difficulty, the lower the probability of spawning a basic enemy
     return {
         EnemyType.BASIC: 230 - DIFF_MULTS[difficulty] * 10,
-        EnemyType.FAST: (level - 1) * 10 * (difficulty > 2),
-        EnemyType.ARTILLERY: level * 10,
-        EnemyType.TANK: 10 + level * 5,
+        EnemyType.FAST: (level - 1) * 10. * (difficulty > 2),
+        EnemyType.ARTILLERY: level * 10.,
+        EnemyType.TANK: 10. + level * 5.,
+        EnemyType.MINER: 40. + level * 4.,
         EnemyType.BOSS: 0.,
     }
 
@@ -210,7 +211,7 @@ class Game:
             self.spawn_enemy(EnemyType.BOSS)
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
-            if random.random() < 0.995:
+            if random.random() < 0.997:
                 self.spawn_energy_orb()
             else:
                 # sometimes (0.5%) spawn the artifact chest instead of the energy orb

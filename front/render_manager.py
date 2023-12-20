@@ -208,15 +208,25 @@ class RenderManager:
             enemy.get_size() * 1.5, 
             color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
         # if less than 1. sec left on the cooldown timer, indicate shooting intent
-        if enemy.shoots_player and enemy.cooldown.get_time_left() < 1.:
-            t = enemy.cooldown.get_time_left()
-            pygame.draw.circle(
-                self.surface,
-                WHITE,
-                enemy.get_pos(),
-                enemy.get_size() * self.soon_shooting_coef_function(1. - t),
-                width=2
-            )
+        if enemy.shoots_player:
+            if (t:=enemy.cooldown.get_time_left()) < 1.:
+                pygame.draw.circle(
+                    self.surface,
+                    WHITE,
+                    enemy.get_pos(),
+                    enemy.get_size() * self.soon_shooting_coef_function(1. - t),
+                    width=2
+                )
+        else:
+            if enemy.enemy_type == EnemyType.MINER and enemy.dash_cooldown_timer.get_time_left() < 1.: # type: ignore
+                color = random.choice([GRAY, WHITE, RED])
+                pygame.draw.circle(
+                    self.surface,
+                    color,
+                    enemy.get_pos(),
+                    enemy.get_size(),
+                    width=5
+                )
         if self.debug:
             health_text = f'{enemy.get_health()}'
             label = Label(health_text, self.surface, 

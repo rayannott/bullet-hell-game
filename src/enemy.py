@@ -2,11 +2,13 @@ from dataclasses import dataclass
 import math
 import random
 from pygame import Vector2, Color
+from src.aoe_effect import AOEEffect
 from src.energy_orb import EnergyOrb
 
 from src.entity import Entity
 from src.corpse import Corpse
 from src.enums import EntityType, EnemyType, ProjectileType
+from src.mine import Mine
 from src.player import Player
 from src.utils import Slider, Timer, random_unit_vector
 from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile, DefinedTrajectoryProjectile
@@ -37,7 +39,8 @@ ENEMY_SIZE_MAP = {
     EnemyType.FAST: ENEMY_DEFAULT_SIZE * 0.87,
     EnemyType.TANK: ENEMY_DEFAULT_SIZE * 1.8,
     EnemyType.ARTILLERY: ENEMY_DEFAULT_SIZE * 2,
-    EnemyType.BOSS: ENEMY_DEFAULT_SIZE * 2.7,
+    EnemyType.MINER: ENEMY_DEFAULT_SIZE * 0.92,
+    EnemyType.BOSS: ENEMY_DEFAULT_SIZE * 2.6,
 }
 
 
@@ -332,8 +335,64 @@ class ArtilleryEnemy(Enemy):
 
 
 class MinerEnemy(Enemy):
-    """Does not shoot. Runs towards the player,
-    spawns a bunch of mines when getting close."""
+    """Does not shoot. Dashes towards the player,
+    explodes and spawns a bunch of mines when getting close."""
+    def __init__(self,
+            pos: Vector2,
+            player: Player,
+        ):         
+        self._player_level = player.get_level()
+        self._difficulty = player.settings.difficulty
+        super().__init__(
+            pos=pos,
+            enemy_type=EnemyType.MINER,
+            player=player,
+            color=Color('#31d6b0'),
+            speed=ENEMY_DEFAULT_SPEED * 1.2,
+            health=ENEMY_DEFAULT_MAX_HEALTH + 40. * (self._player_level - 1),
+            shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,
+            reward=ENEMY_DEFAULT_REWARD * (1.5 + 0.1 * self._player_level),
+            lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
+            damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.3,
+            turn_coefficient=0.4,
+        )
+        self.shoots_player = False
+        self.render_trail = True
+        self.dash_cooldown_timer = Timer(max_time=6.)
+        self.dash_active_timer = Timer(max_time=0.5 + 0.05 * self._player_level)
+        self.dash_active_timer.turn_off()
+        self.COLOR_IN_DASH = Color('#d3e8e3')
+        self.NORMAL_COLOR = self.color
+    
+    def is_in_dash(self) -> bool:
+        return self.dash_active_timer.running()
+    
+    def update(self, time_delta: float):
+        self.dash_cooldown_timer.tick(time_delta)
+        if not self.dash_cooldown_timer.running():
+            self.dash_active_timer.reset()
+            self.dash_cooldown_timer.reset()
+        if self.is_in_dash():
+            self.dash_active_timer.tick(time_delta)
+            self.speed = ENEMY_DEFAULT_SPEED * 4 + self._player_level // 2.
+            self.color = self.COLOR_IN_DASH
+        else:
+            self.speed = ENEMY_DEFAULT_SPEED * 1.2
+            self.color = self.NORMAL_COLOR
+        if (self.homing_target.get_pos() - self.pos).magnitude_squared() < 70.**2:
+            self.kill()
+            for _ in range(random.randint(0, 3) + self._player_level // 4):
+                self.entities_buffer.append(Mine(self.homing_target.pos + random_unit_vector() * random.uniform(50., 200. + 30 * self._player_level)))
+            self.entities_buffer.append(
+                AOEEffect(
+                    pos=self.pos,
+                    size=80,
+                    damage=self.damage,
+                    color=self.color,
+                    animation_lingering_time=0.8
+                )
+            )
+        super().update(time_delta)
 
 
 class BossEnemy(Enemy):
@@ -359,13 +418,13 @@ class BossEnemy(Enemy):
             damage=ENEMY_DEFAULT_DAMAGE + 5 * self._player_level * self.difficulty_mult**2,
             lifetime=math.inf,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
-            turn_coefficient=0.3 + 0.06 * self._player_level,
+            turn_coefficient=0.5,
         )
         self._spawn_oil_spills_cooldown = max(BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 2. * self._player_level, 5.)
         self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
         DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 3, 5: 8}
         self._regen_rate = (BOSS_DEFAULT_REGEN_RATE * DIFF_MULT[self.difficulty] +
-            0.2 * (self._player_level - 1))
+            0.4 * (self._player_level - 1))
         self.PROJECTILE_TYPES_TO_WEIGHTS = {
             ProjectileType.NORMAL: 200,
             ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty] + 20 * (self._player_level - 1),
@@ -415,5 +474,6 @@ ENEMY_TYPE_TO_CLASS = {
     EnemyType.FAST: FastEnemy,
     EnemyType.ARTILLERY: ArtilleryEnemy,
     EnemyType.TANK: TankEnemy,
+    EnemyType.MINER: MinerEnemy,
     EnemyType.BOSS: BossEnemy,
 }
