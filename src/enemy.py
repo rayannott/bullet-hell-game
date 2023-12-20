@@ -34,7 +34,7 @@ class EnemyStats:
 
 ENEMY_SIZE_MAP = {
     EnemyType.BASIC: ENEMY_DEFAULT_SIZE,
-    EnemyType.FAST: ENEMY_DEFAULT_SIZE * 0.85,
+    EnemyType.FAST: ENEMY_DEFAULT_SIZE * 0.87,
     EnemyType.TANK: ENEMY_DEFAULT_SIZE * 1.8,
     EnemyType.ARTILLERY: ENEMY_DEFAULT_SIZE * 2,
     EnemyType.BOSS: ENEMY_DEFAULT_SIZE * 2.7,
@@ -329,6 +329,11 @@ class ArtilleryEnemy(Enemy):
                 player=self.homing_target, # type: ignore
             )
         )
+
+
+class MinerEnemy(Enemy):
+    """Does not shoot. Runs towards the player,
+    spawns a bunch of mines when getting close."""
 
 
 class BossEnemy(Enemy):
