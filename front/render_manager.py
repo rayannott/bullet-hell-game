@@ -166,7 +166,7 @@ class RenderManager:
                 f'{self.entities_drawn}',
                 f'{self.game.player.speed:.1f}',
                 f'{self.game.player.get_stats().get_accuracy():.0%}', 
-                f'{self.game.player.get_stats().ENERGY_ORBS_COLLECTED}',
+                f'{self.game.player.get_stats().ENERGY_ORBS_COLLECTED}/{self.game.energy_orbs_spawned}',
                 f'{self.game.player.get_stats().DAMAGE_TAKEN:.1f}'
             ]
             self.debug_textbox.set_lines(

@@ -64,6 +64,7 @@ class Achievements:
     BLOCK_100_BULLETS: bool = False
     COLLECT_200_ENERGY_ORBS: bool = False
     COLLIDE_WITH_15_ENEMIES: bool = False
+    COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2: bool = False
 
     @staticmethod
     def _snakecase_to_title(snakecase: str) -> str:

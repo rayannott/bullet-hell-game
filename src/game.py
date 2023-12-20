@@ -75,6 +75,7 @@ class Game:
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
         self.reason_of_death = ''
         self.collected_artifact_cache: list[Artifact] = []
+        self.energy_orbs_spawned = 0
 
     def all_entities_iter(self, 
             with_player: bool = True,
@@ -136,7 +137,11 @@ class Game:
             self.add_entity(ac)
 
         # achievements:
-        if self.level == 5:
+        if self.level == 2:
+            if not self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2 and self.energy_orbs_spawned == self.player.get_stats().ENERGY_ORBS_COLLECTED:
+                self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2 = True
+                self.feedback_buffer.append(Feedback('[A] collected all energy orbs by level 2', 3., color=BLUE))
+        elif self.level == 5:
             if not self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES and not len(self.e_corpses):
                 self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES = True
                 self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=BLUE))
@@ -471,6 +476,7 @@ class Game:
     def add_entity(self, entity: Entity) -> None:
         ent_type = entity.get_type()
         if ent_type == EntityType.ENERGY_ORB:
+            self.energy_orbs_spawned += 1
             self.e_energy_orbs.append(entity) # type: ignore
         elif ent_type == EntityType.ENEMY:
             self.e_enemies.append(entity) # type: ignore
