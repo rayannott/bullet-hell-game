@@ -67,7 +67,7 @@ class ArtifactChestGenerator:
             StatsBoost(regen=2.),
             StatsBoost(damage=15.),
             StatsBoost(regen=1., speed=200.),
-            StatsBoost(damage=20.),
+            StatsBoost(damage=25.),
             StatsBoost(add_max_extra_bullets=5),
             StatsBoost(bullet_shield_duration=2.),
             StatsBoost(size=2., add_max_extra_bullets=2),
@@ -82,6 +82,12 @@ class ArtifactChestGenerator:
             2: 'SSS', 3: 'SAA', 4: 'SSS', 5: 'SSA',
             6: 'SSS', 7: 'SSA', 8: 'SSS', 9: 'SSA', 10: 'SSA',
         }
+    
+    def get_random_absent_stats_boost_artifact_chest(self, at: Vector2) -> ArtifactChest | None:
+        absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v]
+        if not absent_stats: return None
+        stats_boost = random.choice(absent_stats)
+        return ArtifactChest(at, InactiveArtifact(stats_boost))
     
     def get_artifact(self, artifact_type: ArtifactType) -> Artifact:
         if artifact_type == ArtifactType.BULLET_SHIELD:
