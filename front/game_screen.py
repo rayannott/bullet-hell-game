@@ -59,13 +59,7 @@ class GameScreen(Screen):
 
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p: self.game.toggle_pause()
-            elif event.key == pygame.K_F1:
-                self.toggle_debug()
-            elif event.key == pygame.K_F5:
-                self.post_run()
-                self.setup_game(self.surface)
-            elif pygame.key.get_mods() & pygame.KMOD_SHIFT:
+            if pygame.key.get_mods() & pygame.KMOD_SHIFT:
                 if event.key == pygame.K_1:
                     self.game.spawn_enemy(EnemyType.BASIC)
                 elif event.key == pygame.K_2:
@@ -75,6 +69,8 @@ class GameScreen(Screen):
                 elif event.key == pygame.K_4:
                     self.game.spawn_enemy(EnemyType.ARTILLERY)
                 elif event.key == pygame.K_5:
+                    self.game.spawn_enemy(EnemyType.MINER)
+                elif event.key == pygame.K_6:
                     self.game.spawn_enemy(EnemyType.BOSS)
                 elif event.key == pygame.K_i:
                     print('--- debug info ---')
@@ -90,6 +86,15 @@ class GameScreen(Screen):
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), MineSpawn(self.game.player)))
                 elif event.key == pygame.K_d:
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Dash(self.game.player)))
+            else:
+                if event.key == pygame.K_p:
+                    self.game.toggle_pause()
+                    # TODO: play_sfx('toggle_pause')
+                elif event.key == pygame.K_F1:
+                    self.toggle_debug()
+                elif event.key == pygame.K_F5:
+                    self.post_run()
+                    self.setup_game(self.surface)
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
