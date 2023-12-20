@@ -128,7 +128,6 @@ class Game:
         self.current_spawn_enemy_cooldown *= (1. - 0.02 * self.settings.difficulty)
 
         art_chests_to_spawn = self.player.artifacts_generator.get_artifact_chests(self.level)
-        print(f'spawning artifact chests: {art_chests_to_spawn}')
         _len = len(art_chests_to_spawn)
         _positions = [
             Vector2(500 + (self.screen_rectangle.width - 500) * i / _len, self.screen_rectangle.height//2)
@@ -211,10 +210,10 @@ class Game:
             self.spawn_enemy(EnemyType.BOSS)
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
-            if random.random() < 0.997:
+            if random.random() < 0.9985:
                 self.spawn_energy_orb()
             else:
-                # sometimes (0.5%) spawn the artifact chest instead of the energy orb
+                # sometimes (0.15%) spawn the artifact chest instead of the energy orb
                 pos = self.get_random_screen_position_for_entity(entity_size=ARTIFACT_CHEST_SIZE)
                 ac = self.player.artifacts_generator.get_random_absent_stats_boost_artifact_chest(pos)
                 if ac is not None:
@@ -407,9 +406,10 @@ class Game:
                 bullet.kill()
                 is_ricochet = bullet.ricochet_count > 0
                 self.player.get_stats().ACCURATE_SHOTS += 1
-                if is_ricochet: self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
-                damage_dealt = bullet.damage
-                self.deal_damage_to_enemy(enemy, damage_dealt)
+                if is_ricochet:
+                    self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
+                    self.feedback_buffer.append(Feedback('ricochet!', 2., color=pygame.Color('pink'), at_pos=enemy.get_pos()))
+                self.deal_damage_to_enemy(enemy, bullet.damage)
                 play_sfx('accurate_shot')
                 if (not self.player.get_achievements().KILL_BOSS_WITH_RICOCHET and is_ricochet and
                 not enemy.is_alive() and enemy.enemy_type == EnemyType.BOSS
