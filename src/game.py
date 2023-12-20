@@ -5,6 +5,7 @@ import itertools
 
 import pygame
 from pygame import Vector2, Color
+from config.back import ARTIFACT_CHEST_SIZE
 from config.settings import Settings
 from src.artifacts import Artifact
 
@@ -142,7 +143,7 @@ class Game:
             if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE and not self.player.get_stats().DAMAGE_TAKEN:
                 self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE = True
                 self.feedback_buffer.append(Feedback('[A] reach level 5 without taking damage', 3., color=BLUE))
-        if self.level == 10:
+        elif self.level == 10:
             if not self.player.get_achievements().REACH_LEVEL_10:
                 self.player.get_achievements().REACH_LEVEL_10 = True
                 self.feedback_buffer.append(Feedback('[A] you\'ve reached the last level!', 3., color=BLUE))
@@ -204,7 +205,14 @@ class Game:
             self.spawn_enemy(EnemyType.BOSS)
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
-            self.spawn_energy_orb()
+            if random.random() < 0.995:
+                self.spawn_energy_orb()
+            else:
+                # sometimes (0.5%) spawn the artifact chest instead of the energy orb
+                pos = self.get_random_screen_position_for_entity(entity_size=ARTIFACT_CHEST_SIZE)
+                ac = self.player.artifacts_generator.get_random_absent_stats_boost_artifact_chest(pos)
+                if ac is not None:
+                    self.add_entity(ac)
             self.new_energy_orb_timer.reset(with_max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
         self.spawn_enemy_timer.tick(time_delta)
         if not self.spawn_enemy_timer.running():
