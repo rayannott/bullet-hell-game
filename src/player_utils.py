@@ -72,3 +72,5 @@ class Achievements:
     def achievements_pretty(self) -> list[str]:
         return [self._snakecase_to_title(k) for k, v in self.__dict__.items() if v]
 
+    def all_achievements_pretty(self) -> list[str]:
+        return list(map(self._snakecase_to_title, self.__dict__.keys()))

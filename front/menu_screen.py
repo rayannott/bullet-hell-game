@@ -10,6 +10,7 @@ from front.sounds import set_sfx_volume, set_bg_music_vol, play_bg_music
 from config import MENU_BUTTONS_SIZE
 from config.settings import Settings
 from front.stats_window import StatsWindow
+from src.player_utils import Achievements
 
 
 class MenuScreen(Screen):
@@ -45,6 +46,7 @@ class MenuScreen(Screen):
         self.stats_window = None
         self.rules_window = None
         self.settings_window = None
+        self.achievements_window = None
 
         self.game_screen = None
 
@@ -77,6 +79,19 @@ class MenuScreen(Screen):
                 if self.rules_window is not None:
                     self.rules_window.kill()
                 self.rules_window = RulesWindow(self.manager, self.surface)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_a:
+                if self.achievements_window is not None:
+                    self.achievements_window.kill()
+                # confirmation dialog
+                self.achievements_window = pygame_gui.windows.UIConfirmationDialog(
+                    rect=pygame.Rect(30, 30, 400, 500),
+                    action_long_desc='\n'.join(Achievements().all_achievements_pretty()),
+                    manager=self.manager,
+                    window_title='All possible achievements',
+                    action_short_name='Ok',
+                    blocking=False,
+                )
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
