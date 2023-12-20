@@ -54,7 +54,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         active_artifacts = [el.get_verbose_string() for el in artifacts_handler.iterate_active()]
         active_artifacts_str = f'active:\n{TAB*3}{paint(", ".join(active_artifacts), LIGHT_ORANGE)}' if active_artifacts else ''
 
-        stats_list_pairs: list[tuple[str, str]] = info['stats'].get_pretty_stats() # TODO: formatting
+        stats_list_pairs: list[tuple[str, str]] = info['stats'].get_pretty_stats()
         stats_str = '\n        '.join(f'{paint(k, NICER_GREEN):<60} {paint(v, NICER_YELLOW):>5}' for k, v in stats_list_pairs)
         
         artifacts_str = f'{paint('artifacts', PRETTY_MAGENTA)}:\n{TAB*2}{stats_boosts_str}\n{TAB*2}{active_artifacts_str}' if stats_boosts_str or active_artifacts_str else ''
