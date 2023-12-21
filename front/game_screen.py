@@ -89,6 +89,8 @@ class GameScreen(Screen):
                     play_sfx('toggle_pause')
                 elif event.key == pygame.K_F1:
                     self.toggle_debug()
+                elif event.key == pygame.K_F2:
+                    self.stats_panel.toggle_visibility()
                 elif event.key == pygame.K_F5:
                     self.post_run()
                     self.setup_game(self.surface)

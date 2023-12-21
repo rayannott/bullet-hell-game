@@ -14,6 +14,7 @@ class StatsPanel:
     def __init__(self, surface: pygame.Surface, manager: pygame_gui.UIManager, game: Game):
         self.surface = surface
         self.game = game
+        self.show_stats_panel = True
         self.panel = pygame_gui.elements.UIPanel(
             relative_rect=pygame.Rect(0, 0, *GAME_STATS_PANEL_SIZE),
             manager=manager
@@ -37,6 +38,7 @@ class StatsPanel:
         )
 
     def update(self, time_delta: float):
+        if not self.show_stats_panel: return
         player = self.game.player
         self.health_bar.set_slider(player.get_health())
         self.energy_bar.set_slider(player.get_energy())
@@ -52,3 +54,9 @@ class StatsPanel:
 
             ])
         self.stats_textbox.update()
+
+    def toggle_visibility(self):
+        self.show_stats_panel = not self.show_stats_panel
+        self.panel.visible = self.show_stats_panel
+        self.health_bar.visible = self.show_stats_panel
+        self.energy_bar.visible = self.show_stats_panel
