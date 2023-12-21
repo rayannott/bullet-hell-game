@@ -438,7 +438,7 @@ class BossEnemy(Enemy):
         self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
         DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 3, 5: 8}
         self._regen_rate = (BOSS_DEFAULT_REGEN_RATE * DIFF_MULT[self.difficulty] +
-            4. * (self._player_level - 1))
+            5. * (self._player_level - 1))
         self.PROJECTILE_TYPES_TO_WEIGHTS = {
             ProjectileType.NORMAL: 200,
             ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty] + 20 * (self._player_level - 1),
