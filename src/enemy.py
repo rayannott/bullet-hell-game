@@ -260,7 +260,7 @@ class TankEnemy(Enemy):
             player=player,
             color=Color('#9e401e'),
             speed=ENEMY_DEFAULT_SPEED * 0.7,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 3. + 90. * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH * 3. + 80. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0,
             reward=ENEMY_DEFAULT_REWARD * (2.3 + 0.1 * self._player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
