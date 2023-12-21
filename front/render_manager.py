@@ -89,7 +89,7 @@ class UltimatePicker:
             self.option_circles_positions = [self.pos_to_draw_at]
             self.options_labels = [Label(self.options[0].get_short_string(), self.surface, position=(self.pos_to_draw_at + shift_render))]
         else:
-            self.option_circles_positions = [self.pos_to_draw_at + Vector2(OPTION_CIRCLE_SIZE * 1.1, 0.).rotate(360. * i / _len) 
+            self.option_circles_positions = [self.pos_to_draw_at + Vector2(OPTION_CIRCLE_SIZE * 1.35, 0.).rotate(360. * i / _len) 
                 for i in range(_len)]
             self.options_labels = []
             for art, pos in zip(self.options, self.option_circles_positions):
@@ -198,7 +198,7 @@ class RenderManager:
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)
         # do not draw health bar if enemy can always be killed with one shot 
-        can_one_shot = enemy.health.max_value < self.game.player.damage - self.game.player.damage_spread
+        can_one_shot = enemy.health.max_value <= self.game.player.damage - self.game.player.damage_spread
         draw_circular_status_bar(self.surface, enemy.get_pos(), enemy.get_health(),
             enemy.get_size() * 1.5, 
             color=NICER_GREEN, draw_full=not can_one_shot, width=2)
