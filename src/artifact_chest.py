@@ -71,10 +71,11 @@ class ArtifactChestGenerator:
             StatsBoost(damage=30.),
             StatsBoost(add_max_extra_bullets=5),
             StatsBoost(bullet_shield_duration=2.),
-            StatsBoost(time_stop_duration=2.),
-            StatsBoost(regen=2.5),
             StatsBoost(mine_cooldown=2.),
+            StatsBoost(time_stop_duration=2.),
+            StatsBoost(damage=25., cooldown=0.07),
             StatsBoost(bullet_shield_size=20.),
+            StatsBoost(regen=2.),
             StatsBoost(cooldown=0.15),
         ]
         self.inactive_artifacts_stats_boosts = dict(zip(_inactive_artifacts, repeat(False)))
@@ -82,7 +83,7 @@ class ArtifactChestGenerator:
         # Maps the player level to the artifact types to be spawned: S - stats, A - active.
         self.ARTIFACT_SCHEDULE = {
             2: 'SSS', 3: 'SAA', 4: 'SSS', 5: 'SSA',
-            6: 'SSS', 7: 'SSA', 8: 'SSS', 9: 'SSA', 10: 'SSA',
+            6: 'SSS', 7: 'SSA', 8: 'SSA', 9: 'SSA', 10: 'SSS',
         }
     
     def get_random_absent_stats_boost_artifact_chest(self, at: Vector2) -> ArtifactChest | None:
