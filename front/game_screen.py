@@ -11,6 +11,7 @@ from front.inventory_info import InventoryInfo
 from src.artifact_chest import ArtifactChest
 from src.artifacts import BulletShield, Dash, InactiveArtifact, MineSpawn, StatsBoost
 from src.enums import ArtifactType, EnemyType
+from src.oil_spill import OilSpill
 
 from src.utils import Feedback, random_unit_vector
 from src.game import Game
@@ -93,6 +94,8 @@ class GameScreen(Screen):
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), MineSpawn(self.game.player)))
                 elif event.key == pygame.K_d:
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Dash(self.game.player)))
+                elif event.key == pygame.K_o:
+                    self.game.add_entity(OilSpill(Vector2(pygame.mouse.get_pos())))
             else:
                 if event.key == pygame.K_p:
                     self.game.toggle_pause()
