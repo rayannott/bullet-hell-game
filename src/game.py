@@ -336,6 +336,7 @@ class Game:
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))
         for oil_spill in self.oil_spills():
             if not oil_spill.intersects(self.player): continue
+            if not oil_spill.is_activated(): continue
             self.player.effect_flags.OIL_SPILL = True
             self.reason_of_death = 'slipped on oil to death'
             play_sfx('in_oil_spill')

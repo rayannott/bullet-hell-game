@@ -7,20 +7,31 @@ from config import OIL_SPILL_SIZE, OIL_SPILL_LIFETIME, OIL_SPILL_SIZE_GROWTH_RAT
 
 
 class OilSpill(Entity):
-    def __init__(self, _pos: Vector2, _size: float = OIL_SPILL_SIZE):
+    def __init__(self, pos: Vector2, size: float = OIL_SPILL_SIZE):
         super().__init__(
-            pos=_pos,
-            size=_size,
+            pos=pos,
+            size=size,
             type=EntityType.OIL_SPILL,
             speed=0.,
             render_trail=False,
             can_spawn_entities=False,
-            color=Color('#453820'),
+            color=Color('#a37d37'),
         )
+        self.ACTIVATED_COLOR = self.color
+        self.INACTIVE_COLOR = Color('#453820')
         self._lifetime_timer = Timer(max_time=OIL_SPILL_LIFETIME)
+        self._activation_timer = Timer(max_time=1.5)
+    
+    def is_activated(self) -> bool:
+        return not self._activation_timer.running()
 
     def update(self, time_delta: float):
         if not self.is_alive(): return
         self._lifetime_timer.tick(time_delta)
+        self._activation_timer.tick(time_delta)
+        if self.is_activated():
+            self.color = self.ACTIVATED_COLOR
+            self.size += OIL_SPILL_SIZE_GROWTH_RATE * time_delta
+        else:
+            self.color = self.INACTIVE_COLOR
         if not self._lifetime_timer.running(): self.kill()
-        self.size += OIL_SPILL_SIZE_GROWTH_RATE * time_delta
