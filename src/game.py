@@ -24,12 +24,13 @@ from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.artifact_chest import ArtifactChest
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, 
-    NICER_MAGENTA_HEX, NICER_BLUE_HEX, NICER_YELLOW_HEX,
+    NICER_MAGENTA_HEX, NICER_BLUE_HEX, NICER_YELLOW_HEX, NICER_GREEN_HEX,
     WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
 from front.sounds import play_sfx
 
 
 NICER_YELLOW = pygame.Color(NICER_YELLOW_HEX)
+NICER_GREEN = pygame.Color(NICER_GREEN_HEX)
 BLUE = pygame.Color(NICER_BLUE_HEX)
 
 
@@ -247,6 +248,7 @@ class Game:
             if not dash.dash_path_intersects_enemy(enemy): continue
             self.deal_damage_to_enemy(enemy, self.player.get_damage())
             self.player.get_stats().DASHED_THROUGH_ENEMIES += 1
+            self.feedback_buffer.append(Feedback('x', 3.5, color=NICER_GREEN, at_pos=enemy.get_pos()))
         self.player.dash_needs_processing = False
     
     def register_new_achievements(self):
