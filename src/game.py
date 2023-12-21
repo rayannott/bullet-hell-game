@@ -239,7 +239,7 @@ class Game:
         dash = self.player.artifacts_handler.get_dash()
         for enemy in self.enemies():
             if not dash.dash_path_intersects_enemy(enemy): continue
-            self.deal_damage_to_enemy(enemy, self.player.get_damage())
+            self.deal_damage_to_enemy(enemy, self.player.get_damage() * 1.5)
             self.player.get_stats().DASHED_THROUGH_ENEMIES += 1
             self.feedback_buffer.append(Feedback('x', 3.5, color=NICER_GREEN, at_pos=enemy.get_pos()))
         self.player.dash_needs_processing = False
@@ -340,16 +340,16 @@ class Game:
         for eo in self.energy_orbs():
             if not eo.intersects(self.player): continue
             energy_collected: float = eo.energy_left()
-            self.player.energy.change(energy_collected)
+            energy_collected_actually = self.player.energy.change(energy_collected)
             self.player.get_stats().ENERGY_ORBS_COLLECTED += 1
-            self.player.get_stats().ENERGY_COLLECTED += energy_collected
+            self.player.get_stats().ENERGY_COLLECTED += energy_collected_actually
             if eo.num_extra_bullets:
                 actually_added = self.player.add_extra_bullets(eo.num_extra_bullets)
                 self.feedback_buffer.append(Feedback(f'+{actually_added}eb', color=Color('white')))
             self.player.get_stats().BONUS_ORBS_COLLECTED += int(eo.is_enemy_bonus_orb())
             play_sfx('energy_collected')
             eo.kill()
-            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))
+            self.feedback_buffer.append(Feedback(f'+{energy_collected_actually:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))
         for oil_spill in self.oil_spills():
             if not oil_spill.intersects(self.player): continue
             if not oil_spill.is_activated(): continue
@@ -436,7 +436,7 @@ class Game:
                     enemy.enemy_type == EnemyType.BOSS
                 ):
                     self.player.get_achievements().KILL_BOSS_WITH_RICOCHET = True
-                    self.feedback_buffer.append(Feedback('[A] killed the boss with ricochet!', 3., color=pygame.Color('blue')))
+                    self.feedback_buffer.append(Feedback('[A] killed the boss with ricochet!', 3., color=BLUE))
         # enemy-enemy collisions
         MULT = 0.3
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
@@ -483,14 +483,14 @@ class Game:
         enemy.kill()
         enemy.on_killed_by_player()
         reward = enemy.get_reward()
-        self.player.energy.change(reward)
+        reward_actually_collected = self.player.energy.change(reward)
         self.player.get_stats().ENEMIES_KILLED += 1
-        self.player.get_stats().ENERGY_COLLECTED += reward
+        self.player.get_stats().ENERGY_COLLECTED += reward_actually_collected
         if enemy.enemy_type == EnemyType.BOSS:
             # killed the boss
             self.new_level()
             self.kill_projectiles()
-        self.feedback_buffer.append(Feedback(f'+{reward:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
+        self.feedback_buffer.append(Feedback(f'+{reward_actually_collected:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
         play_sfx('enemy_killed')
     
     def player_get_damage(self, damage: float, ignore_invul_timer: bool = False) -> float:
