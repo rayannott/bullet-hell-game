@@ -320,6 +320,11 @@ class Game:
                 projectile.pos.y -= delta
     
     def process_collisions(self) -> None:
+        self.process_collisions_player()
+        if not self.time_frozen:
+            self.process_collisions_enemies()
+
+    def process_collisions_player(self) -> None:
         player_in_dash = self.player.effect_flags.IN_DASH
         # player collides with anything:
         for eo in self.energy_orbs():
@@ -399,7 +404,8 @@ class Game:
             # remove all artifacts:
             for ac in self.artifact_chests(): ac.kill()
 
-        # player bullets collide with enemies -> enemies get damage, player gets energy:
+    def process_collisions_enemies(self) -> None:
+        # player bullets collide with enemies
         player_bullets = [el for el in self.projectiles() if el.projectile_type == ProjectileType.PLAYER_BULLET]
         for bullet in player_bullets:
             for enemy in self.enemies():
