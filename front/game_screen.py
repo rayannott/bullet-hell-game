@@ -2,14 +2,14 @@ import datetime
 import random
 import shelve
 from typing import Literal
-from pprint import pformat
 
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
 from front.inventory_info import InventoryInfo
+from front.stats_window import StatsWindow
 from src.artifact_chest import ArtifactChest
-from src.artifacts import BulletShield, Dash, InactiveArtifact, MineSpawn, StatsBoost, TimeStop
+from src.artifacts import BulletShield, Dash, MineSpawn, TimeStop
 from src.enums import ArtifactType, EnemyType
 from src.oil_spill import OilSpill
 
@@ -22,22 +22,9 @@ from front.render_manager import RenderManager
 from front.utils import HUGE_FONT, Label, Notification
 from front.stats_panel import StatsPanel
 
+from config import GAME_OVER_WINDOW_SIZE, SAVE_GAMES_LONGER_THAN
 from config.paths import SAVES_FILE, SAVES_DIR
 from config.settings import Settings
-
-
-class InGameShop(pygame_gui.elements.UIWindow):
-    def __init__(self, manager: pygame_gui.UIManager, surface: pygame.Surface, game: Game):
-        rect = pygame.Rect(0, 0, 400, 400)
-        self.surface = surface
-        self.game = game
-        top_right = surface.get_rect().topright
-        rect.topright = (top_right[0] - 50, top_right[1] + 50)
-        super().__init__(
-            rect=rect,
-            manager=manager,
-            window_display_title='In-game shop',
-        )
 
 
 class GameScreen(Screen):
@@ -171,11 +158,14 @@ class GameScreen(Screen):
         print(f'changing debug mode: now {self.debug=}')
 
     def show_game_is_over_window(self):
+        html_stats = StatsWindow.construct_one_save_html('now', self.game.get_info())
+        r = pygame.Rect(0, 0, *GAME_OVER_WINDOW_SIZE)
+        r.center = self.surface.get_rect().center
         self.game_is_over_window = pygame_gui.windows.UIConfirmationDialog(
-            rect=pygame.Rect(*self.surface.get_rect().center, 600, 400),
+            rect=r,
             manager=self.manager,
             window_title='Game Over',
-            action_long_desc=f'{pformat(self.game.get_info())}',
+            action_long_desc=html_stats,
             blocking=True
         )
         print('[game over]', self.game.get_info())
@@ -218,6 +208,6 @@ class GameScreen(Screen):
             SAVES_DIR.mkdir(exist_ok=True, parents=True)
             
         # do not save games that ran for less than 10 seconds. 
-        if self.game.time < 10.: return
+        if self.game.time < SAVE_GAMES_LONGER_THAN: return
         with shelve.open(str(SAVES_FILE)) as saves:
             saves[datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S')] = self.game.get_info()

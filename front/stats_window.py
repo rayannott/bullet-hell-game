@@ -39,8 +39,8 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
             html_message=text
         )
     
-    def construct_one_save_html(self, datetime_str: str, info: dict) -> str:
-        # TODO
+    @staticmethod
+    def construct_one_save_html(datetime_str: str, info: dict) -> str:
         TAB = '    '
         difficulty_field =  f" {paint('difficulty', PRETTY_MAGENTA)}: {paint(info['difficulty'], NICER_GREEN)};" if info['difficulty'] != 3 else ''
         died_because_str = f"{paint('died because', PRETTY_MAGENTA)} {paint(info['reason_of_death'], NICER_RED)}" if info['reason_of_death'] else paint('did not die', PRETTY_MAGENTA)
