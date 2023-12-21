@@ -11,10 +11,11 @@ from src.enums import ArtifactType, EnemyType, ProjectileType
 from src.game import Game
 from src.entity import Entity
 from src.mine import Mine
+from src.projectile import Projectile
 from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, LIGHT_MAGENTA_HEX, NICER_RED_HEX, GRAY_HEX, 
-    WAVE_DURATION, BM, ARTIFACT_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX, BOSS_ENEMY_COLOR_HEX,
+    WAVE_DURATION, BM, BULLET_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX, BOSS_ENEMY_COLOR_HEX,
 )
 
 
@@ -134,10 +135,7 @@ class RenderManager:
         for aoe_effect in self.game.aoe_effects():
             self.draw_entity_basics(aoe_effect)
         for projectile in self.game.projectiles():
-            if projectile.projectile_type == ProjectileType.DEF_TRAJECTORY:
-                for def_traj_pos in projectile.render_traj_points: # type: ignore
-                    pygame.draw.circle(self.surface, '#202020', def_traj_pos, 2)
-            self.draw_entity_basics(projectile)
+            self.draw_projectile(projectile)
         for enemy in self.game.enemies():
             self.draw_enemy(enemy)
         for energy_orb in self.game.energy_orbs():
@@ -205,11 +203,11 @@ class RenderManager:
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)
         # do not draw health bar if enemy can always be killed with one shot 
-        draw_full_health = enemy.health.max_value >= self.game.player.damage - self.game.player.damage_spread
+        can_one_shot = enemy.health.max_value < self.game.player.damage - self.game.player.damage_spread
         draw_circular_status_bar(self.surface, enemy.get_pos(), enemy.get_health(),
             enemy.get_size() * 1.5, 
-            color=NICER_GREEN, draw_full=draw_full_health, width=2)
-        if self.game.enemies_frozen:
+            color=NICER_GREEN, draw_full=not can_one_shot, width=2)
+        if self.game.time_frozen:
             cross_vec = Vector2(enemy.get_size(), enemy.get_size()) * 1.7
             pygame.draw.line(
                 self.surface,
@@ -271,16 +269,31 @@ class RenderManager:
                 self.surface,
                 YELLOW,
                 player.get_pos(),
-                ARTIFACT_SHIELD_SIZE,
+                BULLET_SHIELD_SIZE,
                 width=2
             )
             draw_circular_status_bar(self.surface, player.get_pos(), 
-                player.artifacts_handler.get_bullet_shield().duration_timer.get_slider(reverse=True), ARTIFACT_SHIELD_SIZE + 5., draw_full=True)
+                player.artifacts_handler.get_bullet_shield().duration_timer.get_slider(reverse=True), BULLET_SHIELD_SIZE + 5., draw_full=True)
         # time stop:
         if (player.artifacts_handler.is_present(ArtifactType.TIME_STOP) and 
             player.artifacts_handler.get_time_stop().is_on()):
             draw_circular_status_bar(self.surface, player.get_pos(), 
                 player.artifacts_handler.get_time_stop().duration_timer.get_slider(reverse=True), player.get_size() + 15., draw_full=True)
+
+    def draw_projectile(self, projectile: Projectile):
+        if projectile.projectile_type == ProjectileType.DEF_TRAJECTORY:
+            for def_traj_pos in projectile.render_traj_points: # type: ignore
+                pygame.draw.circle(self.surface, '#202020', def_traj_pos, 2)
+        if self.game.time_frozen:
+            cross_vec = Vector2(projectile.get_size(), projectile.get_size()) * 2.
+            pygame.draw.line(
+                self.surface,
+                WHITE,
+                projectile.get_pos() - cross_vec,
+                projectile.get_pos() + cross_vec,
+                width=2
+            )
+        self.draw_entity_basics(projectile)
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)
