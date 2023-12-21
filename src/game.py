@@ -146,12 +146,19 @@ class Game:
                 self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2 = True
                 self.feedback_buffer.append(Feedback('[A] collected all energy orbs by level 2', 3., color=BLUE))
         elif self.level == 5:
+            # TODO: add achievement to get all of these at the same time:
             if not self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES and not len(self.e_corpses):
                 self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES = True
                 self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=BLUE))
             if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE and not self.player.get_stats().DAMAGE_TAKEN:
                 self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE = True
                 self.feedback_buffer.append(Feedback('[A] reach level 5 without taking damage', 3., color=BLUE))
+            if not self.player.get_achievements().REACH_LEVEL_5_WITH_100_PERCENT_ACCURACY and self.player.get_stats().ACCURATE_SHOTS == self.player.get_stats().PROJECTILES_FIRED:
+                self.player.get_achievements().REACH_LEVEL_5_WITH_100_PERCENT_ACCURACY = True
+                self.feedback_buffer.append(Feedback('[A] reach level 5 with 100% accuracy', 3., color=BLUE))
+            if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_COLLECTING_ENERGY_ORBS and not self.player.get_stats().ENERGY_ORBS_COLLECTED:
+                self.player.get_achievements().REACH_LEVEL_5_WITHOUT_COLLECTING_ENERGY_ORBS = True
+                self.feedback_buffer.append(Feedback('[A] reach level 5 without collecting energy orbs', 3., color=BLUE))
         elif self.level == 10:
             if not self.player.get_achievements().REACH_LEVEL_10:
                 self.player.get_achievements().REACH_LEVEL_10 = True

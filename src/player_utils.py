@@ -59,6 +59,8 @@ class Achievements:
     KILL_BOSS_WITH_RICOCHET: bool = False
     REACH_LEVEL_5_WITH_NO_CORPSES: bool = False
     REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE: bool = False
+    REACH_LEVEL_5_WITH_100_PERCENT_ACCURACY: bool = False
+    REACH_LEVEL_5_WITHOUT_COLLECTING_ENERGY_ORBS: bool = False
     REACH_LEVEL_10: bool = False
     RECEIVE_1000_DAMAGE: bool = False
     FIRE_200_PROJECTILES: bool = False
