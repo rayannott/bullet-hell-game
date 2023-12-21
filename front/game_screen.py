@@ -209,13 +209,15 @@ class GameScreen(Screen):
         self.notifications = [notification for notification in self.notifications if notification._is_alive]
 
     def post_run(self):
+        """Saves the game info to the "saves" file."""
         # if player quit the game witout dying
         if self.game.player.is_alive():
             # do not write the reason of death to the info
             self.game.reason_of_death = ''
         if not SAVES_DIR.exists():
             SAVES_DIR.mkdir(exist_ok=True, parents=True)
-        # with open(SAVES_FILE, 'a') as f:
-        #     print({datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S'): self.game.get_info()}, file=f)
+            
+        # do not save games that ran for less than 10 seconds. 
+        if self.game.time < 10.: return
         with shelve.open(str(SAVES_FILE)) as saves:
             saves[datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S')] = self.game.get_info()
