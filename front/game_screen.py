@@ -109,7 +109,6 @@ class GameScreen(Screen):
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 3:
                 option_picked = self.render_manager.ult_picker.get_turned_off()
-                print(f'picked {option_picked=}')
                 if option_picked is not None:
                     self.game.player_try_ultimate(artifact_type=option_picked)
         elif event.type == pygame.KEYDOWN:
@@ -155,7 +154,6 @@ class GameScreen(Screen):
     def toggle_debug(self):
         self.debug = not self.debug
         self.render_manager.set_debug(self.debug)
-        print(f'changing debug mode: now {self.debug=}')
 
     def show_game_is_over_window(self):
         html_stats = StatsWindow.construct_one_save_html('now', self.game.get_info())
@@ -168,7 +166,6 @@ class GameScreen(Screen):
             action_long_desc=html_stats,
             blocking=True
         )
-        print('[game over]', self.game.get_info())
     
     def spawn_notification(self,
             text: str = '', 

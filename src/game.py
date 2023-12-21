@@ -273,15 +273,12 @@ class Game:
         except OnCooldown as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
-            print(e)
         except NotEnoughEnergy as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
-            print(e)
         except ShootingDirectionUndefined as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
-            print(e)
         else:
             self.add_entity(new_projectile)
             play_sfx('player_shot')
@@ -291,7 +288,6 @@ class Game:
         except (ArtifactMissing, OnCooldown, NotEnoughEnergy, ShieldRunning, TimeStopRunning) as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
-            print(e)
 
     def spawn_buffered_entities(self) -> None:
         """
@@ -406,7 +402,6 @@ class Game:
             if not artifact_chest.intersects(self.player): continue
             if not artifact_chest.can_be_picked_up(): continue
             artifact = artifact_chest.get_artifact()
-            print(f'collected artifact {artifact}')
             self.player.add_artifact(artifact)
             self.collected_artifact_cache.append(artifact)
             self.feedback_buffer.append(Feedback(f'+{artifact}', 3., color=NICER_YELLOW))
@@ -470,7 +465,6 @@ class Game:
             if not self.player.get_achievements().KILL_BOSS_USING_EXACTLY_7_BULLETS and enemy.get_num_bullets_caught() == 7:
                 self.player.get_achievements().KILL_BOSS_USING_EXACTLY_7_BULLETS = True
                 self.feedback_buffer.append(Feedback('[A] killed the boss using exactly 7 bullets', 3., color=BLUE))
-
 
     def deal_damage_to_enemy(self, enemy: Enemy, damage: float, get_damage_feedback: bool = True) -> None:
         damage_dealt_actual = -enemy.get_health().change(-damage)
