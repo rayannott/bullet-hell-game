@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 import math
 import random
+
 from pygame import Vector2, Color
+
 from front.sounds import play_sfx
 from src.aoe_effect import AOEEffect
 from src.energy_orb import EnergyOrb
-
 from src.entity import Entity
 from src.corpse import Corpse
 from src.enums import EntityType, EnemyType, ProjectileType
@@ -14,12 +15,11 @@ from src.player import Player
 from src.utils import Slider, Timer, random_unit_vector
 from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile, DefinedTrajectoryProjectile
 from src.oil_spill import OilSpill
-
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_RATE,
     PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE,
-    BOSS_ENEMY_COLOR_HEX, PROBABILITY_SPAWN_EXTRA_BULLET_ORB,
+    BOSS_ENEMY_COLOR_HEX, PROBABILITY_SPAWN_EXTRA_BULLET_ORB, MINE_DEFAULT_DAMAGE
 )
 
 
@@ -82,6 +82,7 @@ class Enemy(Entity):
         self.spread = spread # in radians
         self.damage = damage
         self.damage_spread = damage_spread
+        self.num_bullets_caught = 0
 
         self.damage_on_collision = damage_on_collision
         self.shoots_player = True
@@ -185,7 +186,13 @@ class Enemy(Entity):
         self.entities_buffer.append(
             EnergyOrb(self.pos, reward, 0.25, num_extra_bullets=bullets)
         )
-
+    
+    def caught_bullet(self):
+        self.num_bullets_caught += 1
+    
+    def get_num_bullets_caught(self) -> int:
+        return self.num_bullets_caught
+    
     def get_health(self) -> Slider: return self.health
 
     def get_reward(self) -> float: return self.reward
@@ -277,7 +284,7 @@ class TankEnemy(Enemy):
             num_subproj = 3 + self._player_level + delta_num_proj
             self.shoot_explosive(num_of_subprojectiles=num_subproj)
             return
-        num_shots = random.randint(2, 3 + int(self._player_level) + delta_num_proj)
+        num_shots = random.randint(2, 2 + int(self._player_level) + delta_num_proj)
         for _ in range(num_shots):
             self.shoot_normal(speed_mult=1.2 + 0.05 * self._player_level)
     
@@ -350,7 +357,7 @@ class MinerEnemy(Enemy):
             player=player,
             color=Color('#103d9e'),
             speed=ENEMY_DEFAULT_SPEED * 1.2,
-            health=ENEMY_DEFAULT_MAX_HEALTH + 15. * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH + 20. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,
             reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * self._player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
@@ -360,7 +367,7 @@ class MinerEnemy(Enemy):
         self.shoots_player = False
         self.render_trail = True
         self.dash_cooldown_timer = Timer(max_time=6.)
-        self.dash_active_timer = Timer(max_time=0.5 + 0.05 * self._player_level)
+        self.dash_active_timer = Timer(max_time=0.5 + 0.04 * self._player_level)
         self.dash_active_timer.turn_off()
         self.COLOR_IN_DASH = Color('#d3e8e3')
         self.NORMAL_COLOR = self.color
@@ -381,14 +388,19 @@ class MinerEnemy(Enemy):
         else:
             self.speed = ENEMY_DEFAULT_SPEED * 1.2
             self.color = self.NORMAL_COLOR
-        if (self.homing_target.get_pos() - self.pos).magnitude_squared() < 70.**2:
+        if (self.homing_target.get_pos() - self.pos).magnitude_squared() < 65.**2:
             self.kill()
             for _ in range(random.randint(0, 3) + self._player_level // 4):
-                self.entities_buffer.append(Mine(self.homing_target.pos + random_unit_vector() * random.uniform(50., 200. + 30 * self._player_level)))
+                self.entities_buffer.append(
+                    Mine(
+                        self.homing_target.pos + random_unit_vector() * random.uniform(50., 200. + 30 * self._player_level),
+                        damage=MINE_DEFAULT_DAMAGE + 8. * self._player_level,
+                    )
+                )
             self.entities_buffer.append(
                 AOEEffect(
                     pos=self.pos,
-                    size=80,
+                    size=80.,
                     damage=self.damage_on_collision * 0.7,
                     color=self.color,
                     animation_lingering_time=0.8
@@ -413,20 +425,20 @@ class BossEnemy(Enemy):
             enemy_type=EnemyType.BOSS,
             player=player,
             color=Color(BOSS_ENEMY_COLOR_HEX),
-            speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 25 * (self._player_level - 1),
-            health=ENEMY_DEFAULT_MAX_HEALTH * 5. + 60. * (self._player_level - 1) * self.difficulty_mult**2,
+            speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 20 * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH * 5. + 70. * (self._player_level - 1) * self.difficulty_mult**2,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.6,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.2 * self._player_level),
             damage=ENEMY_DEFAULT_DAMAGE + 5 * self._player_level * self.difficulty_mult**2,
             lifetime=math.inf,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
-            turn_coefficient=0.5,
+            turn_coefficient=0.65,
         )
         self._spawn_oil_spills_cooldown = max(BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 2. * self._player_level, 5.)
         self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
         DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 3, 5: 8}
         self._regen_rate = (BOSS_DEFAULT_REGEN_RATE * DIFF_MULT[self.difficulty] +
-            0.4 * (self._player_level - 1))
+            4. * (self._player_level - 1))
         self.PROJECTILE_TYPES_TO_WEIGHTS = {
             ProjectileType.NORMAL: 200,
             ProjectileType.HOMING: 30 + 20 * DIFF_MULT[self.difficulty] + 20 * (self._player_level - 1),
@@ -467,7 +479,7 @@ class BossEnemy(Enemy):
         inprecision = 0.5 - 0.03 * (self._player_level + self.difficulty - 3)
         self.entities_buffer.append(
             OilSpill(pos=self.pos + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
-                     size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
+                size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
         )
 
 
