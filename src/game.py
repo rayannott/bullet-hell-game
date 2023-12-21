@@ -254,6 +254,7 @@ class Game:
     def register_new_achievements(self):
         ach = self.player.get_achievements()
         st = self.player.get_stats()
+        # TODO: play_sfx('new_achievement') -- add this next to feedback
         if not ach.RECEIVE_1000_DAMAGE and st.DAMAGE_TAKEN >= 1000:
             ach.RECEIVE_1000_DAMAGE = True
             self.feedback_buffer.append(Feedback('[A] receive 1000 damage', 3., color=BLUE))
@@ -420,6 +421,7 @@ class Game:
             for ac in self.artifact_chests(): ac.kill()
 
     def process_collisions_enemies(self) -> None:
+        # TODO: move the for enemy in enemies outside of individual collision checks
         # player bullets collide with enemies
         player_bullets = [el for el in self.projectiles() if el.projectile_type == ProjectileType.PLAYER_BULLET]
         for bullet in player_bullets:
@@ -432,12 +434,15 @@ class Game:
                     self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
                     self.feedback_buffer.append(Feedback('ricochet!', 2., color=pygame.Color('pink'), at_pos=enemy.get_pos()))
                 self.deal_damage_to_enemy(enemy, bullet.damage)
+                enemy.caught_bullet()
                 play_sfx('accurate_shot')
-                if (not self.player.get_achievements().KILL_BOSS_WITH_RICOCHET and is_ricochet and
-                not enemy.is_alive() and enemy.enemy_type == EnemyType.BOSS
+                if (not self.player.get_achievements().KILL_BOSS_WITH_RICOCHET and
+                    is_ricochet and 
+                    not enemy.is_alive() and
+                    enemy.enemy_type == EnemyType.BOSS
                 ):
                     self.player.get_achievements().KILL_BOSS_WITH_RICOCHET = True
-                    self.feedback_buffer.append(Feedback('[A] killed boss with ricochet!', 3., color=pygame.Color('blue')))
+                    self.feedback_buffer.append(Feedback('[A] killed the boss with ricochet!', 3., color=pygame.Color('blue')))
         # enemy-enemy collisions
         MULT = 0.3
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
@@ -460,6 +465,18 @@ class Game:
                 if not aoe_effect.intersects(enemy): continue
                 self.deal_damage_to_enemy(enemy, aoe_effect.damage)
             aoe_effect.applied_effect_enemies = True
+
+        # check if the Boss just died
+        for enemy in self.enemies(include_dead=True):
+            if enemy.enemy_type != EnemyType.BOSS: continue
+            if enemy.is_alive(): continue
+            if not self.player.get_achievements().KILL_BOSS_WITHOUT_BULLETS and enemy.get_num_bullets_caught() == 0:
+                self.player.get_achievements().KILL_BOSS_WITHOUT_BULLETS = True
+                self.feedback_buffer.append(Feedback('[A] killed the boss without bullets', 3., color=BLUE))
+            if not self.player.get_achievements().KILL_BOSS_USING_EXACTLY_7_BULLETS and enemy.get_num_bullets_caught() == 7:
+                self.player.get_achievements().KILL_BOSS_USING_EXACTLY_7_BULLETS = True
+                self.feedback_buffer.append(Feedback('[A] killed the boss using exactly 7 bullets', 3., color=BLUE))
+
 
     def deal_damage_to_enemy(self, enemy: Enemy, damage: float, get_damage_feedback: bool = True) -> None:
         damage_dealt_actual = -enemy.get_health().change(-damage)
