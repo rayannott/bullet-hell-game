@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from pygame import Vector2
 
+from src.entity import Entity
 from src.mine import Mine
 from src.enums import ArtifactType
 from src.exceptions import DashRunning, NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
@@ -188,13 +189,14 @@ class Dash(Artifact):
             cooldown=DASH_COOLDOWN,
             cost=DASH_COST,
         )
-        self.duration_timer = Timer(max_time=DASH_DURATION)
-        self.duration_timer.turn_off()
-    
+        self.dash_path_history: list[tuple[Vector2, Vector2]] = []
+        self.path_animation_lingering_timer = Timer(max_time=0.6)
+        self.path_animation_lingering_timer.turn_off()
+
     def update(self, time_delta: float):
         super().update(time_delta)
-        self.duration_timer.tick(time_delta)
-    
+        self.path_animation_lingering_timer.tick(time_delta)
+
     @staticmethod
     def get_artifact_type():
         return ArtifactType.DASH
@@ -205,24 +207,25 @@ class Dash(Artifact):
     def get_verbose_string(self) -> str:
         return 'Dash'
 
-    def dash(self):
+    def dash(self, pos_dash_to: Vector2):
         if self.player.energy.get_value() < self.cost:
             raise NotEnoughEnergy('not enough energy for dash')
-        if self.is_on():
-            raise DashRunning('dash already running')
         if self.cooldown_timer.running():
             raise OnCooldown(f'dash on cooldown: {self.cooldown_timer.get_time_left():.1f}')
+        
+        self.dash_path_history.append((self.player.get_pos(), pos_dash_to.copy()))
         self.player.energy.change(-self.cost)
-        self.duration_timer.reset()
         self.cooldown_timer.reset()
-        # TODO: rework dash: make the player teleport to the destination point and
-        # deal damage to all enemies intersecting the path line
-        self.player.invulnerability_timer.reset(with_max_time=2.) # TODO to be removed
+        self.path_animation_lingering_timer.reset()
+        self.player.set_pos(pos_dash_to)
+        self.player.invulnerability_timer.reset()
 
-    
-    def is_on(self) -> bool:
-        return self.duration_timer.running()
+    def dash_path_intersects_enemy(self, enemy: Entity) -> bool:
+        """Should be called after self.dash is called."""
+        c = enemy.get_pos(); r = enemy.get_size()
+        a, b = self.dash_path_history[-1]
 
+        return True
 
 class TimeStop(Artifact):
     def __init__(self, player):
