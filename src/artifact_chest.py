@@ -7,7 +7,7 @@ from pygame import Vector2, Color
 from src.entity import Entity
 from src.utils import Timer
 from src.enums import EntityType, ArtifactType
-from src.artifacts import Artifact, ArtifactsHandler, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop
+from src.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop
 from config import ARTIFACT_CHEST_SIZE, ARTIFACT_CHEST_LIFETIME
 
 

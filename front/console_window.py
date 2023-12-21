@@ -1,12 +1,10 @@
 import datetime
 from pprint import pformat
-import shelve
 
 import pygame_gui
 import pygame
 
 from config import CONSOLE_WINDOW_SIZE
-# from config.paths import SAVES_FILE
 from config.settings import Settings
 
 

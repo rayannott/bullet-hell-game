@@ -46,4 +46,3 @@ class ArtifactType(Enum):
     MINE_SPAWN = auto()
     DASH = auto()
     TIME_STOP = auto()
-    # ROTATING_BULLETS = auto()

@@ -19,7 +19,7 @@ from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType
 from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback, random_unit_vector
 from src.energy_orb import EnergyOrb
-from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, DashRunning, TimeStopRunning
+from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, TimeStopRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.artifact_chest import ArtifactChest
 
@@ -294,7 +294,7 @@ class Game:
 
     def player_try_ultimate(self, artifact_type: ArtifactType):
         try: self.player.ultimate_ability(artifact_type)
-        except (ArtifactMissing, OnCooldown, NotEnoughEnergy, ShieldRunning, DashRunning, TimeStopRunning) as e:
+        except (ArtifactMissing, OnCooldown, NotEnoughEnergy, ShieldRunning, TimeStopRunning) as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
             print(e)

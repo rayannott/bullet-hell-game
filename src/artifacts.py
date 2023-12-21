@@ -6,7 +6,7 @@ from pygame import Vector2
 from src.entity import Entity
 from src.mine import Mine
 from src.enums import ArtifactType
-from src.exceptions import DashRunning, NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
+from src.exceptions import NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
 from src.utils import Timer, random_unit_vector
 from config import (BULLET_SHIELD_SIZE, BULLET_SHIELD_COOLDOWN,
     BULLET_SHIELD_DURATION, BULLET_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE,

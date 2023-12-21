@@ -7,9 +7,8 @@ from pygame import Vector2, Color
 from front.utils import ColorGradient
 
 from src.enums import EntityType
-from src.utils import Timer, random_unit_vector
-from config import (TRAIL_MAX_LENGTH, MINE_SIZE, MINE_ACTIVATION_TIME,
-    MINE_LIFETIME, MINE_DEFAULT_DAMAGE, BACKGROUND_COLOR_HEX, MINE_AOE_EFFECT_SIZE)
+from src.utils import random_unit_vector
+from config import TRAIL_MAX_LENGTH
 
 
 class Entity(ABC):

@@ -2,7 +2,7 @@ import pygame, pygame_gui
 from pygame import Color, Vector2, freetype
 
 from src.game import Game
-from front.utils import ProgressBar, Label, TextBox
+from front.utils import ProgressBar, TextBox
 from config import (SM, BM, GAME_STATS_PANEL_SIZE, FONT_FILE,
     GAME_HEALTH_BAR_SIZE, GAME_ENERGY_BAR_SIZE, GAME_STATS_TEXTBOX_SIZE)
 
