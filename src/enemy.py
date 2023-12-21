@@ -464,8 +464,8 @@ class BossEnemy(Enemy):
         # precision of spawning oil spills increases with level and difficulty
         inprecision = 0.5 - 0.03 * (self._player_level + self.difficulty - 3)
         self.entities_buffer.append(
-            OilSpill(_pos=self.pos + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
-                     _size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
+            OilSpill(pos=self.pos + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
+                     size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
         )
 
 
