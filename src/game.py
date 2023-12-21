@@ -19,7 +19,7 @@ from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType
 from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback, random_unit_vector
 from src.energy_orb import EnergyOrb
-from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, DashRunning
+from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, DashRunning, TimeStopRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.artifact_chest import ArtifactChest
 
@@ -77,16 +77,19 @@ class Game:
         self.reason_of_death = ''
         self.collected_artifact_cache: list[Artifact] = []
         self.energy_orbs_spawned = 0
+        self.time_frozen = False
 
     def all_entities_iter(self, 
             with_player: bool = True,
-            include_dead: bool = False
+            include_dead: bool = False,
+            with_enemies: bool = True,
+            with_projectiles: bool = True,
         ) -> Generator[Entity, None, None]:
         yield from self.oil_spills(include_dead)
         yield from self.corpses(include_dead)
-        yield from self.projectiles(include_dead)
+        if with_projectiles: yield from self.projectiles(include_dead)
         yield from self.energy_orbs(include_dead)
-        yield from self.enemies(include_dead)
+        if with_enemies: yield from self.enemies(include_dead)
         yield from self.dummies(include_dead)
         yield from self.mines(include_dead)
         yield from self.aoe_effects(include_dead)
@@ -227,7 +230,8 @@ class Game:
     def update(self, time_delta: float) -> None:
         if not self.is_running() or self.paused: return
         self.time += time_delta
-        self.enemies_frozen = self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP) and self.player.artifacts_handler.get_time_stop().is_on()
+        self.time_frozen = self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP) and self.player.artifacts_handler.get_time_stop().is_on()
+        for entity in self.all_entities_iter(with_enemies=not self.time_frozen, with_projectiles=not self.time_frozen):
             entity.update(time_delta)
         self.process_timers(time_delta)
         self.process_collisions()
@@ -277,7 +281,7 @@ class Game:
 
     def player_try_ultimate(self, artifact_type: ArtifactType):
         try: self.player.ultimate_ability(artifact_type)
-        except (ArtifactMissing, OnCooldown, NotEnoughEnergy, ShieldRunning, DashRunning) as e:
+        except (ArtifactMissing, OnCooldown, NotEnoughEnergy, ShieldRunning, DashRunning, TimeStopRunning) as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
             print(e)
@@ -348,19 +352,22 @@ class Game:
         for projectile in self.projectiles():
             if (projectile.projectile_type != ProjectileType.PLAYER_BULLET and 
                 self.player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD) and
-                self.player.artifacts_handler.get_bullet_shield().point_inside_shield(projectile.get_pos())):
+                self.player.artifacts_handler.get_bullet_shield().point_inside_shield(projectile.get_pos())
+            ):
                 projectile.kill()
                 self.feedback_buffer.append(Feedback(f'blocked', 1., color=pygame.Color('yellow')))
                 self.player.get_stats().BULLET_SHIELD_BULLETS_BLOCKED += 1
                 play_sfx('shield_blocked')
                 continue
             if not projectile.intersects(self.player): continue
+            if self.time_frozen: continue
             self.player_get_damage(projectile.damage)
             self.player.get_stats().BULLETS_CAUGHT += 1
             projectile.kill()
             self.reason_of_death = f'caught Bullet::{projectile.projectile_type.name.title()}'
         for enemy in self.enemies():
             if not enemy.intersects(self.player): continue
+            if self.time_frozen: continue
             if player_in_dash:
                 self.deal_damage_to_enemy(enemy, self.player.get_damage())
                 # TODO: play_sfx('dash_hit')
@@ -423,7 +430,6 @@ class Game:
                 ):
                     self.player.get_achievements().KILL_BOSS_WITH_RICOCHET = True
                     self.feedback_buffer.append(Feedback('[A] killed boss with ricochet!', 3., color=pygame.Color('blue')))
-        
         # enemy-enemy collisions
         MULT = 0.3
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
@@ -431,7 +437,6 @@ class Game:
                 if enem1.intersects(enem2):
                     vec_between = enem2.get_pos() - enem1.get_pos()
                     enem1.pos -= vec_between * MULT; enem2.pos += vec_between * MULT
-        
         # enemy-mine collisions
         for mine in self.mines():
             if not mine.is_activated(): continue
@@ -440,7 +445,6 @@ class Game:
                 self.deal_damage_to_enemy(enemy, mine.damage)
                 play_sfx('explosion')
                 mine.kill()
-        
         # enemy-aoe_effect collisions
         for aoe_effect in self.aoe_effects():
             if aoe_effect.applied_effect_enemies: continue
