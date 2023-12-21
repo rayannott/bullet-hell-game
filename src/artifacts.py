@@ -5,7 +5,7 @@ from pygame import Vector2
 
 from src.mine import Mine
 from src.enums import ArtifactType
-from src.exceptions import DashRunning, NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing
+from src.exceptions import DashRunning, NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
 from src.utils import Timer, random_unit_vector
 from config import (ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN,
     ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE
@@ -24,16 +24,17 @@ class StatsBoost:
     bullet_shield_duration: float = 0.
     mine_cooldown: float = 0.
     add_max_extra_bullets: int = 0
+    time_stop_duration: float = 0.
 
     def __iter__(self):
         yield from (self.health, self.regen, self.damage,
             self.speed, self.cooldown, self.size, self.bullet_shield_size, 
-            self.bullet_shield_duration, self.mine_cooldown, self.add_max_extra_bullets)
+            self.bullet_shield_duration, self.mine_cooldown, self.add_max_extra_bullets, self.time_stop_duration)
 
     def __str__(self) -> str:
         formats = ('+{:.0f}hp', '+{:.1f}reg', '+{:.0f}dmg', 
             '+{:.0f}spd', '-{:.2f}cd', '-{:.0f}size', 
-            '+{:.0f}shld size', '+{:.1f}shld dur', '-{:.1f}mine cd', '+{}max eb')
+            '+{:.0f}shld size', '+{:.1f}shld dur', '-{:.1f}mine cd', '+{}max eb', '+{:.1f}ts dur')
         res = '|'.join(
             format_.format(val) for format_, val in zip(formats, self, strict=True) if val
         )
@@ -51,6 +52,7 @@ class StatsBoost:
             bullet_shield_duration=self.bullet_shield_duration + other.bullet_shield_duration,
             mine_cooldown=self.mine_cooldown + other.mine_cooldown,
             add_max_extra_bullets=self.add_max_extra_bullets + other.add_max_extra_bullets,
+            time_stop_duration=self.time_stop_duration + other.time_stop_duration,
         )
 
 
@@ -216,6 +218,48 @@ class Dash(Artifact):
         return self.duration_timer.running()
 
 
+class TimeStop(Artifact):
+    def __init__(self, player):
+        super().__init__(
+            artifact_type=ArtifactType.TIME_STOP,
+            player=player,
+            cooldown=12.,
+            cost=370.,
+        )
+        self.duration = 3. + self.total_stats_boost.time_stop_duration
+        self.duration_timer = Timer(max_time=3.)
+        self.duration_timer.turn_off()
+    
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.duration = 3. + self.total_stats_boost.time_stop_duration
+        self.duration_timer.tick(time_delta)
+    
+    @staticmethod
+    def get_artifact_type():
+        return ArtifactType.TIME_STOP
+    
+    def get_short_string(self) -> str:
+        return 'Time Stop'
+
+    def get_verbose_string(self) -> str:
+        return f'TimeStop({self.duration:.0f}dur)'
+
+    def time_stop(self):
+        if self.player.energy.get_value() < self.cost:
+            raise NotEnoughEnergy('not enough energy for time stop')
+        if self.is_on():
+            raise TimeStopRunning('time stop already running')
+        if self.cooldown_timer.running():
+            raise OnCooldown(f'time stop on cooldown: {self.cooldown_timer.get_time_left():.1f}')
+        self.player.energy.change(-self.cost)
+        self.duration_timer.reset(self.duration)
+        self.cooldown_timer.reset()
+    
+    def is_on(self) -> bool:
+        return self.duration_timer.running()
+
+
 class InactiveArtifact(Artifact):
     def __init__(self, stats_boost: StatsBoost):
         super().__init__(artifact_type=ArtifactType.STATS, player=None, cooldown=0, cost=0)
@@ -245,6 +289,7 @@ class ArtifactsHandler:
         self.bullet_shield: BulletShield | None = None
         self.mine_spawn: MineSpawn | None = None
         self.dash: Dash | None = None
+        self.time_stop: TimeStop | None = None
 
     def get_total_stats_boost(self) -> StatsBoost:
         return sum((artifact.stats_boost for artifact in self.inactive_artifacts), StatsBoost())
@@ -260,6 +305,8 @@ class ArtifactsHandler:
             yield self.mine_spawn
         if self.dash is not None:
             yield self.dash
+        if self.time_stop is not None:
+            yield self.time_stop
     
     def add_artifact(self, artifact: Artifact):
         if isinstance(artifact, InactiveArtifact):
@@ -270,6 +317,8 @@ class ArtifactsHandler:
             self.mine_spawn = artifact
         elif isinstance(artifact, Dash):
             self.dash = artifact
+        elif isinstance(artifact, TimeStop):
+            self.time_stop = artifact
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact.artifact_type}')
     
@@ -280,6 +329,8 @@ class ArtifactsHandler:
             return self.mine_spawn is not None
         elif artifact_type == ArtifactType.DASH:
             return self.dash is not None
+        elif artifact_type == ArtifactType.TIME_STOP:
+            return self.time_stop is not None
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact_type}')
     
@@ -295,6 +346,10 @@ class ArtifactsHandler:
         if self.dash is None:
             raise ArtifactMissing('[?] dash is missing')
         return self.dash
+    def get_time_stop(self) -> TimeStop:
+        if self.time_stop is None:
+            raise ArtifactMissing('[?] time stop is missing')
+        return self.time_stop
     
     def __repr__(self) -> str:
         active_artivacts = ' | '.join(map(str, self.iterate_active()))

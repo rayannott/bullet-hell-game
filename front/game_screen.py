@@ -9,7 +9,7 @@ from pygame import Color, Vector2
 import pygame_gui
 from front.inventory_info import InventoryInfo
 from src.artifact_chest import ArtifactChest
-from src.artifacts import BulletShield, Dash, InactiveArtifact, MineSpawn, StatsBoost
+from src.artifacts import BulletShield, Dash, InactiveArtifact, MineSpawn, StatsBoost, TimeStop
 from src.enums import ArtifactType, EnemyType
 from src.oil_spill import OilSpill
 
@@ -84,8 +84,8 @@ class GameScreen(Screen):
                     print('--- debug info ---')
                     print(self.game.get_info())
                     print('-'*10)
-                # elif event.key == pygame.K_t:
-                #     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), InactiveArtifact(StatsBoost(mine_cooldown=2.))))
+                elif event.key == pygame.K_t:
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), TimeStop(self.game.player)))
                 elif event.key == pygame.K_l:
                     self.game.new_level()
                 elif event.key == pygame.K_s:
@@ -133,6 +133,8 @@ class GameScreen(Screen):
                 self.game.player_try_ultimate(artifact_type=ArtifactType.BULLET_SHIELD)
             elif event.key == pygame.K_d:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.DASH)
+            elif event.key == pygame.K_t:
+                self.game.player_try_ultimate(artifact_type=ArtifactType.TIME_STOP)
     
     def update(self, time_delta: float):
         self.game.update(time_delta)

@@ -7,7 +7,7 @@ from pygame import Vector2, Color
 from src.entity import Entity
 from src.utils import Timer
 from src.enums import EntityType, ArtifactType
-from src.artifacts import Artifact, ArtifactsHandler, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost
+from src.artifacts import Artifact, ArtifactsHandler, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop
 from config import ARTIFACT_CHEST_SIZE, ARTIFACT_CHEST_LIFETIME
 
 
@@ -71,6 +71,7 @@ class ArtifactChestGenerator:
             StatsBoost(damage=30.),
             StatsBoost(add_max_extra_bullets=5),
             StatsBoost(bullet_shield_duration=2.),
+            StatsBoost(time_stop_duration=2.),
             StatsBoost(regen=2.5),
             StatsBoost(mine_cooldown=2.),
             StatsBoost(bullet_shield_size=20.),
@@ -97,6 +98,8 @@ class ArtifactChestGenerator:
             return Dash(self.player)
         elif artifact_type == ArtifactType.MINE_SPAWN:
             return MineSpawn(self.player)
+        elif artifact_type == ArtifactType.TIME_STOP:
+            return TimeStop(self.player)
         else:
             raise NotImplementedError(f'Unknown artifact type: {artifact_type}')
 

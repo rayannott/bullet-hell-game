@@ -227,7 +227,7 @@ class Game:
     def update(self, time_delta: float) -> None:
         if not self.is_running() or self.paused: return
         self.time += time_delta
-        for entity in self.all_entities_iter():
+        self.enemies_frozen = self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP) and self.player.artifacts_handler.get_time_stop().is_on()
             entity.update(time_delta)
         self.process_timers(time_delta)
         self.process_collisions()

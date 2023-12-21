@@ -204,9 +204,20 @@ class RenderManager:
 
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)
+        # do not draw health bar if enemy can always be killed with one shot 
+        draw_full_health = enemy.health.max_value >= self.game.player.damage - self.game.player.damage_spread
         draw_circular_status_bar(self.surface, enemy.get_pos(), enemy.get_health(),
             enemy.get_size() * 1.5, 
-            color=NICER_GREEN, draw_full=enemy.enemy_type != EnemyType.BASIC, width=2)
+            color=NICER_GREEN, draw_full=draw_full_health, width=2)
+        if self.game.enemies_frozen:
+            cross_vec = Vector2(enemy.get_size(), enemy.get_size()) * 1.7
+            pygame.draw.line(
+                self.surface,
+                WHITE,
+                enemy.get_pos() - cross_vec,
+                enemy.get_pos() + cross_vec,
+                width=4
+            )
         # if less than 1. sec left on the cooldown timer, indicate shooting intent
         if enemy.shoots_player:
             if (t:=enemy.cooldown.get_time_left()) < 1.:
@@ -215,7 +226,7 @@ class RenderManager:
                     WHITE,
                     enemy.get_pos(),
                     enemy.get_size() * self.soon_shooting_coef_function(1. - t),
-                    width=2
+                    width=3
                 )
         else:
             if enemy.enemy_type == EnemyType.MINER and enemy.dash_cooldown_timer.get_time_left() < 1.: # type: ignore
@@ -265,6 +276,11 @@ class RenderManager:
             )
             draw_circular_status_bar(self.surface, player.get_pos(), 
                 player.artifacts_handler.get_bullet_shield().duration_timer.get_slider(reverse=True), ARTIFACT_SHIELD_SIZE + 5., draw_full=True)
+        # time stop:
+        if (player.artifacts_handler.is_present(ArtifactType.TIME_STOP) and 
+            player.artifacts_handler.get_time_stop().is_on()):
+            draw_circular_status_bar(self.surface, player.get_pos(), 
+                player.artifacts_handler.get_time_stop().duration_timer.get_slider(reverse=True), player.get_size() + 15., draw_full=True)
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)

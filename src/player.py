@@ -170,6 +170,11 @@ class Player(Entity):
             self.get_stats().DASHES_ACTIVATED += 1
             play_sfx('player_dash')
             return
+        if artifact_type == ArtifactType.TIME_STOP:
+            self.artifacts_handler.get_time_stop().time_stop()
+            self.get_stats().TIME_STOPS_ACTIVATED += 1
+            play_sfx('time_stop')
+            return
         raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
     
     def add_artifact(self, artifact: Artifact):

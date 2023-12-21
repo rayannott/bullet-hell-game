@@ -13,6 +13,9 @@ class ShieldRunning(Exception):
 class DashRunning(Exception):
     pass
 
+class TimeStopRunning(Exception):
+    pass
+
 class ArtifactMissing(Exception):
     pass
 
