@@ -149,6 +149,7 @@ class RenderManager:
         for art_chest in self.game.artifact_chests():
             self.draw_artifact_chest(art_chest)
         self.ult_picker.render()
+        self.dash_animation()
         self.draw_player()
 
         # "boss spawns in 5 seconds" indicator
@@ -294,6 +295,21 @@ class RenderManager:
                 width=2
             )
         self.draw_entity_basics(projectile)
+
+    def dash_animation(self):
+        if self.game.player.artifacts_handler.is_present(ArtifactType.DASH):
+            dash = self.game.player.artifacts_handler.get_dash()
+            if not dash.path_animation_lingering_timer.running():
+                return
+            a, b = dash.dash_path_history[-1]
+            N = 20
+            for i in range(N):
+                pygame.draw.circle(
+                    self.surface,
+                    WHITE,
+                    a + (b - a) * i / N,
+                    2
+                )
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)
