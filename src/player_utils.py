@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Generator
 
 
 @dataclass
@@ -72,12 +73,20 @@ class Achievements:
     KILL_BOSS_WITHOUT_BULLETS: bool = False
     KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False
 
+    def update(self, other: 'Achievements'):
+        for k, v in other.__dict__.items():
+            if v: setattr(self, k, v)
+
     @staticmethod
     def _snakecase_to_title(snakecase: str) -> str:
         return ' '.join(snakecase.split('_')).title()
     
+    def items_pretty(self) -> Generator[tuple[str, bool], None, None]:
+        for k, v in self.__dict__.items():
+            yield (self._snakecase_to_title(k), v)
+    
     def achievements_pretty(self) -> list[str]:
-        return [self._snakecase_to_title(k) for k, v in self.__dict__.items() if v]
+        return [k for k, v in self.items_pretty() if v]
 
     def all_achievements_pretty(self) -> list[str]:
-        return list(map(self._snakecase_to_title, self.__dict__.keys()))
+        return [k for k in self.__dict__.keys()]

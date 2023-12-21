@@ -1,5 +1,6 @@
-import pygame
-import pygame_gui
+import pickle, shelve
+
+import pygame, pygame_gui
 
 from front.screen import Screen
 from front.game_screen import GameScreen
@@ -7,10 +8,16 @@ from front.console_window import ConsoleWindow
 from front.settings_window import SettingsWindow
 from front.rules_window import RulesWindow
 from front.sounds import set_sfx_volume, set_bg_music_vol, play_bg_music
-from config import MENU_BUTTONS_SIZE
-from config.settings import Settings
 from front.stats_window import StatsWindow
+from front.utils import paint
+from config import MENU_BUTTONS_SIZE, NICER_GREEN_HEX
+from config.settings import Settings
+from config.paths import ACHIEVEMENTS_FILE, SAVES_DIR, SAVES_FILE
 from src.player_utils import Achievements
+
+
+NICER_GREEN = pygame.Color(NICER_GREEN_HEX)
+WHITE = pygame.Color('white')
 
 
 class MenuScreen(Screen):
@@ -18,6 +25,15 @@ class MenuScreen(Screen):
         super().__init__(surface)
 
         self.reload_settings()
+
+        if not SAVES_DIR.exists():
+            SAVES_DIR.mkdir(exist_ok=True, parents=True)
+            with shelve.open(str(SAVES_FILE)) as saves:
+                saves.clear()
+        if not ACHIEVEMENTS_FILE.exists():
+            # this is global achievements
+            with ACHIEVEMENTS_FILE.open('wb') as f:
+                pickle.dump(Achievements(), f)
 
         start_game_btn_rect = pygame.Rect(0, 0, 0, 0)
         start_game_btn_rect.size = MENU_BUTTONS_SIZE
@@ -83,10 +99,12 @@ class MenuScreen(Screen):
             if event.key == pygame.K_a:
                 if self.achievements_window is not None:
                     self.achievements_window.kill()
-                # confirmation dialog
+                with ACHIEVEMENTS_FILE.open('rb') as f:
+                    ach_global: Achievements = pickle.load(f)
+                html_text = '\n'.join('-+'[v] + ' ' + paint(k, (NICER_GREEN if v else WHITE)) for k, v in ach_global.items_pretty()) 
                 self.achievements_window = pygame_gui.windows.UIConfirmationDialog(
-                    rect=pygame.Rect(30, 30, 400, 500),
-                    action_long_desc='\n'.join(Achievements().all_achievements_pretty()),
+                    rect=pygame.Rect(50, 50, 450, 600),
+                    action_long_desc=html_text,
                     manager=self.manager,
                     window_title='All possible achievements',
                     action_short_name='Ok',

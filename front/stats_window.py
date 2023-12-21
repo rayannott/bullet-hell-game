@@ -2,12 +2,11 @@ import shelve
 
 from pygame import Color, Surface, Rect
 import pygame_gui
-from config.paths import SAVES_DIR
 
 from front.utils import paint
 from config import (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, NICER_YELLOW_HEX,
     LIGHT_ORANGE_HEX, NICER_RED_HEX, NICER_BLUE_HEX, LIGHT_BLUE_HEX,
-    SAVES_FILE,
+    SAVES_FILE
 )
 from src.artifacts import ArtifactsHandler, StatsBoost
 
@@ -25,10 +24,6 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
     def __init__(self, manager: pygame_gui.UIManager, surface: Surface):
         rect = Rect(40, 40, 1000, 800)
         rect.center = surface.get_rect().center
-        if not SAVES_DIR.exists():
-            SAVES_DIR.mkdir(exist_ok=True, parents=True)
-            with shelve.open(str(SAVES_FILE)) as saves:
-                saves.clear()
         with shelve.open(str(SAVES_FILE)) as saves:
             text = self.construct_html(saves)
 

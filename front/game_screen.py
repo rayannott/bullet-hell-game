@@ -1,4 +1,5 @@
 import datetime
+import pickle
 import random
 import shelve
 from typing import Literal
@@ -12,6 +13,7 @@ from src.artifact_chest import ArtifactChest
 from src.artifacts import BulletShield, Dash, MineSpawn, TimeStop
 from src.enums import ArtifactType, EnemyType
 from src.oil_spill import OilSpill
+from src.player_utils import Achievements
 
 from src.utils import Feedback, random_unit_vector
 from src.game import Game
@@ -23,7 +25,7 @@ from front.utils import HUGE_FONT, Label, Notification
 from front.stats_panel import StatsPanel
 
 from config import GAME_OVER_WINDOW_SIZE, SAVE_GAMES_LONGER_THAN
-from config.paths import SAVES_FILE, SAVES_DIR
+from config.paths import ACHIEVEMENTS_FILE, SAVES_FILE, SAVES_DIR
 from config.settings import Settings
 
 
@@ -203,10 +205,15 @@ class GameScreen(Screen):
         if self.game.player.is_alive():
             # do not write the reason of death to the info
             self.game.reason_of_death = ''
-        if not SAVES_DIR.exists():
-            SAVES_DIR.mkdir(exist_ok=True, parents=True)
             
         # do not save games that ran for less than 10 seconds. 
         if self.game.time < SAVE_GAMES_LONGER_THAN: return
         with shelve.open(str(SAVES_FILE)) as saves:
             saves[datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S')] = self.game.get_info()
+
+        with ACHIEVEMENTS_FILE.open('rb') as f:
+            ach_global: Achievements = pickle.load(f)
+        ach_global.update(self.game.player.get_achievements())
+        with ACHIEVEMENTS_FILE.open('wb') as f:
+            pickle.dump(ach_global, f)
+    
