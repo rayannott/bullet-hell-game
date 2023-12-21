@@ -18,6 +18,7 @@ class Stats:
     MINES_PLANTED: int = 0
     DASHES_ACTIVATED: int = 0
     TIME_STOPS_ACTIVATED: int = 0
+    DASHED_THROUGH_ENEMIES: int = 0
 
     DAMAGE_TAKEN: float = 0.
     DAMAGE_DEALT: float = 0.

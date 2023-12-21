@@ -236,7 +236,18 @@ class Game:
         self.process_timers(time_delta)
         self.process_collisions()
         self.spawn_buffered_entities()
+        self.process_dash()
         self.register_new_achievements()
+    
+    def process_dash(self):
+        if not self.player.dash_needs_processing: return
+        if not self.player.artifacts_handler.is_present(ArtifactType.DASH): return
+        dash = self.player.artifacts_handler.get_dash()
+        for enemy in self.enemies():
+            if not dash.dash_path_intersects_enemy(enemy): continue
+            self.deal_damage_to_enemy(enemy, self.player.get_damage())
+            self.player.get_stats().DASHED_THROUGH_ENEMIES += 1
+        self.player.dash_needs_processing = False
     
     def register_new_achievements(self):
         ach = self.player.get_achievements()
@@ -329,7 +340,6 @@ class Game:
             self.process_collisions_enemies()
 
     def process_collisions_player(self) -> None:
-        player_in_dash = self.player.effect_flags.IN_DASH
         # player collides with anything:
         for eo in self.energy_orbs():
             if not eo.intersects(self.player): continue
@@ -368,15 +378,11 @@ class Game:
         for enemy in self.enemies():
             if not enemy.intersects(self.player): continue
             if self.time_frozen: continue
-            if player_in_dash:
-                self.deal_damage_to_enemy(enemy, self.player.get_damage())
-                # TODO: play_sfx('dash_hit')
-            else:
-                self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=enemy.enemy_type == EnemyType.BOSS)
-                self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
-                enemy.kill()
-                self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
-                self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
+            self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=enemy.enemy_type == EnemyType.BOSS)
+            self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
+            enemy.kill()
+            self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
+            self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
             self.player_get_damage(corpse._damage_on_collision, ignore_invul_timer=True)

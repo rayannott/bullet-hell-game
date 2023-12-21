@@ -56,6 +56,7 @@ class Player(Entity):
         self.boosts = self.artifacts_handler.get_total_stats_boost()
         self.max_extra_bullets = PLAYER_DEFAULT_MAX_EXTRA_BULLETS + self.boosts.add_max_extra_bullets
 
+        self.dash_needs_processing = False
         self.extra_bullets = 0
 
     def update(self, time_delta: float):
@@ -71,8 +72,6 @@ class Player(Entity):
         self.invulnerability_timer.tick(time_delta)
         self.artifacts_handler.update(time_delta)
         self.effect_flags.reset()
-        self.effect_flags.IN_DASH = self.artifacts_handler.is_present(ArtifactType.DASH) and \
-            self.artifacts_handler.get_dash().is_on() # TODO to be removed 
         self.color = NICER_GREEN if self.effect_flags.IN_DASH else WHITE
     
     def add_extra_bullets(self, num_to_add: int) -> int:
@@ -166,7 +165,8 @@ class Player(Entity):
             play_sfx('mine_planted')
             return
         if artifact_type == ArtifactType.DASH:
-            self.artifacts_handler.get_dash().dash()
+            self.artifacts_handler.get_dash().dash(self.gravity_point)
+            self.dash_needs_processing = True
             self.get_stats().DASHES_ACTIVATED += 1
             play_sfx('player_dash')
             return
@@ -222,6 +222,8 @@ class Player(Entity):
     def get_level(self) -> int: return self.level
 
     def get_gravity_point(self) -> Vector2: return self.gravity_point
+
+    def set_pos(self, set_to: Vector2) -> None: self.pos = set_to
 
     def __repr__(self) -> str:
         def pretty_vector2(v: Vector2) -> str:
