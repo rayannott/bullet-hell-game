@@ -95,17 +95,5 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
                     self.add_log(pformat(self.menu_screen.game_screen.game.get_info()))
                 else:
                     self.add_log('No game has been played yet')
-            # elif text.startswith('saves'):
-            #     args = text.split(maxsplit=2)[1:]
-            #     if args[0] == 'delete':
-            #         with shelve.open(str(SAVES_FILE)) as saves:
-            #             if args[0] in saves:
-            #                 del saves[args[1]]
-            #                 self.add_log(f'Save {args[1]} deleted')
-            #             else:
-            #                 self.add_log(f'[!] Save {args[1]} not found')
-            #     else:
-            #         self.add_log('[!] Usage: saves <save_name> delete')
-
             else:
                 self.add_log(f'[!] Unknown command: {text}. Type "help" for available commands')
