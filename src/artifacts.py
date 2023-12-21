@@ -221,11 +221,19 @@ class Dash(Artifact):
         self.player.invulnerability_timer.reset()
 
     def dash_path_intersects_enemy(self, enemy: Entity) -> bool:
-        """Should be called after self.dash is called."""
+        """Checks if the enemy is affected by the dash.
+        Should be called only after self.dash is called."""
+        # check if the line segment a->b intersects the circle c_r
         c = enemy.get_pos(); r = enemy.get_size()
         a, b = self.dash_path_history[-1]
-
-        return True
+        d = b - a
+        f = a - c
+        # quadratic equation coefficients
+        a_ = d.dot(d)
+        b_ = 2 * f.dot(d)
+        c_ = f.dot(f) - r ** 2
+        discriminant = b_ ** 2 - 4 * a_ * c_
+        return discriminant >= 0
 
 class TimeStop(Artifact):
     def __init__(self, player):
