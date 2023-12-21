@@ -72,7 +72,6 @@ class Player(Entity):
         self.invulnerability_timer.tick(time_delta)
         self.artifacts_handler.update(time_delta)
         self.effect_flags.reset()
-        self.color = NICER_GREEN if self.effect_flags.IN_DASH else WHITE
     
     def add_extra_bullets(self, num_to_add: int) -> int:
         """Returns the number of extra bullets that were actually added."""
@@ -86,8 +85,7 @@ class Player(Entity):
         dist_to_gravity_point = towards_gravity_point.magnitude()
         t = (dist_to_gravity_point / 1500.) ** 0.8
         self.speed = (self.speed_range[0] + (self.get_max_speed() - self.speed_range[0]) * t *
-            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.) * 
-            (2. if self.effect_flags.IN_DASH else 1.)) # TODO to be removed 
+            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.))
         if dist_to_gravity_point > self.get_size() * 0.2:
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:

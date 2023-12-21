@@ -45,7 +45,6 @@ class EffectFlags:
     Flags for effects that can be applied to the player.
     """
     OIL_SPILL: bool = False
-    IN_DASH: bool = False # TODO to be removed 
 
     def reset(self):
         self.OIL_SPILL = False

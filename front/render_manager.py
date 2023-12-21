@@ -228,8 +228,6 @@ class RenderManager:
             _indicator_color = YELLOW
         else:
             _indicator_color = WHITE
-        if player.effect_flags.IN_DASH:
-            _indicator_color = NICER_GREEN
         if player.energy.get_value() > PLAYER_SHOT_COST:
             pygame.draw.circle(self.surface, _indicator_color, player.get_pos(), player.get_size(), width=6)
         draw_circular_status_bar(self.surface, player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
@@ -260,7 +258,7 @@ class RenderManager:
             if not dash.path_animation_lingering_timer.running():
                 return
             a, b = dash.dash_path_history[-1]
-            N = 20
+            N = 50
             for i in range(N):
                 pygame.draw.circle(self.surface, NICER_GREEN, a + (b - a) * i / N, 2)
 
