@@ -7,8 +7,10 @@ from src.mine import Mine
 from src.enums import ArtifactType
 from src.exceptions import DashRunning, NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
 from src.utils import Timer, random_unit_vector
-from config import (ARTIFACT_SHIELD_SIZE, ARTIFACT_SHIELD_COOLDOWN,
-    ARTIFACT_SHIELD_DURATION, ARTIFACT_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE
+from config import (BULLET_SHIELD_SIZE, BULLET_SHIELD_COOLDOWN,
+    BULLET_SHIELD_DURATION, BULLET_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE,
+    TIME_STOP_DEFAULT_DURATION, TIME_STOP_COOLDOWN, TIME_STOP_COST,
+    DASH_COOLDOWN, DASH_COST, DASH_DURATION,
 )
 
 
@@ -98,10 +100,10 @@ class BulletShield(Artifact):
         super().__init__(
             artifact_type=ArtifactType.BULLET_SHIELD, 
             player=player,
-            cooldown=ARTIFACT_SHIELD_COOLDOWN,
-            cost=ARTIFACT_SHIELD_COST
+            cooldown=BULLET_SHIELD_COOLDOWN,
+            cost=BULLET_SHIELD_COST
         )
-        self.duration = ARTIFACT_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration
+        self.duration = BULLET_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration
         self.duration_timer = Timer(max_time=self.duration)
         self.duration_timer.turn_off()
     
@@ -111,7 +113,7 @@ class BulletShield(Artifact):
         
     def update(self, time_delta: float):
         super().update(time_delta)
-        self.duration = ARTIFACT_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration
+        self.duration = BULLET_SHIELD_DURATION + self.total_stats_boost.bullet_shield_duration
         self.duration_timer.tick(time_delta)
 
     def is_on(self) -> bool:
@@ -129,7 +131,7 @@ class BulletShield(Artifact):
         self.cooldown_timer.reset()
 
     def get_size(self) -> float:
-        return ARTIFACT_SHIELD_SIZE + self.total_stats_boost.bullet_shield_size
+        return BULLET_SHIELD_SIZE + self.total_stats_boost.bullet_shield_size
 
     def point_inside_shield(self, pos: Vector2) -> bool:
         return self.is_on() and (pos - self.player.pos).magnitude_squared() < self.get_size() ** 2
@@ -183,10 +185,10 @@ class Dash(Artifact):
         super().__init__(
             artifact_type=ArtifactType.DASH,
             player=player,
-            cooldown=5.,
-            cost=300,
+            cooldown=DASH_COOLDOWN,
+            cost=DASH_COST,
         )
-        self.duration_timer = Timer(max_time=0.5)
+        self.duration_timer = Timer(max_time=DASH_DURATION)
         self.duration_timer.turn_off()
     
     def update(self, time_delta: float):
@@ -213,6 +215,7 @@ class Dash(Artifact):
         self.player.energy.change(-self.cost)
         self.duration_timer.reset()
         self.cooldown_timer.reset()
+        self.player.invulnerability_timer.reset()
     
     def is_on(self) -> bool:
         return self.duration_timer.running()
@@ -223,16 +226,16 @@ class TimeStop(Artifact):
         super().__init__(
             artifact_type=ArtifactType.TIME_STOP,
             player=player,
-            cooldown=12.,
-            cost=370.,
+            cooldown=TIME_STOP_COOLDOWN,
+            cost=TIME_STOP_COST,
         )
-        self.duration = 3. + self.total_stats_boost.time_stop_duration
-        self.duration_timer = Timer(max_time=3.)
+        self.duration = TIME_STOP_DEFAULT_DURATION + self.total_stats_boost.time_stop_duration
+        self.duration_timer = Timer(max_time=self.duration)
         self.duration_timer.turn_off()
     
     def update(self, time_delta: float):
         super().update(time_delta)
-        self.duration = 3. + self.total_stats_boost.time_stop_duration
+        self.duration = TIME_STOP_DEFAULT_DURATION + self.total_stats_boost.time_stop_duration
         self.duration_timer.tick(time_delta)
     
     @staticmethod
