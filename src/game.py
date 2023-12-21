@@ -214,14 +214,7 @@ class Game:
             self.spawn_enemy(EnemyType.BOSS)
         self.new_energy_orb_timer.tick(time_delta)
         if not self.new_energy_orb_timer.running():
-            if random.random() < 0.9985:
-                self.spawn_energy_orb()
-            else:
-                # sometimes (0.15%) spawn the artifact chest instead of the energy orb
-                pos = self.get_random_screen_position_for_entity(entity_size=ARTIFACT_CHEST_SIZE)
-                ac = self.player.artifacts_generator.get_random_absent_stats_boost_artifact_chest(pos)
-                if ac is not None:
-                    self.add_entity(ac)
+            self.spawn_energy_orb()
             self.new_energy_orb_timer.reset(with_max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
         self.spawn_enemy_timer.tick(time_delta)
         if not self.spawn_enemy_timer.running():
