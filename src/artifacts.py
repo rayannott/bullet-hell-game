@@ -215,7 +215,10 @@ class Dash(Artifact):
         self.player.energy.change(-self.cost)
         self.duration_timer.reset()
         self.cooldown_timer.reset()
-        self.player.invulnerability_timer.reset()
+        # TODO: rework dash: make the player teleport to the destination point and
+        # deal damage to all enemies intersecting the path line
+        self.player.invulnerability_timer.reset(with_max_time=2.) # TODO to be removed
+
     
     def is_on(self) -> bool:
         return self.duration_timer.running()
