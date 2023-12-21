@@ -99,7 +99,7 @@ class GameScreen(Screen):
             else:
                 if event.key == pygame.K_p:
                     self.game.toggle_pause()
-                    # TODO: play_sfx('toggle_pause')
+                    play_sfx('toggle_pause')
                 elif event.key == pygame.K_F1:
                     self.toggle_debug()
                 elif event.key == pygame.K_F5:

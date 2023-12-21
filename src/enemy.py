@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import math
 import random
 from pygame import Vector2, Color
+from front.sounds import play_sfx
 from src.aoe_effect import AOEEffect
 from src.energy_orb import EnergyOrb
 
@@ -371,6 +372,7 @@ class MinerEnemy(Enemy):
         self.dash_cooldown_timer.tick(time_delta)
         if not self.dash_cooldown_timer.running():
             self.dash_active_timer.reset()
+            play_sfx('miner_dash')
             self.dash_cooldown_timer.reset()
         if self.is_in_dash():
             self.dash_active_timer.tick(time_delta)

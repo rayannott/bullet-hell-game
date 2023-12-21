@@ -106,12 +106,12 @@ class Player(Entity):
             low_health_multiplier = 1.
         elif h_percent > 0.4:
             low_health_multiplier = 1. if e_percent < 0.8 else 2.
-            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 3.)
+            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 2.5)
         else:
             # unless health is low
             # then it depends on the energy levels
             low_health_multiplier = 1.5 if e_percent < 0.6 else 2.5
-            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 3.)
+            energy_decay_rate_health = 0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 2.5)
         # decay energy and regenerate health faster when health is low
         if e_percent > 0.: self.health.change(self.get_regen() * low_health_multiplier * time_delta)
         self.energy.change(
@@ -168,6 +168,7 @@ class Player(Entity):
         if artifact_type == ArtifactType.DASH:
             self.artifacts_handler.get_dash().dash()
             self.get_stats().DASHES_ACTIVATED += 1
+            play_sfx('player_dash')
             return
         raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
     
