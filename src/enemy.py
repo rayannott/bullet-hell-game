@@ -350,11 +350,11 @@ class MinerEnemy(Enemy):
             player=player,
             color=Color('#103d9e'),
             speed=ENEMY_DEFAULT_SPEED * 1.2,
-            health=ENEMY_DEFAULT_MAX_HEALTH + 40. * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH + 15. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,
             reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * self._player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
-            damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.3,
+            damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE,
             turn_coefficient=0.4,
         )
         self.shoots_player = False
@@ -389,7 +389,7 @@ class MinerEnemy(Enemy):
                 AOEEffect(
                     pos=self.pos,
                     size=80,
-                    damage=self.damage,
+                    damage=self.damage_on_collision * 0.7,
                     color=self.color,
                     animation_lingering_time=0.8
                 )
