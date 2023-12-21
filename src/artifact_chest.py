@@ -64,13 +64,14 @@ class ArtifactChestGenerator:
         # and these too
         _inactive_artifacts = [
             StatsBoost(speed=400.),
-            StatsBoost(regen=2.),
+            StatsBoost(regen=1.5),
             StatsBoost(damage=15.),
-            StatsBoost(regen=1., speed=200.),
-            StatsBoost(damage=25.),
+            StatsBoost(regen=0.75, speed=200.),
+            StatsBoost(size=2., add_max_extra_bullets=2),
+            StatsBoost(damage=30.),
             StatsBoost(add_max_extra_bullets=5),
             StatsBoost(bullet_shield_duration=2.),
-            StatsBoost(size=2., add_max_extra_bullets=2),
+            StatsBoost(regen=2.5),
             StatsBoost(mine_cooldown=2.),
             StatsBoost(bullet_shield_size=20.),
             StatsBoost(cooldown=0.15),
@@ -96,8 +97,6 @@ class ArtifactChestGenerator:
             return Dash(self.player)
         elif artifact_type == ArtifactType.MINE_SPAWN:
             return MineSpawn(self.player)
-        elif artifact_type == ArtifactType.DASH:
-            return Dash(self.player)
         else:
             raise NotImplementedError(f'Unknown artifact type: {artifact_type}')
 
@@ -131,7 +130,7 @@ class ArtifactChestGenerator:
         active_to_spawn = absent_active[:num_active_to_spawn] # active artifact types
         to_spawn.extend([ArtifactChest(Vector2(), self.get_artifact(_type)) for _type in active_to_spawn])
     
-        skip = player_level // 2 - 1
+        skip = 2 * player_level // 3 - 1
         if num_stats_to_spawn <= 4:
             stats_to_spawn = absent_stats[skip:skip+num_stats_to_spawn]
         else:
