@@ -45,7 +45,7 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
         rect_label_sfx = pygame.Rect(0, 0, *LABEL_SIZE)
         rect_label_sfx.topleft = self.sfx_volume_slider.relative_rect.topright
         self.sfx_volume_label = pygame_gui.elements.UITextBox(
-            f'sfx\n{self.paint_number(self.settings.sfx_volume, '{:.0%}', self.color_gradient(self.settings.sfx_volume))}',
+            f'sfx\n{self.paint_number(self.settings.sfx_volume, "{:.0%}", self.color_gradient(self.settings.sfx_volume))}',
             rect_label_sfx,
             manager=manager,
             container=self,
