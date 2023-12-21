@@ -176,13 +176,7 @@ class RenderManager:
 
     def draw_entity_debug(self, entity: Entity):
         if entity.speed and entity.vel.magnitude_squared():
-            pygame.draw.line(
-                self.surface,
-                WHITE,
-                entity.get_pos(),
-                entity.get_pos() + entity.vel.normalize() * entity.speed * 0.1,
-                width=2
-            )
+            pygame.draw.line(self.surface, WHITE, entity.get_pos(), entity.get_pos() + entity.vel.normalize() * entity.speed * 0.1, width=2)
 
     @staticmethod
     def soon_shooting_coef_function(x: float) -> float:
@@ -210,33 +204,15 @@ class RenderManager:
             color=NICER_GREEN, draw_full=not can_one_shot, width=2)
         if self.game.time_frozen:
             cross_vec = Vector2(enemy.get_size(), enemy.get_size()) * 1.7
-            pygame.draw.line(
-                self.surface,
-                WHITE,
-                enemy.get_pos() - cross_vec,
-                enemy.get_pos() + cross_vec,
-                width=4
-            )
+            pygame.draw.line(self.surface, WHITE, enemy.get_pos() - cross_vec, enemy.get_pos() + cross_vec, width=4)
         # if less than 1. sec left on the cooldown timer, indicate shooting intent
         if enemy.shoots_player:
             if (t:=enemy.cooldown.get_time_left()) < 1.:
-                pygame.draw.circle(
-                    self.surface,
-                    WHITE,
-                    enemy.get_pos(),
-                    enemy.get_size() * self.soon_shooting_coef_function(1. - t),
-                    width=3
-                )
+                pygame.draw.circle(self.surface, WHITE, enemy.get_pos(), enemy.get_size() * self.soon_shooting_coef_function(1. - t), width=3)
         else:
             if enemy.enemy_type == EnemyType.MINER and enemy.dash_cooldown_timer.get_time_left() < 1.: # type: ignore
                 color = random.choice([GRAY, WHITE, RED])
-                pygame.draw.circle(
-                    self.surface,
-                    color,
-                    enemy.get_pos(),
-                    enemy.get_size(),
-                    width=5
-                )
+                pygame.draw.circle(self.surface, color, enemy.get_pos(), enemy.get_size(), width=5)
         if self.debug:
             health_text = f'{enemy.get_health()}'
             label = Label(health_text, self.surface, 
@@ -255,24 +231,12 @@ class RenderManager:
         if player.effect_flags.IN_DASH:
             _indicator_color = NICER_GREEN
         if player.energy.get_value() > PLAYER_SHOT_COST:
-            pygame.draw.circle(
-                self.surface,
-                _indicator_color,
-                player.get_pos(),
-                player.get_size(),
-                width=6
-            )
+            pygame.draw.circle(self.surface, _indicator_color, player.get_pos(), player.get_size(), width=6)
         draw_circular_status_bar(self.surface, player.get_pos(), player.shoot_cooldown_timer.get_slider(), player.get_size()*2)
         # bullet shield:
         if (player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD) and 
             player.artifacts_handler.get_bullet_shield().is_on()):
-            pygame.draw.circle(
-                self.surface,
-                YELLOW,
-                player.get_pos(),
-                BULLET_SHIELD_SIZE,
-                width=2
-            )
+            pygame.draw.circle(self.surface, YELLOW, player.get_pos(), BULLET_SHIELD_SIZE, width=2)
             draw_circular_status_bar(self.surface, player.get_pos(), 
                 player.artifacts_handler.get_bullet_shield().duration_timer.get_slider(reverse=True), BULLET_SHIELD_SIZE + 5., draw_full=True)
         # time stop:
@@ -287,13 +251,7 @@ class RenderManager:
                 pygame.draw.circle(self.surface, '#202020', def_traj_pos, 2)
         if self.game.time_frozen:
             cross_vec = Vector2(projectile.get_size(), projectile.get_size()) * 2.
-            pygame.draw.line(
-                self.surface,
-                WHITE,
-                projectile.get_pos() - cross_vec,
-                projectile.get_pos() + cross_vec,
-                width=2
-            )
+            pygame.draw.line(self.surface, WHITE, projectile.get_pos() - cross_vec, projectile.get_pos() + cross_vec, width=2)
         self.draw_entity_basics(projectile)
 
     def dash_animation(self):
@@ -304,24 +262,13 @@ class RenderManager:
             a, b = dash.dash_path_history[-1]
             N = 20
             for i in range(N):
-                pygame.draw.circle(
-                    self.surface,
-                    WHITE,
-                    a + (b - a) * i / N,
-                    2
-                )
+                pygame.draw.circle(self.surface, NICER_GREEN, a + (b - a) * i / N, 2)
 
     def draw_entity_trail(self, entity: Entity):
         _trail_len = len(entity.trail)
         color_gradient = ColorGradient(BLACK, entity.get_color())
         for i, pos in enumerate(entity.trail):
-            pygame.draw.circle(
-                self.surface,
-                color_gradient(i / _trail_len),
-                pos,
-                2.,
-                width=1
-            )
+            pygame.draw.circle(self.surface, color_gradient(i / _trail_len), pos, 2., width=1)
 
     def draw_entity_basics(self, entity: Entity):
         pygame.draw.circle(self.surface, entity.get_color(), entity.get_pos(), entity.get_size())
