@@ -184,7 +184,7 @@ class Enemy(Entity):
     def on_killed_by_player(self):
         reward, bullets = (self.reward * 0.5, int(self.reward / 100)) if random.random() < PROBABILITY_SPAWN_EXTRA_BULLET_ORB else (self.reward, 0)
         self.entities_buffer.append(
-            EnergyOrb(self.pos, reward, 0.25, num_extra_bullets=bullets)
+            EnergyOrb(self.pos, reward, 0.25, num_extra_bullets=bullets, is_enemy_bonus_orb=True)
         )
     
     def caught_bullet(self):

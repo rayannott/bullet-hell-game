@@ -13,7 +13,8 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
             pos: Vector2,
             energy: float,
             lifetime: float,
-            num_extra_bullets: int = False
+            num_extra_bullets: int = False,
+            is_enemy_bonus_orb: bool = False
         ) -> None:
         size = ENERGY_ORB_SIZE
         self.num_extra_bullets = num_extra_bullets
@@ -26,11 +27,15 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
             render_trail=False
         )
         self._energy = energy
+        self._is_enemy_bonus_orb = is_enemy_bonus_orb
         self._lifetime = lifetime
         self._life_timer = Timer(max_time=self._lifetime)
 
     def energy_left(self) -> float:
         return self._energy * (1. - self._life_timer.get_percent_full())
+
+    def is_enemy_bonus_orb(self) -> bool:
+        return self._is_enemy_bonus_orb
 
     def update(self, time_delta: float) -> None:
         super().update(time_delta)
