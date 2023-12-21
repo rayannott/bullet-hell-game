@@ -192,7 +192,7 @@ class GameScreen(Screen):
             duration = feedback.duration
             at_pos = feedback.at_pos
             color = feedback.color
-        random_vector = random_unit_vector() * random.random() * 50
+        random_vector = random_unit_vector() * random.random() * 80
         if at_pos == 'player': at_pos = self.game.player.get_pos() + random_vector
         elif at_pos == 'cursor': at_pos = Vector2(pygame.mouse.get_pos()) + random_vector
         elif at_pos == 'center': at_pos = self.surface.get_rect().center + random_vector
