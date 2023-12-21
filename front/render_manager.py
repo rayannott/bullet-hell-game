@@ -198,10 +198,9 @@ class RenderManager:
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)
         # do not draw health bar if enemy can always be killed with one shot 
-        can_one_shot = enemy.health.max_value <= self.game.player.damage - self.game.player.damage_spread
+        can_one_shot = enemy.health.max_value <= self.game.player.get_damage() - self.game.player.damage_spread
         draw_circular_status_bar(self.surface, enemy.get_pos(), enemy.get_health(),
-            enemy.get_size() * 1.5, 
-            color=NICER_GREEN, draw_full=not can_one_shot, width=2)
+            enemy.get_size() * 1.2, color=NICER_GREEN, draw_full=not can_one_shot, width=2)
         if self.game.time_frozen:
             cross_vec = Vector2(enemy.get_size(), enemy.get_size()) * 1.7
             pygame.draw.line(self.surface, WHITE, enemy.get_pos() - cross_vec, enemy.get_pos() + cross_vec, width=4)
