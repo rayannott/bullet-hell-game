@@ -254,25 +254,31 @@ class Game:
     def register_new_achievements(self):
         ach = self.player.get_achievements()
         st = self.player.get_stats()
-        # TODO: play_sfx('new_achievement') -- add this next to feedback
+        
         if not ach.RECEIVE_1000_DAMAGE and st.DAMAGE_TAKEN >= 1000:
             ach.RECEIVE_1000_DAMAGE = True
             self.feedback_buffer.append(Feedback('[A] receive 1000 damage', 3., color=BLUE))
+            play_sfx('new_achievement')
         if not ach.KILL_100_ENEMIES and st.ENEMIES_KILLED >= 100:
             ach.KILL_100_ENEMIES = True
             self.feedback_buffer.append(Feedback('[A] killed 100 enemies', 3., color=BLUE))
+            play_sfx('new_achievement')
         if not ach.FIRE_200_PROJECTILES and st.PROJECTILES_FIRED >= 200:
             ach.FIRE_200_PROJECTILES = True
             self.feedback_buffer.append(Feedback('[A] fired 200 projectiles', 3., color=BLUE))
+            play_sfx('new_achievement')
         if not ach.BLOCK_100_BULLETS and st.BULLET_SHIELD_BULLETS_BLOCKED >= 100:
             ach.BLOCK_100_BULLETS = True
             self.feedback_buffer.append(Feedback('[A] blocked 100 bullets', 3., color=BLUE))
+            play_sfx('new_achievement')
         if not ach.COLLECT_200_ENERGY_ORBS and st.ENERGY_ORBS_COLLECTED >= 200:
             ach.COLLECT_200_ENERGY_ORBS = True
             self.feedback_buffer.append(Feedback('[A] collected 200 energy orbs', 3., color=BLUE))
+            play_sfx('new_achievement')
         if not ach.COLLIDE_WITH_15_ENEMIES and st.ENEMIES_COLLIDED_WITH >= 15:
             ach.COLLIDE_WITH_15_ENEMIES = True
             self.feedback_buffer.append(Feedback('[A] collided with 15 enemies', 3., color=BLUE))
+            play_sfx('new_achievement')
 
     def player_try_shooting(self):
         try:
@@ -390,6 +396,7 @@ class Game:
             corpse.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
             self.reason_of_death = f'collided with Corpse'
+            # play_sfx('fart')
         for mine in self.mines():
             if not mine.intersects(self.player): continue
             if not mine.is_activated(): continue
@@ -439,6 +446,7 @@ class Game:
                 ):
                     self.player.get_achievements().KILL_BOSS_WITH_RICOCHET = True
                     self.feedback_buffer.append(Feedback('[A] killed the boss with ricochet!', 3., color=BLUE))
+                    play_sfx('new_achievement')
         # enemy-enemy collisions
         MULT = 0.3
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
@@ -469,9 +477,11 @@ class Game:
             if not self.player.get_achievements().KILL_BOSS_WITHOUT_BULLETS and enemy.get_num_bullets_caught() == 0:
                 self.player.get_achievements().KILL_BOSS_WITHOUT_BULLETS = True
                 self.feedback_buffer.append(Feedback('[A] killed the boss without bullets', 3., color=BLUE))
+                play_sfx('new_achievement')
             if not self.player.get_achievements().KILL_BOSS_USING_EXACTLY_7_BULLETS and enemy.get_num_bullets_caught() == 7:
                 self.player.get_achievements().KILL_BOSS_USING_EXACTLY_7_BULLETS = True
                 self.feedback_buffer.append(Feedback('[A] killed the boss using exactly 7 bullets', 3., color=BLUE))
+                play_sfx('new_achievement')
 
     def deal_damage_to_enemy(self, enemy: Enemy, damage: float, get_damage_feedback: bool = True) -> None:
         damage_dealt_actual = -enemy.get_health().change(-damage)
