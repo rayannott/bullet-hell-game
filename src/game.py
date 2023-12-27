@@ -617,6 +617,7 @@ class Game:
         return self._last_fps
 
     def get_info(self) -> dict:
+        score = 0 # TODO: add calculation
         return {
             'level': self.level,
             'difficulty': self.settings.difficulty,
@@ -625,4 +626,5 @@ class Game:
             'achievements': self.player.get_achievements(),
             'artifacts': self.player.artifacts_handler, 
             'reason_of_death': self.reason_of_death,
+            'score': score,
         }

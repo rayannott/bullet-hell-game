@@ -38,7 +38,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         )
     
     @staticmethod
-    def construct_one_save_html(datetime_str: str, info: dict) -> tuple[str, float]:
+    def construct_one_save_html(datetime_str: str, info: dict) -> str:
         TAB = '    '
         difficulty_field =  f" {paint('difficulty', PRETTY_MAGENTA)}: {paint(info['difficulty'], NICER_GREEN)};" if info['difficulty'] != 3 else ''
         died_because_str = f"{paint('died because', PRETTY_MAGENTA)} {paint(info['reason_of_death'], NICER_RED)}" if info['reason_of_death'] else paint('did not die', PRETTY_MAGENTA)
@@ -58,7 +58,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         artifacts_str = f'{paint('artifacts', PRETTY_MAGENTA)}:\n{TAB*2}{stats_boosts_str}\n{TAB*2}{active_artifacts_str}' if stats_boosts_str or active_artifacts_str else ''
 
         DASHES = '-' * 10
-        text = f'''<b>{DASHES} {paint('GAME', WHITE)} {paint(datetime_str.replace('/', '.'), LIGHT_BLUE)} {DASHES}</b>
+        text = f'''<b>{DASHES} {paint('GAME', WHITE)} {paint(datetime_str.replace('/', '.'), LIGHT_BLUE)} (score={info.get('score', 0)}) {DASHES}</b>
     {paint('level', PRETTY_MAGENTA)}: {paint(info['level'], NICER_GREEN)};{difficulty_field} {paint('time', PRETTY_MAGENTA)}: {paint('{:.2f}'.format(info['time']), NICER_GREEN)} sec
     {paint('stats', PRETTY_MAGENTA)}:
         {stats_str}
@@ -66,8 +66,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
     {artifacts_str}
     {died_because_str}
     '''
-        score = 0.
-        return text, score
+        return text
     
     def construct_html(self, saves: shelve.Shelf) -> str:
         if len(saves) == 0:
@@ -75,5 +74,4 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         texts = []
         for datetime_str, info in reversed(list(saves.items())):
             texts.append(self.construct_one_save_html(datetime_str, info))
-        texts.sort(key=lambda x: x[1], reverse=True) # sort by score
-        return '\n\n'.join(text for text, _ in texts)
+        return '\n\n'.join(texts)
