@@ -37,8 +37,9 @@ class FpsInfo:
     def calc_stats(self) -> tuple[float, float, float, float, int]:
         num_ticks = len(self.fps_history)
         avg_fps = sum(self.fps_history) / num_ticks
-        min_fps = min(self.fps_history)
-        max_fps = max(self.fps_history)
+        self.fps_history.sort()
+        min_fps = sum(self.fps_history[:10]) / 10
+        max_fps = sum(self.fps_history[-10:]) / 10
         std_fps = (sum((fps - avg_fps) ** 2 for fps in self.fps_history) / len(self.fps_history)) ** 0.5
         return avg_fps, min_fps, max_fps, std_fps, num_ticks
 
