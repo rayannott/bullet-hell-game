@@ -279,9 +279,9 @@ class Game:
             ach.COLLIDE_WITH_15_ENEMIES = True
             self.feedback_buffer.append(Feedback('[A] collided with 15 enemies', color=BLUE))
             play_sfx('new_achievement')
-        if not ach.DASH_THROUGH_20_ENEMIES and st.DASHED_THROUGH_ENEMIES >= 20:
-            ach.DASH_THROUGH_20_ENEMIES = True
-            self.feedback_buffer.append(Feedback('[A] dashed through 20 enemies', color=BLUE))
+        if not ach.DASH_THROUGH_10_ENEMIES and st.DASHED_THROUGH_ENEMIES >= 10:
+            ach.DASH_THROUGH_10_ENEMIES = True
+            self.feedback_buffer.append(Feedback('[A] dashed through 10 enemies', color=BLUE))
             play_sfx('new_achievement')
 
     def player_try_shooting(self):
