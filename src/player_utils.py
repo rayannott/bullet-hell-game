@@ -75,7 +75,7 @@ class Achievements:
     KILL_BOSS_WITH_RICOCHET: bool = False
     KILL_BOSS_WITHOUT_BULLETS: bool = False
     KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False
-    KILL_BOSS_WITHIN_ONE_SECOND: bool = False # TODO: implement logic
+    KILL_BOSS_WITHIN_ONE_SECOND: bool = False
 
     def update(self, other: 'Achievements'):
         for k, v in other.__dict__.items():
