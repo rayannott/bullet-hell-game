@@ -482,6 +482,10 @@ class Game:
                 self.player.get_achievements().KILL_BOSS_USING_EXACTLY_7_BULLETS = True
                 self.feedback_buffer.append(Feedback('[A] killed the boss using exactly 7 bullets', 3., color=BLUE))
                 play_sfx('new_achievement')
+            if not self.player.get_achievements().KILL_BOSS_WITHIN_ONE_SECOND and enemy.lifetime_cooldown.current_time < 1.:
+                self.player.get_achievements().KILL_BOSS_WITHIN_ONE_SECOND = True
+                self.feedback_buffer.append(Feedback('[A] killed the boss within one second', 3., color=BLUE))
+                play_sfx('new_achievement')
 
     def deal_damage_to_enemy(self, enemy: Enemy, damage: float, get_damage_feedback: bool = True) -> None:
         damage_dealt_actual = -enemy.get_health().change(-damage)

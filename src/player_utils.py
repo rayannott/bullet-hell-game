@@ -57,7 +57,6 @@ class Achievements:
     """
     Achievement flags.
     """
-    KILL_BOSS_WITH_RICOCHET: bool = False
     REACH_LEVEL_5_WITH_NO_CORPSES: bool = False
     REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE: bool = False
     REACH_LEVEL_5_WITH_100_PERCENT_ACCURACY: bool = False
@@ -70,8 +69,10 @@ class Achievements:
     COLLECT_200_ENERGY_ORBS: bool = False
     COLLIDE_WITH_15_ENEMIES: bool = False
     COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2: bool = False
+    KILL_BOSS_WITH_RICOCHET: bool = False
     KILL_BOSS_WITHOUT_BULLETS: bool = False
     KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False
+    KILL_BOSS_WITHIN_ONE_SECOND: bool = False # TODO: implement logic
 
     def update(self, other: 'Achievements'):
         for k, v in other.__dict__.items():
