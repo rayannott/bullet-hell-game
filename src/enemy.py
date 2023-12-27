@@ -167,7 +167,7 @@ class Enemy(Entity):
         )
     
     def shoot_def_trajectory_one(self):
-        points_around_player = [ # TODO: fix this
+        points_around_player = [
             self.homing_target.get_pos() + Vector2(0., 1.).rotate(i * 360. / 5) * random.uniform(200, 700) 
             for i in range(5)
         ]
