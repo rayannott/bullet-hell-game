@@ -1,4 +1,4 @@
-FRAMERATE_MIN_MAX = (30, 150)
+FRAMERATE_MIN_MAX = (30, 220)
 
 SM = 5 # small margin
 BM = 10 # big margin

@@ -4,6 +4,7 @@ import pygame
 import pygame_gui
 
 from front.sounds import play_sfx
+from front.utils import FpsInfo
 from config import QUIT_BUTTON_SIZE, BACKGROUND_COLOR_HEX
 from config.settings import Settings
 
@@ -37,6 +38,7 @@ class Screen(ABC):
             manager=self.manager
         )
         self.clock = pygame.time.Clock()
+        self.fps_info = FpsInfo(framerate)
 
     @abstractmethod
     def process_event(self, event: pygame.event.Event):
@@ -56,9 +58,11 @@ class Screen(ABC):
                 self.is_running = False
         ...
     
-    def run(self):
+    def run(self) -> FpsInfo:
+        """Main loop. Returns the average FPS."""
         while self.is_running:
             time_delta = self.clock.tick(self.framerate)/1000.0
+            self.fps_info.update(time_delta)
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -74,3 +78,4 @@ class Screen(ABC):
             self.manager.draw_ui(self.surface)
             pygame.display.update()
         self.post_run()
+        return self.fps_info

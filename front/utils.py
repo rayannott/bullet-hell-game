@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+import math
 from typing import Literal
 
 import pygame, pygame_gui
@@ -18,6 +20,44 @@ def paint(text: str, color: Color) -> str:
 
 def bold(text: str) -> str:
     return f'<b>{text}</b>'
+
+
+@dataclass
+class FpsInfo:
+    target_fps: int
+
+    def __post_init__(self):
+        self.fps_history: list[float] = []
+        self.min_fps = math.inf
+        self.max_fps = -math.inf
+
+    def update(self, time_delta: float):
+        self.fps_history.append(1. / time_delta)
+    
+    def calc_stats(self) -> tuple[float, float, float, float, int]:
+        num_ticks = len(self.fps_history)
+        avg_fps = sum(self.fps_history) / num_ticks
+        min_fps = min(self.fps_history)
+        max_fps = max(self.fps_history)
+        std_fps = (sum((fps - avg_fps) ** 2 for fps in self.fps_history) / len(self.fps_history)) ** 0.5
+        return avg_fps, min_fps, max_fps, std_fps, num_ticks
+
+    def verdict(self) -> str:
+        avg_fps, min_fps, _, std_fps, num_ticks = self.calc_stats()
+        if num_ticks < 100:
+            return ''
+        problems = []
+        if min_fps < self.target_fps * 0.3:
+            problems.append(f'[Freezes] minimum framerate falls below 30% the target fps ({min_fps:.2f})')
+        if std_fps > self.target_fps * 0.15:
+            problems.append(f'[Jumps] standard deviation of the framerate is too high ({std_fps:.2f})')
+        if avg_fps < self.target_fps * 0.9:
+            problems.append(f'[Jitters] average framerate is below 90% of the target fps ({avg_fps:.2f} < {self.target_fps}) * 0.9')
+        return '\n'.join(problems)
+
+    def __str__(self) -> str:
+        avg_fps, min_fps, max_fps, std_fps, num_ticks = self.calc_stats()
+        return f'FPSINFO({avg_fps:.2f}±{std_fps:.2f} (min-max: {min_fps:.2f}-{max_fps:.2f}; target: {self.target_fps}); {num_ticks} ticks)'
 
 
 class ColorGradient:

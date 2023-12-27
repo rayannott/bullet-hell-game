@@ -91,7 +91,7 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
             manager=manager,
             container=self,
         )
-        # TODO: add framerate slider; add warnings if the actual framerate is lower than the desired framerate
+
         rect_framerate = pygame.Rect(0, 0, *SLIDERS_SIZE)
         rect_framerate.topleft = rect_difficulty.bottomleft
         self.framerate_slider = pygame_gui.elements.UIHorizontalSlider(

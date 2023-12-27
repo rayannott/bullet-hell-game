@@ -82,7 +82,16 @@ class MenuScreen(Screen):
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.start_game_btn:
                 self.game_screen = GameScreen(self.surface, self.settings)
-                self.game_screen.run()
+                fps_info = self.game_screen.run()
+                print(fps_info)
+                str_verdict = fps_info.verdict()
+                if str_verdict:
+                    pygame_gui.windows.UIMessageWindow(
+                        rect=pygame.Rect(0, 0, 400, 400),
+                        manager=self.manager,
+                        window_title='FPS Warning',
+                        html_message=str_verdict + '\n' + str(fps_info),
+                    )
             elif event.ui_element == self.stats_btn:
                 if self.stats_window is not None:
                     self.stats_window.kill()
