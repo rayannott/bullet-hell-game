@@ -1,4 +1,5 @@
 import shelve
+from copy import copy
 
 from pygame import Color, Surface, Rect
 import pygame_gui
@@ -27,7 +28,8 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         with shelve.open(str(SAVES_FILE)) as saves:
             text = self.construct_html(saves)
             len_saves = len(saves)
-
+        # TODO: add scores to the saves; add button to leave only 20 best saves
+        # also add button to toggle sort by: score or date
         super().__init__(
             rect=rect,
             manager=manager,
@@ -36,7 +38,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         )
     
     @staticmethod
-    def construct_one_save_html(datetime_str: str, info: dict) -> str:
+    def construct_one_save_html(datetime_str: str, info: dict) -> tuple[str, float]:
         TAB = '    '
         difficulty_field =  f" {paint('difficulty', PRETTY_MAGENTA)}: {paint(info['difficulty'], NICER_GREEN)};" if info['difficulty'] != 3 else ''
         died_because_str = f"{paint('died because', PRETTY_MAGENTA)} {paint(info['reason_of_death'], NICER_RED)}" if info['reason_of_death'] else paint('did not die', PRETTY_MAGENTA)
@@ -64,12 +66,14 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
     {artifacts_str}
     {died_because_str}
     '''
-        return text
+        score = 0.
+        return text, score
     
     def construct_html(self, saves: shelve.Shelf) -> str:
         if len(saves) == 0:
             return 'No saves yet'
-        text = ''
+        texts = []
         for datetime_str, info in reversed(list(saves.items())):
-            text += self.construct_one_save_html(datetime_str, info) + '<br>'
-        return text
+            texts.append(self.construct_one_save_html(datetime_str, info))
+        texts.sort(key=lambda x: x[1], reverse=True) # sort by score
+        return '\n\n'.join(text for text, _ in texts)

@@ -168,7 +168,7 @@ class GameScreen(Screen):
             rect=r,
             manager=self.manager,
             window_title='Game Over',
-            action_long_desc=html_stats,
+            action_long_desc=html_stats[0],
             blocking=True
         )
     
