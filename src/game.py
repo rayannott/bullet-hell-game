@@ -11,7 +11,7 @@ from config.settings import Settings
 from src.artifacts import Artifact
 from src.entity import Entity, DummyEntity
 from src.corpse import Corpse
-from src.aoe_effect import AOEEffect
+from src.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.mine import Mine
 from src.oil_spill import OilSpill
 from src.player import Player
@@ -25,7 +25,9 @@ from src.artifact_chest import ArtifactChest
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, 
     NICER_MAGENTA_HEX, NICER_BLUE_HEX, NICER_YELLOW_HEX, NICER_GREEN_HEX,
-    WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM)
+    WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM,
+    PLAYER_SHOT_COST,
+)
 from front.sounds import play_sfx
 
 
@@ -413,9 +415,10 @@ class Game:
         for aoe_effect in self.aoe_effects():
             if not aoe_effect.intersects(self.player): continue
             if aoe_effect.applied_effect_player: continue
-            self.player_get_damage(aoe_effect.damage)
+            if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
+                self.player_get_damage(aoe_effect.damage)
+                self.reason_of_death = f'impact AOE damage'
             aoe_effect.applied_effect_player = True
-            self.reason_of_death = f'impact AOE damage'
         for artifact_chest in self.artifact_chests():
             if not artifact_chest.intersects(self.player): continue
             if not artifact_chest.can_be_picked_up(): continue
@@ -471,7 +474,10 @@ class Game:
             if aoe_effect.applied_effect_enemies: continue
             for enemy in self.enemies():
                 if not aoe_effect.intersects(enemy): continue
-                self.deal_damage_to_enemy(enemy, aoe_effect.damage)
+                if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
+                    self.deal_damage_to_enemy(enemy, aoe_effect.damage)
+                elif aoe_effect.effect_type == AOEEffectEffectType.ENEMY_BLOCK_ON:
+                    enemy.has_block = True
             aoe_effect.applied_effect_enemies = True
 
         # check if the Boss just died
@@ -492,6 +498,20 @@ class Game:
                 play_sfx('new_achievement')
 
     def deal_damage_to_enemy(self, enemy: Enemy, damage: float, get_damage_feedback: bool = True) -> None:
+        if enemy.has_block:
+            # checks if that enemy has the block on
+            enemy.has_block = False
+            self.player.get_stats().BLOCKS_LIFTED += 1
+            # lift the block and either give energy or extra bullets
+            if random.random() < 0.5:
+                energy_collected = self.player.energy.change(PLAYER_SHOT_COST * 1.2)
+                self.player.get_stats().ENERGY_COLLECTED += energy_collected
+                self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
+            else:
+                self.player.add_extra_bullets(1)
+                self.feedback_buffer.append(Feedback(f'+1eb', color=Color('white')))
+            self.feedback_buffer.append(Feedback('block lifted', 2., color=pygame.Color('yellow')))
+            return
         damage_dealt_actual = -enemy.get_health().change(-damage)
         enemy.get_health().current_value = round(enemy.get_health().current_value)
         self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual

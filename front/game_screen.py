@@ -10,6 +10,7 @@ import pygame_gui
 
 from front.inventory_info import InventoryInfo
 from front.stats_window import StatsWindow
+from src.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.artifact_chest import ArtifactChest
 from src.artifacts import BulletShield, Dash, MineSpawn, TimeStop
 from src.enums import ArtifactType, EnemyType
@@ -86,6 +87,10 @@ class GameScreen(Screen):
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Dash(self.game.player)))
                 elif event.key == pygame.K_o:
                     self.game.add_entity(OilSpill(Vector2(pygame.mouse.get_pos())))
+                elif event.key == pygame.K_b:
+                    self.game.add_entity(AOEEffect(Vector2(pygame.mouse.get_pos()), 200, 
+                        effect_type=AOEEffectEffectType.ENEMY_BLOCK_ON, 
+                        affects_enemies=True, affects_player=False, animation_lingering_time=1.2))
             else:
                 if event.key == pygame.K_p:
                     self.game.toggle_pause()

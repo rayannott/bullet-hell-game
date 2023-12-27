@@ -3,7 +3,7 @@ from pygame import Vector2, Color
 from src.entity import Entity
 from src.enums import EntityType
 from src.utils import Timer
-from src.aoe_effect import AOEEffect
+from src.aoe_effect import AOEEffect, AOEEffectEffectType
 from config import (MINE_SIZE, MINE_ACTIVATION_TIME, MINE_LIFETIME, MINE_DEFAULT_DAMAGE, MINE_AOE_EFFECT_SIZE)
 
 
@@ -39,9 +39,10 @@ class Mine(Entity):
             AOEEffect(
                 pos=self.pos,
                 size=MINE_AOE_EFFECT_SIZE,
-                damage=self.aoe_damage,
+                effect_type=AOEEffectEffectType.DAMAGE,
                 color=self.color,
-                animation_lingering_time=0.8
+                animation_lingering_time=0.8,
+                damage=self.aoe_damage,
             )
         )
         return super().kill()

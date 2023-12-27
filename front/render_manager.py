@@ -16,6 +16,7 @@ from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, LIGHT_MAGENTA_HEX, NICER_RED_HEX, GRAY_HEX, 
     WAVE_DURATION, BM, BULLET_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX, BOSS_ENEMY_COLOR_HEX,
+    LIGHT_ORANGE_HEX,
 )
 
 
@@ -23,6 +24,7 @@ freetype.init()
 
 
 NICER_GREEN = Color(NICER_GREEN_HEX)
+LIGHT_ORANGE = Color(LIGHT_ORANGE_HEX)
 MAGENTA = Color(NICER_MAGENTA_HEX)
 LIGHTER_MAGENTA = Color(LIGHT_MAGENTA_HEX)
 YELLOW = Color('yellow')
@@ -201,6 +203,11 @@ class RenderManager:
         can_one_shot = enemy.health.max_value <= self.game.player.get_damage() - self.game.player.damage_spread
         draw_circular_status_bar(self.surface, enemy.get_pos(), enemy.get_health(),
             enemy.get_size() * 1.2, color=NICER_GREEN, draw_full=not can_one_shot, width=2)
+        if enemy.has_block:
+            block_vec = Vector2(enemy.get_size(), 0.) * 1.2
+            delta = Vector2(0., 4)
+            pygame.draw.line(self.surface, LIGHT_ORANGE, enemy.get_pos() - block_vec + delta, enemy.get_pos() + block_vec + delta, width=5)
+            pygame.draw.line(self.surface, LIGHT_ORANGE, enemy.get_pos() - block_vec - delta, enemy.get_pos() + block_vec - delta, width=5)
         if self.game.time_frozen:
             cross_vec = Vector2(enemy.get_size(), enemy.get_size()) * 1.7
             pygame.draw.line(self.surface, WHITE, enemy.get_pos() - cross_vec, enemy.get_pos() + cross_vec, width=4)

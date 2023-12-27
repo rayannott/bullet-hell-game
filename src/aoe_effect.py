@@ -1,3 +1,5 @@
+from enum import Enum, auto
+
 from pygame import Vector2, Color
 
 from front.utils import ColorGradient
@@ -8,13 +10,21 @@ from src.utils import Timer
 from config import BACKGROUND_COLOR_HEX
 
 
+class AOEEffectEffectType(Enum):
+    DAMAGE = auto()
+    ENEMY_BLOCK_ON = auto()
+
+
 class AOEEffect(Entity):
     def __init__(self,
         pos: Vector2,
         size: float,
-        damage: float,
+        effect_type: AOEEffectEffectType = AOEEffectEffectType.DAMAGE,
+        affects_enemies: bool = True,
+        affects_player: bool = True,
         color: Color = Color('black'),
         animation_lingering_time: float = 0.5,
+        damage: float = 0.,
     ):
         super().__init__(
             pos=pos,
@@ -22,12 +32,15 @@ class AOEEffect(Entity):
             size=size,
             color=color,
         )
+        self.effect_type = effect_type
         self.color_gradient = ColorGradient(color, Color(BACKGROUND_COLOR_HEX))
         self.damage = damage
         self.lifetime_timer = Timer(max_time=animation_lingering_time)
 
-        self.applied_effect_player = False
-        self.applied_effect_enemies = False
+        self.applied_effect_player = not affects_player
+        self.applied_effect_enemies = not affects_enemies
+        if self.effect_type == AOEEffectEffectType.ENEMY_BLOCK_ON:
+            self.applied_effect_player = True # this does not apply to players
 
     def update(self, time_delta: float):
         self.lifetime_timer.tick(time_delta)

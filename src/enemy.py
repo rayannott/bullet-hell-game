@@ -5,7 +5,7 @@ import random
 from pygame import Vector2, Color
 
 from front.sounds import play_sfx
-from src.aoe_effect import AOEEffect
+from src.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.energy_orb import EnergyOrb
 from src.entity import Entity
 from src.corpse import Corpse
@@ -19,8 +19,12 @@ from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_
     PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE,
-    BOSS_ENEMY_COLOR_HEX, PROBABILITY_SPAWN_EXTRA_BULLET_ORB, MINE_DEFAULT_DAMAGE
+    BOSS_ENEMY_COLOR_HEX, BOSS_GIVE_BLOCKS_COOLDOWN, PROBABILITY_SPAWN_EXTRA_BULLET_ORB, MINE_DEFAULT_DAMAGE, BLOCKS_FOR_ENEMIES_EFFECT_SIZE,
+    LIGHT_ORANGE_HEX,
 )
+
+
+LIGHT_ORANGE = Color(LIGHT_ORANGE_HEX)
 
 
 @dataclass
@@ -72,6 +76,7 @@ class Enemy(Entity):
             homing_target=player,
             turn_coefficient=turn_coefficient,
         )
+        self.has_block = False
         self.homing_target: Player # to avoid typing errors (this is always a player)
         self.health = Slider(health)
         self.cooldown = Timer(max_time=shoot_cooldown)
@@ -401,9 +406,10 @@ class MinerEnemy(Enemy):
                 AOEEffect(
                     pos=self.pos,
                     size=80.,
-                    damage=self.damage_on_collision * 0.7,
+                    effect_type=AOEEffectEffectType.DAMAGE,
                     color=self.color,
-                    animation_lingering_time=0.8
+                    animation_lingering_time=0.8,
+                    damage=self.damage_on_collision * 0.7,
                 )
             )
         super().update(time_delta)
@@ -434,8 +440,8 @@ class BossEnemy(Enemy):
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 10.,
             turn_coefficient=0.65,
         )
-        self._spawn_oil_spills_cooldown = max(BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 2. * self._player_level, 5.)
-        self._spawn_oil_spills_timer = Timer(max_time=self._spawn_oil_spills_cooldown)
+        self.spawn_oil_spills_cooldown = max(BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN / self.difficulty_mult - 2. * self._player_level, 5.)
+        self.spawn_oil_spills_timer = Timer(max_time=self.spawn_oil_spills_cooldown)
         DIFF_MULT = {1: 0, 2: 0.8, 3: 1, 4: 3, 5: 8}
         self._regen_rate = (BOSS_DEFAULT_REGEN_RATE * DIFF_MULT[self.difficulty] +
             5. * (self._player_level - 1))
@@ -445,15 +451,20 @@ class BossEnemy(Enemy):
             ProjectileType.EXPLOSIVE: 20 + 30 * DIFF_MULT[self.difficulty] + 30 * (self._player_level - 1),
             ProjectileType.DEF_TRAJECTORY: 10 + 20 * DIFF_MULT[self.difficulty] + 20 * (self._player_level - 1),
         }
+        self.give_blocks_timer = Timer(max_time=BOSS_GIVE_BLOCKS_COOLDOWN)
 
     def update(self, time_delta: float):
         super().update(time_delta)
-        self._spawn_oil_spills_timer.tick(time_delta)
+        self.spawn_oil_spills_timer.tick(time_delta)
         self.health.change(self._regen_rate * time_delta)
-        if not self._spawn_oil_spills_timer.running():
+        if not self.spawn_oil_spills_timer.running():
             self.spawn_oil_spills()
-            self._spawn_oil_spills_cooldown *= 0.9 # with every spawn the cooldown decreases
-            self._spawn_oil_spills_timer.reset(with_max_time=self._spawn_oil_spills_cooldown)
+            self.spawn_oil_spills_cooldown *= 0.9 # with every spawn the cooldown decreases
+            self.spawn_oil_spills_timer.reset(with_max_time=self.spawn_oil_spills_cooldown)
+        self.give_blocks_timer.tick(time_delta)
+        if not self.give_blocks_timer.running():
+            self.give_blocks()
+            self.give_blocks_timer.reset()
 
     def shoot(self):
         projectile_type_to_shoot = random.choices(
@@ -478,8 +489,20 @@ class BossEnemy(Enemy):
         # precision of spawning oil spills increases with level and difficulty
         inprecision = 0.5 - 0.03 * (self._player_level + self.difficulty - 3)
         self.entities_buffer.append(
-            OilSpill(pos=self.pos + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
+            OilSpill(pos=self.get_pos() + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
                 size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
+        )
+    
+    def give_blocks(self):
+        self.entities_buffer.append(
+            AOEEffect(
+                self.get_pos(),
+                BLOCKS_FOR_ENEMIES_EFFECT_SIZE,
+                effect_type=AOEEffectEffectType.ENEMY_BLOCK_ON,
+                affects_enemies=True, affects_player=False,
+                color=LIGHT_ORANGE,
+                animation_lingering_time=0.8,
+            )
         )
 
 
