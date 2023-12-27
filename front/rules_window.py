@@ -7,7 +7,33 @@ from config import (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, LIGHT_ORANGE_HEX)
 LIGHT_MAGENTA, NICER_GREEN, LIGHT_ORANGE = map(Color, (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, LIGHT_ORANGE_HEX))
 
 # TODO !!!
-TEXT = f'''Some <b>rules</b> {paint(("here"), NICER_GREEN)}.
+TEXT = f'''<b>{paint(("Idea"), NICER_GREEN)}</b>
+
+
+<b>{paint(("Mechanics and Controls"), NICER_GREEN)}</b>
+
+
+<b>{paint(("Enemies and Bullets"), NICER_GREEN)}</b>
+
+
+<b>{paint(("Artifacts"), NICER_GREEN)}</b>
+
+
+<b>{paint(("Other Entities"), NICER_GREEN)}</b>
+- energy orbs
+- oil spills
+- mines
+- bonus orbs
+- corpses
+
+
+<b>{paint(("Achievements"), NICER_GREEN)}</b>
+There are many achievements to unlock in this game. The achievements are unlocked during the individual runs and are saved between the runs. You can see the list of all achievements in the main menu by pressing the `{paint("a", LIGHT_MAGENTA)}` key.
+
+
+<b>{paint(("Stats"), NICER_GREEN)}</b>
+
+
 '''
 
 
