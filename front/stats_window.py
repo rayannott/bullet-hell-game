@@ -26,11 +26,12 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         rect.center = surface.get_rect().center
         with shelve.open(str(SAVES_FILE)) as saves:
             text = self.construct_html(saves)
+            len_saves = len(saves)
 
         super().__init__(
             rect=rect,
             manager=manager,
-            window_title='Stats',
+            window_title=f'Stats ({len_saves} save{"s" * (len_saves != 1)})',
             html_message=text
         )
     
