@@ -22,7 +22,7 @@ WHITE = Color('white')
 
 class StatsWindow(pygame_gui.windows.UIMessageWindow):
     def __init__(self, manager: pygame_gui.UIManager, surface: Surface):
-        rect = Rect(40, 40, 1000, 800)
+        rect = Rect(40, 40, 550, 800)
         rect.center = surface.get_rect().center
         with shelve.open(str(SAVES_FILE)) as saves:
             text = self.construct_html(saves)

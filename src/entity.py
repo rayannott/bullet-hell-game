@@ -4,7 +4,6 @@ from typing import Optional
 import pygame
 
 from pygame import Vector2, Color
-from front.utils import ColorGradient
 
 from src.enums import EntityType
 from src.utils import random_unit_vector
