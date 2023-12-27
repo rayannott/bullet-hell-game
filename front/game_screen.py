@@ -7,6 +7,7 @@ from typing import Literal
 import pygame
 from pygame import Color, Vector2
 import pygame_gui
+
 from front.inventory_info import InventoryInfo
 from front.stats_window import StatsWindow
 from src.artifact_chest import ArtifactChest
@@ -31,7 +32,7 @@ from config.settings import Settings
 
 class GameScreen(Screen):
     def __init__(self, surface: pygame.Surface, settings: Settings):
-        super().__init__(surface)
+        super().__init__(surface, framerate=settings.framerate)
         self.settings = settings
         self.setup_game(surface)
         rect = pygame.Rect(0, 0, 400, 80); rect.center = surface.get_rect().center

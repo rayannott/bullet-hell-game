@@ -4,16 +4,23 @@ import pygame
 import pygame_gui
 
 from front.sounds import play_sfx
-from config import QUIT_BUTTON_SIZE, FRAMERATE, BACKGROUND_COLOR_HEX
+from config import QUIT_BUTTON_SIZE, BACKGROUND_COLOR_HEX
+from config.settings import Settings
+
+
+settings = Settings.load()
+FRAMERATE = settings.framerate
 
 
 class Screen(ABC):
     """Abstract class for all screens in the game."""
     def __init__(self,
             surface: pygame.Surface,
-            bg_color: str = BACKGROUND_COLOR_HEX
+            bg_color: str = BACKGROUND_COLOR_HEX,
+            framerate: int = FRAMERATE
         ):
         self.surface = surface
+        self.framerate = framerate
         self.window_size = self.surface.get_rect().size
         self.background = pygame.Surface(self.window_size)
         self.background.fill(pygame.Color(bg_color))
@@ -51,7 +58,7 @@ class Screen(ABC):
     
     def run(self):
         while self.is_running:
-            time_delta = self.clock.tick(FRAMERATE)/1000.0
+            time_delta = self.clock.tick(self.framerate)/1000.0
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:

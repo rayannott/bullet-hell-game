@@ -3,7 +3,7 @@ import pygame_gui
 
 from front.utils import ColorGradient, paint
 from config.settings import Settings
-from config import NICER_RED_HEX, NICER_GREEN_HEX
+from config import NICER_RED_HEX, NICER_GREEN_HEX, FRAMERATE_MIN_MAX
 
 
 NICER_RED = pygame.Color(NICER_RED_HEX)
@@ -13,6 +13,7 @@ NICER_GREEN = pygame.Color(NICER_GREEN_HEX)
 SETTINGS_WINDOW_SIZE = (560, 400)
 SLIDERS_SIZE = (400, 60)
 LABEL_SIZE = SETTINGS_WINDOW_SIZE[0]-SLIDERS_SIZE[0], 60
+
 
 
 class SettingsWindow(pygame_gui.elements.UIWindow):
@@ -51,10 +52,10 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
             container=self,
         )
 
-        rect1 = pygame.Rect(0, 0, *SLIDERS_SIZE)
-        rect1.topleft = self.sfx_volume_slider.relative_rect.bottomleft
+        rect_music_vol = pygame.Rect(0, 0, *SLIDERS_SIZE)
+        rect_music_vol.topleft = self.sfx_volume_slider.relative_rect.bottomleft
         self.music_volume_slider = pygame_gui.elements.UIHorizontalSlider(
-            rect1,
+            rect_music_vol,
             min(200 * self.settings.music_volume, 100),
             (0, 100),
             manager=manager,
@@ -63,7 +64,7 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
         self.music_volume_slider.set_tooltip('Music volume')
 
         rect_label_music = pygame.Rect(0, 0, *LABEL_SIZE)
-        rect_label_music.topleft = rect1.topright
+        rect_label_music.topleft = rect_music_vol.topright
         self.music_volume_label = pygame_gui.elements.UITextBox(
             f'music\n{self.paint_number(self.settings.music_volume, '{:.0%}', self.color_gradient(self.settings.music_volume))}',
             rect_label_music,
@@ -71,10 +72,10 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
             container=self,
         )
 
-        rect2 = pygame.Rect(0, 0, *SLIDERS_SIZE)
-        rect2.topleft = rect1.bottomleft
+        rect_difficulty = pygame.Rect(0, 0, *SLIDERS_SIZE)
+        rect_difficulty.topleft = rect_music_vol.bottomleft
         self.difficulty_slider = pygame_gui.elements.UIHorizontalSlider(
-            rect2,
+            rect_difficulty,
             self.settings.difficulty,
             (1, 5),
             manager=manager,
@@ -83,16 +84,36 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
         self.difficulty_slider.set_tooltip('Difficulty')
 
         rect_label_difficulty = pygame.Rect(0, 0, *LABEL_SIZE)
-        rect_label_difficulty.topleft = rect2.topright
+        rect_label_difficulty.topleft = rect_difficulty.topright
         self.difficulty_label = pygame_gui.elements.UITextBox(
             f'difficulty\n{self.paint_number(self.settings.difficulty, '{}', self.color_gradient(self.settings.difficulty / 5))}',
             rect_label_difficulty,
             manager=manager,
             container=self,
         )
+        # TODO: add framerate slider; add warnings if the actual framerate is lower than the desired framerate
+        rect_framerate = pygame.Rect(0, 0, *SLIDERS_SIZE)
+        rect_framerate.topleft = rect_difficulty.bottomleft
+        self.framerate_slider = pygame_gui.elements.UIHorizontalSlider(
+            rect_framerate,
+            self.settings.framerate,
+            FRAMERATE_MIN_MAX,
+            manager=manager,
+            container=self,
+        )
+        self.framerate_slider.set_tooltip('Framerate')
+
+        rect_label_framerate = pygame.Rect(0, 0, *LABEL_SIZE)
+        rect_label_framerate.topleft = rect_framerate.topright
+        self.framerate_label = pygame_gui.elements.UITextBox(
+            f'framerate\n{self.paint_number(self.settings.framerate, '{}', self.color_gradient(self.settings.framerate / FRAMERATE_MIN_MAX[1]))}',
+            rect_label_framerate,
+            manager=manager,
+            container=self,
+        )
 
         rect_save_btn = pygame.Rect(0, 0, *LABEL_SIZE)
-        rect_save_btn.topleft = rect2.bottomleft
+        rect_save_btn.topleft = rect_framerate.bottomleft
         self.save_btn = pygame_gui.elements.UIButton(
             rect_save_btn,
             'Save',
@@ -108,6 +129,7 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
             container=self,
             tool_tip_text='Reset to default settings',
         )
+
     
     def process_event(self, event):
         super().process_event(event)
@@ -121,6 +143,9 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
             elif event.ui_element == self.difficulty_slider:
                 self.settings.difficulty = int(self.difficulty_slider.get_current_value())
                 self.difficulty_label.set_text(f'difficulty\n{self.paint_number(self.settings.difficulty, '{}', self.color_gradient(self.settings.difficulty / 5))}')
+            elif event.ui_element == self.framerate_slider:
+                self.settings.framerate = int(self.framerate_slider.get_current_value())
+                self.framerate_label.set_text(f'framerate\n{self.paint_number(self.settings.framerate, '{}', self.color_gradient(self.settings.framerate / FRAMERATE_MIN_MAX[1]))}')
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.save_btn:
                 self.settings.dump()
@@ -131,6 +156,8 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
                 self.sfx_volume_slider.set_current_value(min(200 * self.settings.sfx_volume, 100))
                 self.music_volume_slider.set_current_value(min(200 * self.settings.music_volume, 100))
                 self.difficulty_slider.set_current_value(self.settings.difficulty)
+                self.framerate_slider.set_current_value(self.settings.framerate)
                 self.sfx_volume_label.set_text(f'sfx\n{self.paint_number(self.settings.sfx_volume, '{:.0%}', self.color_gradient(self.settings.sfx_volume))}')
                 self.music_volume_label.set_text(f'music\n{self.paint_number(self.settings.music_volume, '{:.0%}', self.color_gradient(self.settings.music_volume))}')
                 self.difficulty_label.set_text(f'difficulty\n{self.paint_number(self.settings.difficulty, '{}', self.color_gradient(self.settings.difficulty / 5))}')
+                self.framerate_label.set_text(f'framerate\n{self.paint_number(self.settings.framerate, '{}', self.color_gradient(self.settings.framerate / FRAMERATE_MIN_MAX[1]))}')

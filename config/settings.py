@@ -9,6 +9,7 @@ class Settings:
     sfx_volume: float = 0.3
     music_volume: float = 0.1
     difficulty: int = 3 # from 1 to 5; 3 is normal
+    framerate: int = 60
 
     def dump(self):
         with open(SETTINGS_FILE, 'w') as f:
