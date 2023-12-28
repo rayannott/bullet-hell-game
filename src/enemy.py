@@ -19,7 +19,7 @@ from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE,
     BOSS_ENEMY_COLOR_HEX, BOSS_GIVE_BLOCKS_COOLDOWN, PROBABILITY_SPAWN_EXTRA_BULLET_ORB, MINE_DEFAULT_DAMAGE, 
-    BLOCKS_FOR_ENEMIES_EFFECT_SIZE, LIGHT_ORANGE_HEX,
+    BLOCKS_FOR_ENEMIES_EFFECT_SIZE, LIGHT_ORANGE_HEX, MINER_DETONATION_RADIUS,
 )
 
 
@@ -380,7 +380,7 @@ class MinerEnemy(Enemy):
         else:
             self.speed = ENEMY_DEFAULT_SPEED * 1.2
             self.color = self.NORMAL_COLOR
-        if (self.homing_target.get_pos() - self.pos).magnitude_squared() < 65.**2:
+        if (self.homing_target.get_pos() - self.pos).magnitude_squared() < MINER_DETONATION_RADIUS**2:
             self.kill()
             for _ in range(random.randint(0, 3) + self._player_level // 4):
                 self.entities_buffer.append(
@@ -392,7 +392,7 @@ class MinerEnemy(Enemy):
             self.entities_buffer.append(
                 AOEEffect(
                     pos=self.pos,
-                    size=80.,
+                    size=MINER_DETONATION_RADIUS * 1.5,
                     effect_type=AOEEffectEffectType.DAMAGE,
                     color=self.color,
                     animation_lingering_time=0.8,
