@@ -264,35 +264,35 @@ class Game:
         
         if not ach.RECEIVE_1000_DAMAGE and st.DAMAGE_TAKEN >= 1000:
             ach.RECEIVE_1000_DAMAGE = True
-            self.feedback_buffer.append(Feedback('[A] receive 1000 damage', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] receive 1000 damage', 3., color=BLUE))
             play_sfx('new_achievement')
         if not ach.KILL_100_ENEMIES and st.ENEMIES_KILLED >= 100:
             ach.KILL_100_ENEMIES = True
-            self.feedback_buffer.append(Feedback('[A] killed 100 enemies', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] killed 100 enemies', 3., color=BLUE))
             play_sfx('new_achievement')
         if not ach.FIRE_200_PROJECTILES and st.PROJECTILES_FIRED >= 200:
             ach.FIRE_200_PROJECTILES = True
-            self.feedback_buffer.append(Feedback('[A] fired 200 projectiles', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] fired 200 projectiles', 3., color=BLUE))
             play_sfx('new_achievement')
         if not ach.BLOCK_100_BULLETS and st.BULLET_SHIELD_BULLETS_BLOCKED >= 100:
             ach.BLOCK_100_BULLETS = True
-            self.feedback_buffer.append(Feedback('[A] blocked 100 bullets', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] blocked 100 bullets', 3., color=BLUE))
             play_sfx('new_achievement')
         if not ach.COLLECT_200_ENERGY_ORBS and st.ENERGY_ORBS_COLLECTED >= 200:
             ach.COLLECT_200_ENERGY_ORBS = True
-            self.feedback_buffer.append(Feedback('[A] collected 200 energy orbs', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] collected 200 energy orbs', 3., color=BLUE))
             play_sfx('new_achievement')
         if not ach.COLLIDE_WITH_15_ENEMIES and st.ENEMIES_COLLIDED_WITH >= 15:
             ach.COLLIDE_WITH_15_ENEMIES = True
-            self.feedback_buffer.append(Feedback('[A] collided with 15 enemies', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] collided with 15 enemies', 3., color=BLUE))
             play_sfx('new_achievement')
         if not ach.DASH_THROUGH_10_ENEMIES and st.DASHED_THROUGH_ENEMIES >= 10:
             ach.DASH_THROUGH_10_ENEMIES = True
-            self.feedback_buffer.append(Feedback('[A] dashed through 10 enemies', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] dashed through 10 enemies', 3., color=BLUE))
             play_sfx('new_achievement')
         if not ach.LIFT_20_BLOCKS and st.BLOCKS_LIFTED >= 20:
             ach.LIFT_20_BLOCKS = True
-            self.feedback_buffer.append(Feedback('[A] lifted 20 blocks', color=BLUE))
+            self.feedback_buffer.append(Feedback('[A] lifted 20 blocks', 3., color=BLUE))
             play_sfx('new_achievement')
 
     def player_try_shooting(self):
