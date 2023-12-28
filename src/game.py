@@ -402,7 +402,7 @@ class Game:
             self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
-            self.player_get_damage(corpse._damage_on_collision, ignore_invul_timer=True)
+            self.player_get_damage(corpse.damage_on_collision, ignore_invul_timer=True)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             corpse.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
