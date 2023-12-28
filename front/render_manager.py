@@ -136,6 +136,13 @@ class RenderManager:
             self.draw_entity_basics(oil_spill)
         for aoe_effect in self.game.aoe_effects():
             self.draw_entity_basics(aoe_effect)
+            pygame.draw.circle(
+                self.surface, 
+                BLACK,
+                aoe_effect.get_pos(), 
+                aoe_effect.get_size(), 
+                width=5
+            )
         for projectile in self.game.projectiles():
             self.draw_projectile(projectile)
         for enemy in self.game.enemies():
