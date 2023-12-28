@@ -16,7 +16,7 @@ from src.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, LIGHT_MAGENTA_HEX, NICER_RED_HEX, GRAY_HEX, 
     WAVE_DURATION, BM, BULLET_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX, BOSS_ENEMY_COLOR_HEX,
-    LIGHT_ORANGE_HEX,
+    LIGHT_ORANGE_HEX, MINER_DETONATION_RADIUS,
 )
 
 
@@ -33,6 +33,7 @@ RED = Color(NICER_RED_HEX)
 GRAY = Color(GRAY_HEX)
 BLACK = Color('black')
 BOSS_ENEMY_COLOR = Color(BOSS_ENEMY_COLOR_HEX)
+ALMOST_BG_COLOR = Color('#080808')
 
 
 def draw_circular_status_bar(
@@ -225,9 +226,17 @@ class RenderManager:
             if (t:=enemy.cooldown.get_time_left()) < 1.:
                 pygame.draw.circle(self.surface, WHITE, enemy.get_pos(), enemy.get_size() * self.soon_shooting_coef_function(1. - t), width=3)
         else:
-            if enemy.enemy_type == EnemyType.MINER and enemy.dash_cooldown_timer.get_time_left() < 1.: # type: ignore
-                color = random.choice([GRAY, WHITE, RED])
-                pygame.draw.circle(self.surface, color, enemy.get_pos(), enemy.get_size(), width=5)
+            if enemy.enemy_type == EnemyType.MINER:
+                pygame.draw.circle(
+                    self.surface, 
+                    ALMOST_BG_COLOR,
+                    enemy.get_pos(), 
+                    MINER_DETONATION_RADIUS, 
+                    width=2
+                )
+                if enemy.dash_cooldown_timer.get_time_left() < 1.: # type: ignore
+                    color = random.choice([GRAY, WHITE, RED])
+                    pygame.draw.circle(self.surface, color, enemy.get_pos(), enemy.get_size(), width=5)
         if self.debug:
             health_text = f'{enemy.get_health()}'
             label = Label(health_text, self.surface, 
