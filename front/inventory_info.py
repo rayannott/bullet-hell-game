@@ -3,10 +3,11 @@ from pygame import Vector2
 
 from front.utils import TextBox
 from src.player import Player
-from config.front import LIGHT_ORANGE_HEX
+from config.front import LIGHT_ORANGE_HEX, NICER_RED_HEX
 
 
 ORANGE = pygame.Color(LIGHT_ORANGE_HEX)
+NICER_RED = pygame.Color(NICER_RED_HEX)
 
 
 class InventoryInfo:
@@ -25,7 +26,8 @@ class InventoryInfo:
             self.N_old = N
         for i, active in enumerate(actives_list):
             self.textbox.labels[i].set_text(f'{active.get_verbose_string()}')
-            self.textbox.labels[i].set_color(ORANGE)
+            color = NICER_RED if active.cooldown_timer.running() or active.cost > self.player.energy.get_value() else ORANGE
+            self.textbox.labels[i].set_color(color)
     
     def update(self, time_delta: float):
         self.rebuild_textbox_if()
