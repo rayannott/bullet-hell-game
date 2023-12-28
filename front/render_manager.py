@@ -153,6 +153,8 @@ class RenderManager:
                 energy_orb.get_size() * 2., color=energy_orb.color, draw_full=True, width=1)
         for corpse in self.game.corpses():
             self.draw_entity_basics(corpse)
+            draw_circular_status_bar(self.surface, corpse.get_pos(),
+                corpse.give_blocks_timer.get_slider(reverse=True), corpse.get_size() * 0.6, BLACK, width=4)
         for mine in self.game.mines():
             self.draw_mine(mine)
         for art_chest in self.game.artifact_chests():
