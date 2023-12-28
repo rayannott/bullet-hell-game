@@ -464,7 +464,7 @@ class Game:
                     self.feedback_buffer.append(Feedback('[A] killed the boss with ricochet!', 3., color=BLUE))
                     play_sfx('new_achievement')
         # enemy-enemy collisions
-        MULT = 0.3
+        MULT = 0.1
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
             if enem1.intersects(enem2):
                 if enem1.intersects(enem2):
