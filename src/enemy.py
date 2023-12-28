@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import math
 import random
 
@@ -19,24 +18,12 @@ from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_
     PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE,
-    BOSS_ENEMY_COLOR_HEX, BOSS_GIVE_BLOCKS_COOLDOWN, PROBABILITY_SPAWN_EXTRA_BULLET_ORB, MINE_DEFAULT_DAMAGE, BLOCKS_FOR_ENEMIES_EFFECT_SIZE,
-    LIGHT_ORANGE_HEX,
+    BOSS_ENEMY_COLOR_HEX, BOSS_GIVE_BLOCKS_COOLDOWN, PROBABILITY_SPAWN_EXTRA_BULLET_ORB, MINE_DEFAULT_DAMAGE, 
+    BLOCKS_FOR_ENEMIES_EFFECT_SIZE, LIGHT_ORANGE_HEX,
 )
 
 
 LIGHT_ORANGE = Color(LIGHT_ORANGE_HEX)
-
-
-@dataclass
-class EnemyStats:
-    size: float
-    color: Color
-    speed: float
-    health: float
-    shoot_cooldown: float
-    reward: float
-    lifetime: float
-    damage_on_collision: float
 
 
 ENEMY_SIZE_MAP = {
@@ -272,7 +259,7 @@ class TankEnemy(Enemy):
             player=player,
             color=Color('#9e401e'),
             speed=ENEMY_DEFAULT_SPEED * 0.7,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 3. + 80. * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH * 3. + 85. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 2.0,
             reward=ENEMY_DEFAULT_REWARD * (2.3 + 0.1 * self._player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
@@ -362,7 +349,7 @@ class MinerEnemy(Enemy):
             player=player,
             color=Color('#103d9e'),
             speed=ENEMY_DEFAULT_SPEED * 1.2,
-            health=ENEMY_DEFAULT_MAX_HEALTH + 20. * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH + 25. * (self._player_level - 1),
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,
             reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * self._player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
@@ -432,7 +419,7 @@ class BossEnemy(Enemy):
             player=player,
             color=Color(BOSS_ENEMY_COLOR_HEX),
             speed=ENEMY_DEFAULT_SPEED + self.difficulty_mult * 20 * (self._player_level - 1),
-            health=ENEMY_DEFAULT_MAX_HEALTH * 5. + 70. * (self._player_level - 1) * self.difficulty_mult**2,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 5.5 + 70. * (self._player_level - 1) * self.difficulty_mult**2,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 0.6,
             reward=ENEMY_DEFAULT_REWARD * (3. + 0.2 * self._player_level),
             damage=ENEMY_DEFAULT_DAMAGE + 5 * self._player_level * self.difficulty_mult**2,
