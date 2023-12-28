@@ -202,13 +202,11 @@ class Game:
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
         type_weights = get_enemy_type_prob_weights(level=self.level, difficulty=self.settings.difficulty)
-        enemy_type = random.choices(
-            list(type_weights.keys()), 
-            list(type_weights.values()), 
-        k=1)[0]
-        if enemy_type == EnemyType.BASIC and self.level > 3:
-            num = random.randint(1, self.level//3 + 1)
-        else: num = 1
+        if self.is_boss_alive():
+            enemy_type = EnemyType.BASIC
+        else:
+            enemy_type = random.choices(list(type_weights.keys()), list(type_weights.values()), k=1)[0]
+        num = random.randint(1, self.level//3 + 1) if (enemy_type == EnemyType.BASIC and self.level > 3) else 1
         for _ in range(num):
             self.spawn_enemy(enemy_type)
 
@@ -222,7 +220,7 @@ class Game:
         if not self.one_wave_timer.running():
             self.one_wave_timer.reset()
             # spawn boss at the end of the wave unless one is already alive
-            if any(ent.enemy_type == EnemyType.BOSS for ent in self.enemies()):
+            if self.is_boss_alive():
                 self.feedback_buffer.append(Feedback('boss is still alive!', 2., color=Color('red')))
                 return
             self.spawn_enemy(EnemyType.BOSS)
@@ -246,6 +244,9 @@ class Game:
         self.spawn_buffered_entities()
         self.process_dash()
         self.register_new_achievements()
+    
+    def is_boss_alive(self) -> bool:
+        return any(ent.enemy_type == EnemyType.BOSS for ent in self.enemies())
     
     def process_dash(self):
         if not self.player.dash_needs_processing: return
