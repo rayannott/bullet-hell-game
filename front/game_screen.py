@@ -90,7 +90,9 @@ class GameScreen(Screen):
                 elif event.key == pygame.K_b:
                     self.game.add_entity(AOEEffect(Vector2(pygame.mouse.get_pos()), 200, 
                         effect_type=AOEEffectEffectType.ENEMY_BLOCK_ON, 
-                        affects_enemies=True, affects_player=False, animation_lingering_time=1.2))
+                        affects_enemies=True, affects_player=False, 
+                        color=Color('orange'),
+                        animation_lingering_time=1.2))
             else:
                 if event.key == pygame.K_p:
                     self.game.toggle_pause()
