@@ -129,16 +129,16 @@ class Game:
         self.level += 1
         self.feedback_buffer.append(Feedback(f'new level: {self.level}', 3.5, color=Color('green'), at_pos='player'))
         self.player.new_level()
-        # the higher the difficulty, the faster the spawn cooldown shrinks
         self.current_spawn_enemy_cooldown *= (1. - 0.02 * self.settings.difficulty)
 
+        for ac in self.artifact_chests(): ac.kill()
         art_chests_to_spawn = self.player.artifacts_generator.get_artifact_chests(self.level)
-        _len = len(art_chests_to_spawn)
-        _positions = [
-            Vector2(500 + (self.screen_rectangle.width - 500) * i / _len, self.screen_rectangle.height//2)
-            for i in range(_len)]
-        for _pos, ac in zip(_positions, art_chests_to_spawn):
-            ac.set_pos(_pos)
+        len_ = len(art_chests_to_spawn)
+        positions = [
+            Vector2(500 + (self.screen_rectangle.width - 500) * i / len_, self.screen_rectangle.height//2)
+            for i in range(len_)]
+        for pos, ac in zip(positions, art_chests_to_spawn):
+            ac.set_pos(pos)
             self.add_entity(ac)
 
         # achievements:
@@ -515,7 +515,6 @@ class Game:
             energy_collected = self.player.energy.change(PLAYER_SHOT_COST * 1.35)
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
             self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
-
             self.feedback_buffer.append(Feedback('block lifted', 2., color=pygame.Color('yellow')))
             return
         damage_dealt_actual = -enemy.get_health().change(-damage)
