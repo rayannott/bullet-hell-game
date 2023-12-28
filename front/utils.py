@@ -38,8 +38,9 @@ class FpsInfo:
         num_ticks = len(self.fps_history)
         avg_fps = sum(self.fps_history) / num_ticks
         self.fps_history.sort()
-        min_fps = sum(self.fps_history[:10]) / 10
-        max_fps = sum(self.fps_history[-10:]) / 10
+        SMOOTH_WINDOW_SIZE = 100
+        min_fps = sum(self.fps_history[:SMOOTH_WINDOW_SIZE]) / SMOOTH_WINDOW_SIZE
+        max_fps = sum(self.fps_history[-SMOOTH_WINDOW_SIZE:]) / SMOOTH_WINDOW_SIZE
         std_fps = (sum((fps - avg_fps) ** 2 for fps in self.fps_history) / len(self.fps_history)) ** 0.5
         return avg_fps, min_fps, max_fps, std_fps, num_ticks
 
