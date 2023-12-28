@@ -296,19 +296,11 @@ class Game:
             play_sfx('new_achievement')
 
     def player_try_shooting(self):
-        try:
-            new_projectile = self.player.shoot()
-        except OnCooldown as e:
-            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
-            play_sfx('warning')
-        except NotEnoughEnergy as e:
-            self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
-            play_sfx('warning')
-        except ShootingDirectionUndefined as e:
+        try: self.player.shoot()
+        except (OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined) as e:
             self.feedback_buffer.append(Feedback(str(e), 2., color=Color('red')))
             play_sfx('warning')
         else:
-            self.add_entity(new_projectile)
             play_sfx('player_shot')
 
     def player_try_ultimate(self, artifact_type: ArtifactType):

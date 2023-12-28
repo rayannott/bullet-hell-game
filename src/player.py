@@ -124,7 +124,7 @@ class Player(Entity):
     def is_on_cooldown(self) -> bool:
         return self.shoot_cooldown_timer.running()
 
-    def shoot(self) -> Projectile:
+    def shoot(self):
         used_extra_bullet = False
         if self.is_on_cooldown():
             if self.extra_bullets > 0:
@@ -144,6 +144,9 @@ class Player(Entity):
         self.shoot_cooldown_timer.reset(with_max_time=self.get_shoot_coolodown())
         self.get_stats().PROJECTILES_FIRED += 1
         direction = self.vel.normalize()
+        self.entities_buffer.append(self.get_projectile(direction))
+
+    def get_projectile(self, direction: Vector2) -> Projectile:
         return Projectile(
             pos=self.pos.copy() + direction * self.get_size() * 1.5,
             vel=direction,
