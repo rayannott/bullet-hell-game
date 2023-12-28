@@ -116,7 +116,8 @@ class Player(Entity):
         )
         # other effects
         if self.effect_flags.OIL_SPILL:
-            oil_spill_damage_dealt = -self.health.change(-OIL_SPILL_DAMAGE_PER_SECOND * time_delta)
+            oil_spill_damage_per_sec = OIL_SPILL_DAMAGE_PER_SECOND * (self.settings.difficulty > 3)
+            oil_spill_damage_dealt = -self.health.change(-oil_spill_damage_per_sec * time_delta)
             self.get_stats().OIL_SPILL_TIME_SPENT += time_delta
             self.get_stats().DAMAGE_TAKEN += oil_spill_damage_dealt
 
