@@ -195,6 +195,7 @@ class GameScreen(Screen):
         if at_pos == 'player': at_pos = self.game.player.get_pos() + random_vector
         elif at_pos == 'cursor': at_pos = Vector2(pygame.mouse.get_pos()) + random_vector
         elif at_pos == 'center': at_pos = self.surface.get_rect().center + random_vector
+        else: at_pos += random_vector
         self.notifications.append(
             Notification(
                 text=text,
@@ -204,7 +205,6 @@ class GameScreen(Screen):
                 color=color
             )
         )
-        # remove dead notifications
         self.notifications = [notification for notification in self.notifications if notification._is_alive]
 
     def post_run(self):
@@ -214,7 +214,7 @@ class GameScreen(Screen):
             # do not write the reason of death to the info
             self.game.reason_of_death = ''
             
-        # do not save games that ran for less than 10 seconds. 
+        # do not save games that ran for less than 15 seconds
         if self.game.time < SAVE_GAMES_LONGER_THAN: return
         with shelve.open(str(SAVES_FILE)) as saves:
             saves[datetime.datetime.now().strftime('%d/%m/%Y, %H:%M:%S')] = self.game.get_info()
