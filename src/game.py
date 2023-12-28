@@ -146,10 +146,10 @@ class Game:
         if self.level == 2:
             if not self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2 and self.energy_orbs_spawned == self.player.get_stats().ENERGY_ORBS_COLLECTED:
                 self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2 = True
-                self.feedback_buffer.append(Feedback('[A] collected all energy orbs by level 2', 3., color=BLUE))
+                self.feedback_buffer.append(Feedback('[A!] collected all energy orbs by level 2', 3., color=BLUE))
         elif self.level == 5:
             simultaneous_achievements_cnt = 0
-            if not self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES and not len(self.e_corpses):
+            if not self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES and not self.player.get_stats().CORPSES_LET_SPAWN:
                 self.player.get_achievements().REACH_LEVEL_5_WITH_NO_CORPSES = True; simultaneous_achievements_cnt += 1
                 self.feedback_buffer.append(Feedback('[A] reach level 5 without corpses', 3., color=BLUE))
             if not self.player.get_achievements().REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE and not self.player.get_stats().DAMAGE_TAKEN:
@@ -164,12 +164,12 @@ class Game:
             
             if not self.player.get_achievements().GET_ALL_LEVEL_5_ACHIEVEMENTS_SIMULTANEOUSLY and simultaneous_achievements_cnt == 4:
                 self.player.get_achievements().GET_ALL_LEVEL_5_ACHIEVEMENTS_SIMULTANEOUSLY = True
-                self.feedback_buffer.append(Feedback('[A!] get all level 5 achievements simultaneously', 3., color=BLUE))
+                self.feedback_buffer.append(Feedback('[A!!] get all level 5 achievements simultaneously', 3., color=BLUE))
 
         elif self.level == 10:
             if not self.player.get_achievements().REACH_LEVEL_10:
                 self.player.get_achievements().REACH_LEVEL_10 = True
-                self.feedback_buffer.append(Feedback('[A] you\'ve reached the last level!', 3., color=BLUE))
+                self.feedback_buffer.append(Feedback('[A!] you\'ve reached the last level!', 3., color=BLUE))
         return True
 
     def kill_projectiles(self):
