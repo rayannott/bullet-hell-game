@@ -618,7 +618,16 @@ class Game:
         return self._last_fps
 
     def get_info(self) -> dict:
-        score = 0 # TODO: add calculation
+        score = (
+            self.time +
+            self.player.get_stats().ENEMIES_KILLED * 1.3 +
+            self.player.get_stats().ACCURATE_SHOTS * 2. +
+            self.player.get_stats().BONUS_ORBS_COLLECTED * 1.2 +
+            len(self.player.get_achievements().achievements_pretty()) * 20. +
+            len(list(self.player.artifacts_handler.iterate_active())) * 15. +
+            len(self.player.artifacts_handler.inactive_artifacts) * 8.
+        ) * (1. + 0.1 * (self.settings.difficulty - 3))
+
         return {
             'level': self.level,
             'difficulty': self.settings.difficulty,
@@ -627,5 +636,5 @@ class Game:
             'achievements': self.player.get_achievements(),
             'artifacts': self.player.artifacts_handler, 
             'reason_of_death': self.reason_of_death,
-            'score': score,
+            'score': int(score),
         }

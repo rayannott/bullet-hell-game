@@ -7,7 +7,7 @@ import pygame_gui
 from front.utils import paint
 from config import (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, NICER_YELLOW_HEX,
     LIGHT_ORANGE_HEX, NICER_RED_HEX, NICER_BLUE_HEX, LIGHT_BLUE_HEX,
-    SAVES_FILE
+    SAVES_FILE, MAX_NUM_OF_SAVES,
 )
 from src.artifacts import ArtifactsHandler, StatsBoost
 
@@ -26,10 +26,14 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         rect = Rect(40, 40, 550, 800)
         rect.center = surface.get_rect().center
         with shelve.open(str(SAVES_FILE)) as saves:
-            text = self.construct_html(saves)
             len_saves = len(saves)
-        # TODO: add scores to the saves; add button to leave only 20 best saves
-        # also add button to toggle sort by: score or date
+            if len_saves > MAX_NUM_OF_SAVES:
+                print(f'[Too many saves] Found {len_saves} saves, deleting {len_saves - MAX_NUM_OF_SAVES} of them:')
+                for datetime_str in sorted(saves.keys(), reverse=True, key=lambda x: saves[x].get('score', 0))[MAX_NUM_OF_SAVES:]:
+                    del saves[datetime_str]
+                    print(f'- deleted save {datetime_str}')
+                len_saves = len(saves)
+            text = self.construct_html(saves)
         super().__init__(
             rect=rect,
             manager=manager,

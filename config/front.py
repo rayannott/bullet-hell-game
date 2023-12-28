@@ -1,5 +1,7 @@
 FRAMERATE_MIN_MAX = (30, 220)
 
+MAX_NUM_OF_SAVES = 15
+
 SM = 5 # small margin
 BM = 10 # big margin
 
