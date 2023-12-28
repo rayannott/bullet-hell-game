@@ -15,10 +15,11 @@ class StatsPanel:
             surface: pygame.Surface,
             manager: pygame_gui.UIManager,
             game: Game,
+            visible: bool
         ):
         self.surface = surface
         self.game = game
-        self.show_stats_panel = True
+        self.show_stats_panel = visible
         self.panel = pygame_gui.elements.UIPanel(
             relative_rect=pygame.Rect(0, 0, *GAME_STATS_PANEL_SIZE),
             manager=manager
@@ -40,6 +41,7 @@ class StatsPanel:
             position=Vector2(BM, SM + self.energy_bar.relative_rect.bottomleft[1] + 2 * BM),
             surface=surface
         )
+        self.set_visibility(self.show_stats_panel)
     
     def __del__(self):
         self.panel.kill()
@@ -63,9 +65,13 @@ class StatsPanel:
 
             ])
         self.stats_textbox.update()
-
-    def toggle_visibility(self):
-        self.show_stats_panel = not self.show_stats_panel
+    
+    def set_visibility(self, set_to):
         self.panel.visible = self.show_stats_panel
         self.health_bar.visible = self.show_stats_panel
         self.energy_bar.visible = self.show_stats_panel
+
+    def toggle_visibility(self):
+        self.show_stats_panel = not self.show_stats_panel
+        self.set_visibility(self.show_stats_panel)
+    

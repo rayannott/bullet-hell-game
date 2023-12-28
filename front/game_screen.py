@@ -35,6 +35,7 @@ class GameScreen(Screen):
     def __init__(self, surface: pygame.Surface, settings: Settings):
         super().__init__(surface, framerate=settings.framerate)
         self.settings = settings
+        self.debug = False
         self.setup_game(surface)
         rect = pygame.Rect(0, 0, 400, 80); rect.center = surface.get_rect().center
         self.paused_label = Label(
@@ -44,13 +45,12 @@ class GameScreen(Screen):
             font=HUGE_FONT
         )
     
-    def setup_game(self, surface: pygame.Surface):
+    def setup_game(self, surface: pygame.Surface, stats_panel_visibility: bool = True):
         play_sfx('start_game')
         self.screen_rectangle = self.surface.get_rect()
         self.game = Game(self.screen_rectangle, self.settings)
-        self.stats_panel = StatsPanel(surface, self.manager, self.game)
+        self.stats_panel = StatsPanel(surface, self.manager, self.game, stats_panel_visibility)
         self.inventory_info = InventoryInfo(surface, self.game.player)
-        self.debug = False
         self.render_manager = RenderManager(surface=surface, debug=self.debug, game=self.game)
 
         self.game_is_over_window_shown = False
@@ -103,7 +103,7 @@ class GameScreen(Screen):
                     self.stats_panel.toggle_visibility()
                 elif event.key == pygame.K_F5:
                     self.post_run()
-                    self.setup_game(self.surface)
+                    self.setup_game(self.surface, self.stats_panel.show_stats_panel)
         super().process_ui_event(event)
 
     def process_event(self, event: pygame.event.Event):
