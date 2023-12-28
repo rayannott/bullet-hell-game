@@ -236,11 +236,11 @@ class Game:
         if not self.is_running() or self.paused: return
         self.time += time_delta
         self.time_frozen = self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP) and self.player.artifacts_handler.get_time_stop().is_on()
+        self.spawn_buffered_entities()
         for entity in self.all_entities_iter(with_enemies=not self.time_frozen, with_projectiles=not self.time_frozen):
             entity.update(time_delta)
         self.process_timers(time_delta)
         self.process_collisions()
-        self.spawn_buffered_entities()
         self.process_dash()
         self.register_new_achievements()
     
