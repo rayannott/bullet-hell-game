@@ -72,6 +72,7 @@ class Achievements:
     COLLIDE_WITH_15_ENEMIES: bool = False
     DASH_THROUGH_10_ENEMIES: bool = False
     LIFT_20_BLOCKS: bool = False
+    SPEND_ONE_MINUTE_IN_OIL_SPILLS: bool = False # TODO: add logic
     KILL_BOSS_WITH_RICOCHET: bool = False
     KILL_BOSS_WITHOUT_BULLETS: bool = False
     KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False
