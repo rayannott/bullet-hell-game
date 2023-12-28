@@ -450,7 +450,8 @@ class BossEnemy(Enemy):
             self.spawn_oil_spills_timer.reset(with_max_time=self.spawn_oil_spills_cooldown)
         self.give_blocks_timer.tick(time_delta)
         if not self.give_blocks_timer.running():
-            self.give_blocks()
+            if self._player_level >= (5 if self.difficulty < 4 else 3):
+                self.give_blocks()
             self.give_blocks_timer.reset()
 
     def shoot(self):
