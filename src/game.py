@@ -493,6 +493,7 @@ class Game:
         for enemy in self.enemies(include_dead=True):
             if enemy.enemy_type != EnemyType.BOSS: continue
             if enemy.is_alive(): continue
+            if not self.player.is_alive(): continue
             if not self.player.get_achievements().KILL_BOSS_WITHOUT_BULLETS and enemy.get_num_bullets_caught() == 0:
                 self.player.get_achievements().KILL_BOSS_WITHOUT_BULLETS = True
                 self.feedback_buffer.append(Feedback('[A] killed the boss without bullets', 3., color=BLUE))
@@ -545,6 +546,7 @@ class Game:
         damage_taken_actual = -self.player.health.change(-damage)
         self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
         self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=pygame.Color('red'), at_pos='player'))
+        if not self.player.health.is_alive(): self.player.kill()
         play_sfx('damage_taken')
         return damage_taken_actual
 
