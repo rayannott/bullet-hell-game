@@ -112,7 +112,7 @@ class MenuScreen(Screen):
                     ach_global: Achievements = pickle.load(f)
                 html_text = '\n'.join('-+'[v] + ' ' + paint(k, (NICER_GREEN if v else WHITE)) for k, v in ach_global.items_pretty()) 
                 self.achievements_window = pygame_gui.windows.UIConfirmationDialog(
-                    rect=pygame.Rect(50, 50, 450, 600),
+                    rect=pygame.Rect(50, 50, 450, 800),
                     action_long_desc=html_text,
                     manager=self.manager,
                     window_title='All possible achievements',
