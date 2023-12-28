@@ -84,7 +84,7 @@ class ExplosiveProjectile(Projectile):
     def on_natural_death(self):
         N = self.num_subprojectiles
         for i in range(N):
-            direction = Vector2(1., 0.).rotate(i * 360. / N + random.uniform(-20, -20))
+            direction = Vector2(1., 0.).rotate(i * 360. / N + random.uniform(-10, 10))
             self.entities_buffer.append(
                 Projectile(
                     pos=self.pos.copy() + direction * (self.size * 1.5),
