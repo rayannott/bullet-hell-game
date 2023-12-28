@@ -72,6 +72,7 @@ class Achievements:
     COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2: bool = False
     COLLIDE_WITH_15_ENEMIES: bool = False
     DASH_THROUGH_10_ENEMIES: bool = False
+    LIFT_20_BLOCKS: bool = False
     KILL_BOSS_WITH_RICOCHET: bool = False
     KILL_BOSS_WITHOUT_BULLETS: bool = False
     KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False

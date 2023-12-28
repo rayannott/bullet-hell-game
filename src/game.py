@@ -290,6 +290,10 @@ class Game:
             ach.DASH_THROUGH_10_ENEMIES = True
             self.feedback_buffer.append(Feedback('[A] dashed through 10 enemies', color=BLUE))
             play_sfx('new_achievement')
+        if not ach.LIFT_20_BLOCKS and st.BLOCKS_LIFTED >= 20:
+            ach.LIFT_20_BLOCKS = True
+            self.feedback_buffer.append(Feedback('[A] lifted 20 blocks', color=BLUE))
+            play_sfx('new_achievement')
 
     def player_try_shooting(self):
         try:
@@ -508,13 +512,10 @@ class Game:
             enemy.has_block = False
             self.player.get_stats().BLOCKS_LIFTED += 1
             # lift the block and either give energy or extra bullets
-            if random.random() < 0.5:
-                energy_collected = self.player.energy.change(PLAYER_SHOT_COST * 1.2)
-                self.player.get_stats().ENERGY_COLLECTED += energy_collected
-                self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
-            else:
-                self.player.add_extra_bullets(1)
-                self.feedback_buffer.append(Feedback(f'+1eb', color=Color('white')))
+            energy_collected = self.player.energy.change(PLAYER_SHOT_COST * 1.35)
+            self.player.get_stats().ENERGY_COLLECTED += energy_collected
+            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
+
             self.feedback_buffer.append(Feedback('block lifted', 2., color=pygame.Color('yellow')))
             return
         damage_dealt_actual = -enemy.get_health().change(-damage)
