@@ -68,7 +68,7 @@ class Achievements:
     KILL_100_ENEMIES: bool = False
     BLOCK_100_BULLETS: bool = False
     COLLECT_200_ENERGY_ORBS: bool = False
-    COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2: bool = False
+    COLLECT_ALL_ENERGY_ORBS_BEFORE_LEVEL_2: bool = False
     COLLIDE_WITH_15_ENEMIES: bool = False
     DASH_THROUGH_10_ENEMIES: bool = False
     LIFT_20_BLOCKS: bool = False

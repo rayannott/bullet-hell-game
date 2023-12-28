@@ -144,8 +144,8 @@ class Game:
 
         # achievements:
         if self.level == 2:
-            if not self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2 and self.energy_orbs_spawned == self.player.get_stats().ENERGY_ORBS_COLLECTED:
-                self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BY_LEVEL_2 = True
+            if not self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BEFORE_LEVEL_2 and self.energy_orbs_spawned == self.player.get_stats().ENERGY_ORBS_COLLECTED:
+                self.player.get_achievements().COLLECT_ALL_ENERGY_ORBS_BEFORE_LEVEL_2 = True
                 self.feedback_buffer.append(Feedback('[A!] collected all energy orbs by level 2', 3., color=BLUE))
         elif self.level == 5:
             simultaneous_achievements_cnt = 0
