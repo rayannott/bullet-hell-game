@@ -1,5 +1,4 @@
 import shelve
-from copy import copy
 
 from pygame import Color, Surface, Rect
 import pygame_gui

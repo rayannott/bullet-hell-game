@@ -6,7 +6,6 @@ import itertools
 import pygame
 from pygame import Vector2, Color
 
-from config.back import ARTIFACT_CHEST_SIZE
 from config.settings import Settings
 from src.artifacts import Artifact
 from src.entity import Entity, DummyEntity
