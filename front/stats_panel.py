@@ -11,7 +11,11 @@ font = freetype.Font(FONT_FILE, 20)
 
 
 class StatsPanel:
-    def __init__(self, surface: pygame.Surface, manager: pygame_gui.UIManager, game: Game):
+    def __init__(self, 
+            surface: pygame.Surface,
+            manager: pygame_gui.UIManager,
+            game: Game,
+        ):
         self.surface = surface
         self.game = game
         self.show_stats_panel = True
@@ -36,6 +40,11 @@ class StatsPanel:
             position=Vector2(BM, SM + self.energy_bar.relative_rect.bottomleft[1] + 2 * BM),
             surface=surface
         )
+    
+    def __del__(self):
+        self.panel.kill()
+        self.health_bar.kill()
+        self.energy_bar.kill()
 
     def update(self, time_delta: float):
         if not self.show_stats_panel: return
