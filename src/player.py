@@ -177,6 +177,11 @@ class Player(Entity):
             self.get_stats().TIME_STOPS_ACTIVATED += 1
             play_sfx('time_stop')
             return
+        if artifact_type == ArtifactType.SHRAPNEL:
+            self.artifacts_handler.get_shrapnel().shoot()
+            # self.get_stats().SHRAPNELS_ACTIVATED += 1
+            # play_sfx('shrapnel')
+            return
         raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
     
     def add_artifact(self, artifact: Artifact):

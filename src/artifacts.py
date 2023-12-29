@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import random
 
 from pygame import Vector2
+from config.back import PROJECTILE_DEFAULT_SPEED
 
 from src.entity import Entity
 from src.mine import Mine
-from src.enums import ArtifactType
+from src.projectile import Projectile
+from src.enums import ArtifactType, ProjectileType
 from src.exceptions import NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
 from src.utils import Timer, random_unit_vector
 from config import (BULLET_SHIELD_SIZE, BULLET_SHIELD_COOLDOWN,
@@ -28,20 +31,23 @@ class StatsBoost:
     mine_cooldown: float = 0.
     add_max_extra_bullets: int = 0
     time_stop_duration: float = 0.
+    shrapnel_extra_shards: int = 0
 
     def __iter__(self):
         yield from (self.health, self.regen, self.damage,
             self.speed, self.cooldown, self.size, self.bullet_shield_size, 
-            self.bullet_shield_duration, self.mine_cooldown, self.add_max_extra_bullets, self.time_stop_duration)
+            self.bullet_shield_duration, self.mine_cooldown, 
+            self.add_max_extra_bullets, self.time_stop_duration, self.shrapnel_extra_shards)
 
     def __str__(self) -> str:
         formats = ('+{:.0f}hp', '+{:.1f}reg', '+{:.0f}dmg', 
             '+{:.0f}spd', '-{:.2f}cd', '-{:.0f}size', 
-            '+{:.0f}shld size', '+{:.1f}shld dur', '-{:.1f}mine cd', '+{}max eb', '+{:.1f}ts dur')
+            '+{:.0f}shld size', '+{:.1f}shld dur', 
+            '-{:.1f}mine cd', '+{}max eb', '+{:.1f}ts dur', '+{}shrapnel')
         res = '|'.join(
             format_.format(val) for format_, val in zip(formats, self, strict=True) if val
         )
-        return res if res else 'no-boosts'
+        return res if res else 'no boosts'
 
     def __add__(self, other: 'StatsBoost'):
         return StatsBoost(
@@ -56,6 +62,7 @@ class StatsBoost:
             mine_cooldown=self.mine_cooldown + other.mine_cooldown,
             add_max_extra_bullets=self.add_max_extra_bullets + other.add_max_extra_bullets,
             time_stop_duration=self.time_stop_duration + other.time_stop_duration,
+            shrapnel_extra_shards=self.shrapnel_extra_shards + other.shrapnel_extra_shards,
         )
 
 
@@ -190,7 +197,7 @@ class Dash(Artifact):
             cost=DASH_COST,
         )
         self.dash_path_history: list[tuple[Vector2, Vector2]] = []
-        self.path_animation_lingering_timer = Timer(max_time=0.6)
+        self.path_animation_lingering_timer = Timer(max_time=0.8)
         self.path_animation_lingering_timer.turn_off()
 
     def update(self, time_delta: float):
@@ -277,6 +284,52 @@ class TimeStop(Artifact):
         return self.duration_timer.running()
 
 
+class Shrapnel(Artifact):
+    def __init__(self, player):
+        super().__init__(
+            artifact_type=ArtifactType.SHRAPNEL,
+            player=player,
+            cooldown=15.,
+            cost=340.,
+        )
+    
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.num_shards = 3 + self.total_stats_boost.shrapnel_extra_shards
+
+    def shoot(self):
+        if self.player.energy.get_value() < self.cost:
+            raise NotEnoughEnergy('not enough energy for shrapnel')
+        if self.cooldown_timer.running():
+            raise OnCooldown(f'shrapnel on cooldown: {self.cooldown_timer.get_time_left():.1f}')
+        self.player.energy.change(-self.cost)
+        self.cooldown_timer.reset()
+        direction: Vector2 = (self.player.gravity_point - self.player.get_pos()).normalize()
+        for _ in range(self.num_shards + self.player.extra_bullets):
+            direction_ = direction.rotate(random.uniform(-8, 8))
+            self.player.entities_buffer.append(
+                Projectile(
+                    pos=self.player.get_pos() + direction_ * self.player.get_size() * 1.5,
+                    vel=direction_,
+                    projectile_type=ProjectileType.PLAYER_BULLET,
+                    damage=self.player.get_damage() / self.num_shards * 3.,
+                    lifetime=1.5,
+                    speed=self.player.speed + PROJECTILE_DEFAULT_SPEED,
+                )
+            )
+        self.player.extra_bullets = 0
+
+    @staticmethod
+    def get_artifact_type():
+        return ArtifactType.SHRAPNEL
+    
+    def get_short_string(self) -> str:
+        return 'Shrapnel'
+
+    def get_verbose_string(self) -> str:
+        return f'Shrapnel(shards={self.num_shards})'
+
+
 class InactiveArtifact(Artifact):
     def __init__(self, stats_boost: StatsBoost):
         super().__init__(artifact_type=ArtifactType.STATS, player=None, cooldown=0, cost=0)
@@ -307,6 +360,7 @@ class ArtifactsHandler:
         self.mine_spawn: MineSpawn | None = None
         self.dash: Dash | None = None
         self.time_stop: TimeStop | None = None
+        self.shrapnel: Shrapnel | None = None
 
     def get_total_stats_boost(self) -> StatsBoost:
         return sum((artifact.stats_boost for artifact in self.inactive_artifacts), StatsBoost())
@@ -324,6 +378,8 @@ class ArtifactsHandler:
             yield self.dash
         if self.time_stop is not None:
             yield self.time_stop
+        if self.shrapnel is not None:
+            yield self.shrapnel
     
     def add_artifact(self, artifact: Artifact):
         if isinstance(artifact, InactiveArtifact):
@@ -336,6 +392,8 @@ class ArtifactsHandler:
             self.dash = artifact
         elif isinstance(artifact, TimeStop):
             self.time_stop = artifact
+        elif isinstance(artifact, Shrapnel):
+            self.shrapnel = artifact
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact.artifact_type}')
     
@@ -348,6 +406,8 @@ class ArtifactsHandler:
             return self.dash is not None
         elif artifact_type == ArtifactType.TIME_STOP:
             return self.time_stop is not None
+        elif artifact_type == ArtifactType.SHRAPNEL:
+            return self.shrapnel is not None
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact_type}')
     
@@ -367,6 +427,10 @@ class ArtifactsHandler:
         if self.time_stop is None:
             raise ArtifactMissing('[?] time stop is missing')
         return self.time_stop
+    def get_shrapnel(self) -> Shrapnel:
+        if self.shrapnel is None:
+            raise ArtifactMissing('[?] shrapnel is missing')
+        return self.shrapnel
     
     def __repr__(self) -> str:
         active_artivacts = ' | '.join(map(str, self.iterate_active()))

@@ -8,7 +8,7 @@ from pygame import Vector2, Color
 from src.entity import Entity
 from src.utils import Timer
 from src.enums import EntityType, ArtifactType
-from src.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop
+from src.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop, Shrapnel
 from config import ARTIFACT_CHEST_SIZE, ARTIFACT_CHEST_LIFETIME
 
 
@@ -72,6 +72,7 @@ class ArtifactChestGenerator:
             StatsBoost(size=1., add_max_extra_bullets=2),
             StatsBoost(add_max_extra_bullets=5),
             StatsBoost(damage=30.),
+            StatsBoost(shrapnel_extra_shards=5),
             StatsBoost(mine_cooldown=2.),
             StatsBoost(damage=20., cooldown=0.07),
             StatsBoost(time_stop_duration=2.5),
@@ -98,6 +99,9 @@ class ArtifactChestGenerator:
         if sb.time_stop_duration: 
             if not self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP):
                 return False
+        if sb.shrapnel_extra_shards:
+            if not self.player.artifacts_handler.is_present(ArtifactType.SHRAPNEL):
+                return False
         return True
     
     def get_random_absent_stats_boost_artifact_chest(self, at: Vector2) -> ArtifactChest | None:
@@ -115,6 +119,8 @@ class ArtifactChestGenerator:
             return MineSpawn(self.player)
         elif artifact_type == ArtifactType.TIME_STOP:
             return TimeStop(self.player)
+        elif artifact_type == ArtifactType.SHRAPNEL:
+            return Shrapnel(self.player)
         else:
             raise NotImplementedError(f'Unknown artifact type: {artifact_type}')
 

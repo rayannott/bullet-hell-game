@@ -46,3 +46,4 @@ class ArtifactType(Enum):
     MINE_SPAWN = auto()
     DASH = auto()
     TIME_STOP = auto()
+    SHRAPNEL = auto()

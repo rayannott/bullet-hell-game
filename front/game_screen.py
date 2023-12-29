@@ -12,7 +12,7 @@ from front.inventory_info import InventoryInfo
 from front.stats_window import StatsWindow
 from src.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.artifact_chest import ArtifactChest
-from src.artifacts import BulletShield, Dash, MineSpawn, TimeStop
+from src.artifacts import BulletShield, Dash, MineSpawn, TimeStop, Shrapnel
 from src.enums import ArtifactType, EnemyType
 from src.oil_spill import OilSpill
 from src.player_utils import Achievements
@@ -77,6 +77,8 @@ class GameScreen(Screen):
                     print('-'*10)
                 elif event.key == pygame.K_t:
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), TimeStop(self.game.player)))
+                elif event.key == pygame.K_x:
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Shrapnel(self.game.player)))
                 elif event.key == pygame.K_l:
                     self.game.new_level()
                 elif event.key == pygame.K_s:
@@ -133,6 +135,8 @@ class GameScreen(Screen):
                 self.game.player_try_ultimate(artifact_type=ArtifactType.DASH)
             elif event.key == pygame.K_t:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.TIME_STOP)
+            elif event.key == pygame.K_x:
+                self.game.player_try_ultimate(artifact_type=ArtifactType.SHRAPNEL)
     
     def update(self, time_delta: float):
         self.game.update(time_delta)
