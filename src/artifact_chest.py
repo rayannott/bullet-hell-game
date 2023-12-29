@@ -63,19 +63,19 @@ class ArtifactChestGenerator:
 
         # and these too
         _inactive_artifacts = [
-            StatsBoost(speed=400.),
-            StatsBoost(regen=1.5),
+            StatsBoost(speed=500.),
+            StatsBoost(regen=1.2),
             StatsBoost(damage=15.),
             StatsBoost(regen=0.8, speed=200.),
-            StatsBoost(size=1., add_max_extra_bullets=2),
-            StatsBoost(damage=30.),
-            StatsBoost(add_max_extra_bullets=5),
             StatsBoost(bullet_shield_duration=2.),
+            StatsBoost(size=1., add_max_extra_bullets=2),
+            StatsBoost(add_max_extra_bullets=5),
+            StatsBoost(damage=30.),
             StatsBoost(mine_cooldown=2.),
-            StatsBoost(time_stop_duration=2.),
-            StatsBoost(damage=25., cooldown=0.07),
-            StatsBoost(bullet_shield_size=20.),
-            StatsBoost(regen=2.),
+            StatsBoost(damage=20., cooldown=0.07),
+            StatsBoost(time_stop_duration=2.5),
+            StatsBoost(bullet_shield_size=25.),
+            StatsBoost(size=1., regen=1.),
             StatsBoost(cooldown=0.15),
         ]
         self.inactive_artifacts_stats_boosts = dict(zip(_inactive_artifacts, repeat(False)))
