@@ -292,6 +292,7 @@ class Shrapnel(Artifact):
             cooldown=15.,
             cost=340.,
         )
+        self.num_shards = 3 + self.total_stats_boost.shrapnel_extra_shards
     
     def update(self, time_delta: float):
         super().update(time_delta)
