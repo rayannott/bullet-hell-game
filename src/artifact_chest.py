@@ -1,3 +1,4 @@
+import itertools
 import math
 import random
 from itertools import repeat
@@ -86,6 +87,19 @@ class ArtifactChestGenerator:
             6: 'SSS', 7: 'SSA', 8: 'SSA', 9: 'SSA', 10: 'SSS',
         }
     
+    def should_include_stats_boost(self, sb: StatsBoost) -> bool:
+        if sb.bullet_shield_duration or sb.bullet_shield_size:
+            if not self.player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD):
+                return False
+        # no dash-related stats boosts yet
+        if sb.mine_cooldown:
+            if not self.player.artifacts_handler.is_present(ArtifactType.MINE_SPAWN):
+                return False
+        if sb.time_stop_duration: 
+            if not self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP):
+                return False
+        return True
+    
     def get_random_absent_stats_boost_artifact_chest(self, at: Vector2) -> ArtifactChest | None:
         absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v]
         if not absent_stats: return None
@@ -122,25 +136,32 @@ class ArtifactChestGenerator:
         Returns a list of ArtifactChests with the artifacts that player does not yet have.
         """
         to_spawn: list[ArtifactChest] = []
-        absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v]
+        # absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v and self.should_include_stats_boost(k)]
         absent_active = [k for k, v in self.active_artifacts.items() if not v]
         random.shuffle(absent_active)
         this_level_schedule = self.ARTIFACT_SCHEDULE[player_level]
         num_stats_to_spawn, num_active_to_spawn = this_level_schedule.count('S'), this_level_schedule.count('A')
         num_active_to_spawn = min(num_active_to_spawn, len(absent_active))
-        num_stats_to_spawn = min(num_stats_to_spawn, len(absent_stats))
+        # num_stats_to_spawn = min(num_stats_to_spawn, len(absent_stats))
         if num_active_to_spawn + num_stats_to_spawn == 0: return []
 
         active_to_spawn = absent_active[:num_active_to_spawn] # active artifact types
         to_spawn.extend([ArtifactChest(Vector2(), self.get_artifact(_type)) for _type in active_to_spawn])
     
-        skip = 2 * player_level // 3 - 1
-        if num_stats_to_spawn <= 4:
-            stats_to_spawn = absent_stats[skip:skip+num_stats_to_spawn]
+        skip = player_level - 2
+        to_sample_from = []
+        for k, v in itertools.islice(self.inactive_artifacts_stats_boosts.items(), skip, skip+5):
+            if not v and self.should_include_stats_boost(k):
+                to_sample_from.append(k)
+        if len(to_sample_from) <= num_stats_to_spawn:
+            stats_to_spawn = to_sample_from[:]
         else:
-            stats_to_spawn = random.sample(absent_stats[skip:skip+4], num_stats_to_spawn)
+            stats_to_spawn = random.sample(to_sample_from, num_stats_to_spawn)
+        print('1 to sample from', '  '.join(map(str, to_sample_from)))
+        print('2 num_stats_to_spawn', num_stats_to_spawn)
+        print('3 skip', skip)
+        print('4 spawning', '  '.join(map(str, stats_to_spawn)))
         to_spawn.extend(
             [ArtifactChest(Vector2(), InactiveArtifact(stats_boost)) for stats_boost in stats_to_spawn]
         )
-
         return to_spawn
