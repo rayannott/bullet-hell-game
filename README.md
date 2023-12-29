@@ -5,4 +5,4 @@ This is a bullet hell game made in python using pygame. It is a work in progress
 Also, here are some stats on this repo:
 | Stat | Number of files | Total lines | Code lines | Empty lines | Comment lines | Code % | Empty % | Comment % |
 |-|--|-|-|-|-|-|-|-|
-| Value | 37 | 4372 | 3691 | 623 | 58 | 84.42% | 14.25% | 1.33% |
+| New Value | 39 | 4521 | 3824 | 636 | 61 | 84.58% | 14.07% | 1.35% |
