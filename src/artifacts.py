@@ -289,7 +289,7 @@ class Shrapnel(Artifact):
         super().__init__(
             artifact_type=ArtifactType.SHRAPNEL,
             player=player,
-            cooldown=15.,
+            cooldown=12.,
             cost=340.,
         )
         self.num_shards = 3 + self.total_stats_boost.shrapnel_extra_shards
@@ -318,6 +318,7 @@ class Shrapnel(Artifact):
                     speed=self.player.speed + PROJECTILE_DEFAULT_SPEED,
                 )
             )
+        self.player.get_stats().PROJECTILES_FIRED += self.num_shards + self.player.extra_bullets
         self.player.extra_bullets = 0
 
     @staticmethod
