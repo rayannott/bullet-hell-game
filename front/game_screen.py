@@ -49,6 +49,7 @@ class GameScreen(Screen):
         play_sfx('start_game')
         self.screen_rectangle = self.surface.get_rect()
         self.game = Game(self.screen_rectangle, self.settings)
+        self.game.animation_handler.set_surface(surface)
         self.stats_panel = StatsPanel(surface, self.manager, self.game, stats_panel_visibility)
         self.inventory_info = InventoryInfo(surface, self.game.player)
         self.render_manager = RenderManager(surface=surface, debug=self.debug, game=self.game)

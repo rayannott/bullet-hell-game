@@ -251,6 +251,7 @@ class Game:
         self.process_collisions()
         self.process_dash()
         self.register_new_achievements()
+        self.animation_handler.update(time_delta)
     
     def is_boss_alive(self) -> bool:
         return any(ent.enemy_type == EnemyType.BOSS for ent in self.enemies())
@@ -455,6 +456,7 @@ class Game:
                 self.deal_damage_to_enemy(enemy, bullet.damage)
                 enemy.caught_bullet()
                 play_sfx('accurate_shot')
+                self.animation_handler.add_animation(enemy.get_pos(), AnimationType.ACCURATE_SHOT, bullet_vel=bullet.get_vel())
                 if (not self.player.get_achievements().KILL_BOSS_WITH_RICOCHET and
                     is_ricochet and 
                     not enemy.is_alive() and
@@ -556,6 +558,7 @@ class Game:
             self.energy_orbs_spawned += 1
             self.e_energy_orbs.append(entity) # type: ignore
         elif ent_type == EntityType.ENEMY:
+            self.animation_handler.add_animation(entity.get_pos(), AnimationType.ENEMY_SPAWNED, enemy_size=entity.get_size())
             self.e_enemies.append(entity) # type: ignore
         elif ent_type == EntityType.PROJECTILE:
             self.e_projectiles.append(entity) # type: ignore

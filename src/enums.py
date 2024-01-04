@@ -47,3 +47,9 @@ class ArtifactType(Enum):
     DASH = auto()
     TIME_STOP = auto()
     SHRAPNEL = auto()
+
+
+class AnimationType(Enum):
+    ACCURATE_SHOT = auto()
+    ENEMY_SPAWNED = auto()
+    ENEMY_DIED = auto()
