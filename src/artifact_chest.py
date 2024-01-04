@@ -163,10 +163,6 @@ class ArtifactChestGenerator:
             stats_to_spawn = to_sample_from[:]
         else:
             stats_to_spawn = random.sample(to_sample_from, num_stats_to_spawn)
-        print('1 to sample from', '  '.join(map(str, to_sample_from)))
-        print('2 num_stats_to_spawn', num_stats_to_spawn)
-        print('3 skip', skip)
-        print('4 spawning', '  '.join(map(str, stats_to_spawn)))
         to_spawn.extend(
             [ArtifactChest(Vector2(), InactiveArtifact(stats_boost)) for stats_boost in stats_to_spawn]
         )
