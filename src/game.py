@@ -14,13 +14,14 @@ from src.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.mine import Mine
 from src.oil_spill import OilSpill
 from src.player import Player
-from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType
+from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType, AnimationType
 from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback, random_unit_vector
 from src.energy_orb import EnergyOrb
 from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, TimeStopRunning
 from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.artifact_chest import ArtifactChest
+from src.animation import Animation, AnimationHandler
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, 
     NICER_MAGENTA_HEX, NICER_BLUE_HEX, NICER_YELLOW_HEX, NICER_GREEN_HEX,
@@ -30,9 +31,9 @@ from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERG
 from front.sounds import play_sfx
 
 
-NICER_YELLOW = pygame.Color(NICER_YELLOW_HEX)
-NICER_GREEN = pygame.Color(NICER_GREEN_HEX)
-BLUE = pygame.Color(NICER_BLUE_HEX)
+NICER_YELLOW = Color(NICER_YELLOW_HEX)
+NICER_GREEN = Color(NICER_GREEN_HEX)
+BLUE = Color(NICER_BLUE_HEX)
 
 
 def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, float]:
@@ -71,15 +72,22 @@ class Game:
         self.e_aoe_effects: list[AOEEffect] = []
         self.e_artifact_chests: list[ArtifactChest] = []
 
+        # timers:
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
         self.one_wave_timer = Timer(max_time=WAVE_DURATION)
         self.new_energy_orb_timer = Timer(max_time=random.uniform(*ENERGY_ORB_COOLDOWN_RANGE))
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
+
+        # misc:
         self.reason_of_death = ''
         self.collected_artifact_cache: list[Artifact] = []
         self.energy_orbs_spawned = 0
         self.time_frozen = False
+
+        # animation:
+        self.animation_handler = AnimationHandler()
+
 
     def all_entities_iter(self, 
             with_player: bool = True,
@@ -365,7 +373,7 @@ class Game:
             self.player.get_stats().BONUS_ORBS_COLLECTED += int(eo.is_enemy_bonus_orb())
             play_sfx('energy_collected')
             eo.kill()
-            self.feedback_buffer.append(Feedback(f'+{energy_collected_actually:.0f}e', color=pygame.Color(NICER_MAGENTA_HEX)))
+            self.feedback_buffer.append(Feedback(f'+{energy_collected_actually:.0f}e', color=Color(NICER_MAGENTA_HEX)))
         for oil_spill in self.oil_spills():
             if not oil_spill.intersects(self.player): continue
             if not oil_spill.is_activated(): continue
@@ -394,14 +402,14 @@ class Game:
             self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=enemy.enemy_type == EnemyType.BOSS)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             enemy.kill()
-            self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
+            self.feedback_buffer.append(Feedback('collided!', 3.5, color=Color('pink')))
             self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
             self.player_get_damage(corpse.damage_on_collision, ignore_invul_timer=True)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             corpse.kill()
-            self.feedback_buffer.append(Feedback('collided!', 3.5, color=pygame.Color('pink')))
+            self.feedback_buffer.append(Feedback('collided!', 3.5, color=Color('pink')))
             self.reason_of_death = f'collided with Corpse'
             # play_sfx('fart')
         for mine in self.mines():
@@ -410,7 +418,7 @@ class Game:
             self.player_get_damage(mine.damage, ignore_invul_timer=True)
             self.player.get_stats().MINES_STEPPED_ON += 1
             mine.kill()
-            self.feedback_buffer.append(Feedback('mine!', 3.5, color=pygame.Color('pink')))
+            self.feedback_buffer.append(Feedback('mine!', 3.5, color=Color('pink')))
             self.reason_of_death = f'stepped on a mine'
             play_sfx('explosion')
         for aoe_effect in self.aoe_effects():
@@ -443,7 +451,7 @@ class Game:
                 self.player.get_stats().ACCURATE_SHOTS += 1
                 if is_ricochet:
                     self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
-                    self.feedback_buffer.append(Feedback('ricochet!', 2., color=pygame.Color('pink'), at_pos=enemy.get_pos()))
+                    self.feedback_buffer.append(Feedback('ricochet!', 2., color=Color('pink'), at_pos=enemy.get_pos()))
                 self.deal_damage_to_enemy(enemy, bullet.damage)
                 enemy.caught_bullet()
                 play_sfx('accurate_shot')
@@ -507,14 +515,14 @@ class Game:
             # lift the block and either give energy or extra bullets
             energy_collected = self.player.energy.change(PLAYER_SHOT_COST * 1.35)
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
-            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
-            self.feedback_buffer.append(Feedback('block lifted', 2., color=pygame.Color('yellow')))
+            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 2., color=Color(NICER_MAGENTA_HEX)))
+            self.feedback_buffer.append(Feedback('block lifted', 2., color=Color('yellow')))
             return
         damage_dealt_actual = -enemy.get_health().change(-damage)
         enemy.get_health().current_value = round(enemy.get_health().current_value)
         self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
         if get_damage_feedback:
-            self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.0f}hp', 2., color=pygame.Color('orange'), at_pos=enemy.get_pos()))
+            self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.0f}hp', 2., color=Color('orange'), at_pos=enemy.get_pos()))
         enemy.update(0.)
         if enemy.is_alive(): return
         enemy.kill()
@@ -527,7 +535,7 @@ class Game:
             # killed the boss
             self.new_level()
             self.kill_projectiles()
-        self.feedback_buffer.append(Feedback(f'+{reward_actually_collected:.0f}e', 2., color=pygame.Color(NICER_MAGENTA_HEX)))
+        self.feedback_buffer.append(Feedback(f'+{reward_actually_collected:.0f}e', 2., color=Color(NICER_MAGENTA_HEX)))
         play_sfx('enemy_killed')
     
     def player_get_damage(self, damage: float, ignore_invul_timer: bool = False) -> float:
@@ -537,7 +545,7 @@ class Game:
         self.player.invulnerability_timer.reset()
         damage_taken_actual = -self.player.health.change(-damage)
         self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
-        self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=pygame.Color('red'), at_pos='player'))
+        self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=Color('red'), at_pos='player'))
         if not self.player.health.is_alive(): self.player.kill()
         play_sfx('damage_taken')
         return damage_taken_actual
