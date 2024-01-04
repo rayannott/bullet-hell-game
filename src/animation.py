@@ -6,14 +6,16 @@ from pygame import Vector2, Color
 from src.utils import Timer
 from src.enums import AnimationType
 from front.utils import ColorGradient
-from config import BACKGROUND_COLOR_HEX
+from config import BACKGROUND_COLOR_HEX, BOSS_ENEMY_COLOR_HEX
 
 
 WHITE = Color('white')
 YELLOW = Color('yellow')
 BG_COLOR = Color(BACKGROUND_COLOR_HEX)
+BOSS_COLOR = Color(BOSS_ENEMY_COLOR_HEX)
 
 yellow_to_bg_gradient = ColorGradient(YELLOW, BG_COLOR)
+boss_to_bg_gradient = ColorGradient(BOSS_COLOR, BG_COLOR)
 
 
 
@@ -32,15 +34,17 @@ def draw_enemy_spawned(animation: 'Animation'):
     print('enemy spawned', animation.life_timer.get_percent_full())
 
 
-def draw_enemy_died(animation: 'Animation'):
-    #? do I need this?
-    print('enemy died', animation.life_timer.get_percent_full())
+def draw_boss_died(animation: 'Animation'):
+    boss_size = animation.kwargs['enemy_size'] # type: ignore
+    p = animation.life_timer.get_percent_full()
+    pygame.draw.circle(animation.surface, boss_to_bg_gradient(p), animation.pos, boss_size * (1. + 3. * p), width=3)
+    print('boss died', animation.life_timer.get_percent_full())
 
 
 ANIM_TYPE_TO_FUNC_DUR = {
     AnimationType.ACCURATE_SHOT: (draw_accurate_shot, 0.45),
     AnimationType.ENEMY_SPAWNED: (draw_enemy_spawned, 0.85),
-    AnimationType.ENEMY_DIED: (draw_enemy_died, 0.85),
+    AnimationType.BOSS_DIED: (draw_boss_died, 1.2),
 }
 
 
@@ -96,8 +100,11 @@ class AnimationHandler:
         for animation in self.animations:
             animation.update(time_delta)
         if not self.clean_up_timer.running():
-            self.clean_up()
+            removed = self.clean_up()
+            print(f'Cleaned up {removed} animations.')
             self.clean_up_timer.reset()
     
-    def clean_up(self):
+    def clean_up(self) -> int:
+        old_len = len(self.animations)
         self.animations = [animation for animation in self.animations if animation.is_alive]
+        return old_len - len(self.animations)
