@@ -536,6 +536,7 @@ class Game:
         if enemy.enemy_type == EnemyType.BOSS:
             # killed the boss
             self.new_level()
+            self.animation_handler.add_animation(enemy.get_pos(), AnimationType.BOSS_DIED, enemy_size=enemy.get_size())
             self.kill_projectiles()
         self.feedback_buffer.append(Feedback(f'+{reward_actually_collected:.0f}e', 2., color=Color(NICER_MAGENTA_HEX)))
         play_sfx('enemy_killed')
