@@ -20,17 +20,20 @@ boss_to_bg_gradient = ColorGradient(BOSS_COLOR, BG_COLOR)
 
 
 def draw_accurate_shot(animation: 'Animation'):
-    bullet_vel = animation.kwargs['bullet_vel'] # type: ignore
+    bullet_vel, enemy_size = animation.kwargs['bullet_vel'], animation.kwargs['enemy_size'] # type: ignore
+    bullet_vel = bullet_vel.normalize()
     p = animation.life_timer.get_percent_full()
-    for i in [1., 1.2, 1.4]:
-        line_seed = animation.pos + bullet_vel * (1 * (1-p) + (10 * i) * p)
-        line_width = (10. - 8. * p) / i
+    for i in [1., 1.5, 2.]:
+        line_seed = animation.pos + bullet_vel * (1 - p + (10 * i) * p) + enemy_size * bullet_vel
+        line_width = (enemy_size * 5 * (1-p)) / i
         line_wing = bullet_vel.rotate(90) * line_width * 0.5
         pygame.draw.line(animation.surface, yellow_to_bg_gradient(p), line_seed - line_wing, line_seed + line_wing, 3)
 
 
 def draw_enemy_spawned(animation: 'Animation'):
     enemy_size = animation.kwargs['enemy_size'] # type: ignore
+    # TODO
+    ...
     print('enemy spawned', animation.life_timer.get_percent_full())
 
 

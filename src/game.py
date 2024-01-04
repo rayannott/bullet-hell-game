@@ -456,7 +456,7 @@ class Game:
                 self.deal_damage_to_enemy(enemy, bullet.damage)
                 enemy.caught_bullet()
                 play_sfx('accurate_shot')
-                self.animation_handler.add_animation(enemy.get_pos(), AnimationType.ACCURATE_SHOT, bullet_vel=bullet.get_vel())
+                self.animation_handler.add_animation(enemy.get_pos(), AnimationType.ACCURATE_SHOT, bullet_vel=bullet.get_vel(), enemy_size=enemy.get_size())
                 if (not self.player.get_achievements().KILL_BOSS_WITH_RICOCHET and
                     is_ricochet and 
                     not enemy.is_alive() and
