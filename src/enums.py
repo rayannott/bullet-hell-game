@@ -52,4 +52,4 @@ class ArtifactType(Enum):
 class AnimationType(Enum):
     ACCURATE_SHOT = auto()
     ENEMY_SPAWNED = auto()
-    ENEMY_DIED = auto()
+    BOSS_DIED = auto()
