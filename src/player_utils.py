@@ -47,9 +47,11 @@ class EffectFlags:
     Flags for effects that can be applied to the player.
     """
     OIL_SPILL: bool = False
+    SLOWNESS: float = 1. # slowness multiplier
 
     def reset(self):
         self.OIL_SPILL = False
+        self.SLOWNESS = 1.
 
 
 @dataclass

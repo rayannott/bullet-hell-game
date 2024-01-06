@@ -26,7 +26,7 @@ from src.animation import Animation, AnimationHandler
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, 
     NICER_MAGENTA_HEX, NICER_BLUE_HEX, NICER_YELLOW_HEX, NICER_GREEN_HEX,
     WAVE_DURATION, GAME_MAX_LEVEL, ENERGY_ORB_SIZE, ENERGY_ORB_COOLDOWN_RANGE, SPAWN_ENEMY_EVERY, BM,
-    PLAYER_SHOT_COST,
+    PLAYER_SHOT_COST, OIL_SPILL_SPEED_MULTIPLIER,
 )
 from front.sounds import play_sfx
 
@@ -380,6 +380,7 @@ class Game:
             if not oil_spill.intersects(self.player): continue
             if not oil_spill.is_activated(): continue
             self.player.effect_flags.OIL_SPILL = True
+            self.player.effect_flags.SLOWNESS = OIL_SPILL_SPEED_MULTIPLIER
             self.reason_of_death = 'slipped on oil to death'
             play_sfx('in_oil_spill')
         for projectile in self.projectiles():
