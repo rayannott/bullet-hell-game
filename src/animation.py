@@ -40,7 +40,8 @@ def draw_enemy_spawned(animation: 'Animation'):
 def draw_boss_died(animation: 'Animation'):
     boss_size = animation.kwargs['enemy_size'] # type: ignore
     p = animation.life_timer.get_percent_full()
-    pygame.draw.circle(animation.surface, boss_to_bg_gradient(p), animation.pos, boss_size * (1. + 3. * p), width=4)
+    for i in [2, 3, 4]:
+        pygame.draw.circle(animation.surface, boss_to_bg_gradient(p), animation.pos, boss_size * (1. + i * p), width=i)
 
 
 ANIM_TYPE_TO_FUNC_DUR = {
