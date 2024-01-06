@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from typing import Optional
-import pygame
+import random
 
+import pygame
 from pygame import Vector2, Color
 
 from src.enums import EntityType
@@ -41,6 +42,7 @@ class Entity(ABC):
         self.entities_buffer: list[Entity] = []
         self.color = color if color is not None else Color('white')
         self.homing_target = homing_target
+        self._id = random.randrange(2**32)
     
     @abstractmethod
     def update(self, time_delta: float):
@@ -76,6 +78,8 @@ class Entity(ABC):
     def get_color(self) -> pygame.Color: return self.color
 
     def set_color(self, color: pygame.Color): self.color = color
+
+    def get_id(self) -> int: return self._id
 
     def is_alive(self) -> bool: return self._is_alive
 

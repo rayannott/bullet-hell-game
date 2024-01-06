@@ -426,7 +426,7 @@ class Game:
             play_sfx('explosion')
         for aoe_effect in self.aoe_effects():
             if not aoe_effect.intersects(self.player): continue
-            if aoe_effect.applied_effect_player: continue
+            if not aoe_effect.affects_player: continue
             if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
                 self.player_get_damage(aoe_effect.damage)
                 self.reason_of_death = f'impact AOE damage'
@@ -441,6 +441,10 @@ class Game:
             play_sfx('artifact_collected')
             # remove all artifacts:
             for ac in self.artifact_chests(): ac.kill()
+        for line in self.lines():
+            if not line.intersects(self.player): continue
+            if line.line_type == LineType.EFFECTS:
+                self.player.effect_flags.SLOWNESS = line.kwargs.get('slow', 1.)
 
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks
@@ -484,13 +488,17 @@ class Game:
                 mine.kill()
         # enemy-aoe_effect collisions
         for aoe_effect in self.aoe_effects():
-            if aoe_effect.applied_effect_enemies: continue
+            if not aoe_effect.affects_enemies: continue
             for enemy in self.enemies():
                 if not aoe_effect.intersects(enemy): continue
+                if not aoe_effect.should_apply_to_entity(enemy): continue
                 if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
                     self.deal_damage_to_enemy(enemy, aoe_effect.damage)
                 elif aoe_effect.effect_type == AOEEffectEffectType.ENEMY_BLOCK_ON:
                     enemy.has_block = True
+                else:
+                    raise NotImplementedError(f'Unknown AOEEffectEffectType {aoe_effect.effect_type}')
+                aoe_effect.check_entity_applied_effect(enemy)
             aoe_effect.applied_effect_enemies = True
 
         # check if the Boss just died

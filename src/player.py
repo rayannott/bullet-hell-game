@@ -35,6 +35,7 @@ class Player(Entity):
             render_trail=True,
             can_spawn_entities=True
         )
+        self._id = 0
         self.level = 1
         self.settings = settings
         self.gravity_point: Vector2 = pos

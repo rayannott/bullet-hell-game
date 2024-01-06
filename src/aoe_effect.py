@@ -32,12 +32,16 @@ class AOEEffect(Entity):
             size=size,
             color=color,
         )
+        self.affects_enemies = affects_enemies
+        self.affects_player = affects_player
+        self.applied_effect_to = set()
+        if not affects_player: self.applied_effect_to.add(0)
+
         self.effect_type = effect_type
         self.color_gradient = ColorGradient(color, Color(BACKGROUND_COLOR_HEX))
         self.damage = damage
         self.lifetime_timer = Timer(max_time=animation_lingering_time)
 
-        self.applied_effect_player = not affects_player
         self.applied_effect_enemies = not affects_enemies
         if self.effect_type == AOEEffectEffectType.ENEMY_BLOCK_ON:
             self.applied_effect_player = True # this does not apply to players
@@ -47,3 +51,10 @@ class AOEEffect(Entity):
         self.set_color(self.color_gradient(self.lifetime_timer.get_percent_full()))
         if not self.lifetime_timer.running(): self.kill()
         return super().update(time_delta)
+
+    def should_apply_to_entity(self, ent: Entity) -> bool:
+        return not ent.get_id() in self.applied_effect_to
+
+    def check_entity_applied_effect(self, ent: Entity) -> None:
+        self.applied_effect_to.add(ent.get_id())
+    
