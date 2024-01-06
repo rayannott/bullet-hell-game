@@ -14,6 +14,7 @@ from src.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.artifact_chest import ArtifactChest
 from src.artifacts import BulletShield, Dash, MineSpawn, TimeStop, Shrapnel
 from src.enums import ArtifactType, EnemyType
+from src.line import Line, LineType
 from src.oil_spill import OilSpill
 from src.player_utils import Achievements
 
@@ -96,6 +97,10 @@ class GameScreen(Screen):
                         affects_enemies=True, affects_player=False, 
                         color=Color('orange'),
                         animation_lingering_time=1.2))
+                elif event.key == pygame.K_n:
+                    self.game.add_line(
+                        Line(Vector2(pygame.mouse.get_pos()), self.game.player.get_pos().copy(), LineType.EFFECTS, damage=0.1)
+                    )
             else:
                 if event.key == pygame.K_p:
                     self.game.toggle_pause()
