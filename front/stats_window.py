@@ -29,8 +29,8 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
             if len_saves > MAX_NUM_OF_SAVES:
                 print(f'[Too many saves] Found {len_saves} saves, deleting {len_saves - MAX_NUM_OF_SAVES} of them:')
                 for datetime_str in sorted(saves.keys(), reverse=True, key=lambda x: saves[x].get('score', 0))[MAX_NUM_OF_SAVES:]:
+                    print(f'- deleted save {datetime_str}; score={saves[datetime_str].get("score")}')
                     del saves[datetime_str]
-                    print(f'- deleted save {datetime_str}')
                 len_saves = len(saves)
             text = self.construct_html(saves)
         super().__init__(
