@@ -290,7 +290,7 @@ class RenderManager:
         _trail_len = len(entity.trail)
         color_gradient = ColorGradient(BLACK, entity.get_color())
         for i, pos in enumerate(entity.trail):
-            pygame.draw.circle(self.surface, color_gradient(i / _trail_len), pos, 2., width=1)
+            pygame.draw.circle(self.surface, color_gradient(i / _trail_len), pos, 3., width=1)
 
     def draw_entity_basics(self, entity: Entity):
         pygame.draw.circle(self.surface, entity.get_color(), entity.get_pos(), entity.get_size())
