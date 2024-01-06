@@ -53,3 +53,4 @@ class AnimationType(Enum):
     ACCURATE_SHOT = auto()
     ENEMY_SPAWNED = auto()
     BOSS_DIED = auto()
+    ENERGY_ORB_COLLECTED = auto()
