@@ -303,7 +303,7 @@ class Shrapnel(Artifact):
     def update(self, time_delta: float):
         super().update(time_delta)
         self.num_shards = 4 + self.total_stats_boost.shrapnel_extra_shards
-        self.cooldown = MINE_COOLDOWN - self.total_stats_boost.mine_cooldown
+        self.cooldown = SHRAPNEL_COOLDOWN - self.total_stats_boost.shrapnel_cooldown
 
     def shoot(self):
         if self.player.energy.get_value() < self.cost:
