@@ -32,18 +32,19 @@ class StatsBoost:
     add_max_extra_bullets: int = 0
     time_stop_duration: float = 0.
     shrapnel_extra_shards: int = 0
+    shrapnel_cooldown: float = 0.
 
     def __iter__(self):
         yield from (self.health, self.regen, self.damage,
             self.speed, self.cooldown, self.size, self.bullet_shield_size, 
             self.bullet_shield_duration, self.mine_cooldown, 
-            self.add_max_extra_bullets, self.time_stop_duration, self.shrapnel_extra_shards)
+            self.add_max_extra_bullets, self.time_stop_duration, self.shrapnel_extra_shards, self.shrapnel_cooldown)
 
     def __str__(self) -> str:
         formats = ('+{:.0f}hp', '+{:.1f}reg', '+{:.0f}dmg', 
             '+{:.0f}spd', '-{:.2f}cd', '-{:.0f}size', 
             '+{:.0f}shld size', '+{:.1f}shld dur', 
-            '-{:.1f}mine cd', '+{}max eb', '+{:.1f}ts dur', '+{}shrapnel')
+            '-{:.1f}mine cd', '+{}max eb', '+{:.1f}ts dur', '+{}shrapnel shards', '-{:.1f}shrapnel cd')
         res = '|'.join(
             format_.format(val) for format_, val in zip(formats, self, strict=True) if val
         )
@@ -63,6 +64,7 @@ class StatsBoost:
             add_max_extra_bullets=self.add_max_extra_bullets + other.add_max_extra_bullets,
             time_stop_duration=self.time_stop_duration + other.time_stop_duration,
             shrapnel_extra_shards=self.shrapnel_extra_shards + other.shrapnel_extra_shards,
+            shrapnel_cooldown=self.shrapnel_cooldown + other.shrapnel_cooldown,
         )
 
 
@@ -284,19 +286,23 @@ class TimeStop(Artifact):
         return self.duration_timer.running()
 
 
+SHRAPNEL_COOLDOWN = 10.
+SHRAPNEL_COST = 340.
+
 class Shrapnel(Artifact):
     def __init__(self, player):
         super().__init__(
             artifact_type=ArtifactType.SHRAPNEL,
             player=player,
-            cooldown=12.,
-            cost=340.,
+            cooldown=SHRAPNEL_COOLDOWN,
+            cost=SHRAPNEL_COST,
         )
-        self.num_shards = 3 + self.total_stats_boost.shrapnel_extra_shards
+        self.num_shards = 4 + self.total_stats_boost.shrapnel_extra_shards
     
     def update(self, time_delta: float):
         super().update(time_delta)
-        self.num_shards = 3 + self.total_stats_boost.shrapnel_extra_shards
+        self.num_shards = 4 + self.total_stats_boost.shrapnel_extra_shards
+        self.cooldown = MINE_COOLDOWN - self.total_stats_boost.mine_cooldown
 
     def shoot(self):
         if self.player.energy.get_value() < self.cost:
@@ -304,16 +310,16 @@ class Shrapnel(Artifact):
         if self.cooldown_timer.running():
             raise OnCooldown(f'shrapnel on cooldown: {self.cooldown_timer.get_time_left():.1f}')
         self.player.energy.change(-self.cost)
-        self.cooldown_timer.reset()
+        self.cooldown_timer.reset(self.cooldown)
         direction: Vector2 = (self.player.gravity_point - self.player.get_pos()).normalize()
         for _ in range(self.num_shards + self.player.extra_bullets):
-            direction_ = direction.rotate(random.uniform(-8, 8))
+            direction_ = direction.rotate(random.uniform(-10, 10))
             self.player.entities_buffer.append(
                 Projectile(
                     pos=self.player.get_pos() + direction_ * self.player.get_size() * 1.5,
                     vel=direction_,
                     projectile_type=ProjectileType.PLAYER_BULLET,
-                    damage=self.player.get_damage() / self.num_shards * 3.,
+                    damage=self.player.get_damage() / self.num_shards * 4.,
                     lifetime=1.5,
                     speed=self.player.speed + PROJECTILE_DEFAULT_SPEED,
                 )

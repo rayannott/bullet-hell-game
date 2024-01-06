@@ -75,6 +75,7 @@ class ArtifactChestGenerator:
             StatsBoost(shrapnel_extra_shards=5),
             StatsBoost(mine_cooldown=2.),
             StatsBoost(damage=20., cooldown=0.07),
+            StatsBoost(shrapnel_cooldown=4),
             StatsBoost(time_stop_duration=2.5),
             StatsBoost(bullet_shield_size=25.),
             StatsBoost(size=1., regen=1.),
@@ -99,7 +100,7 @@ class ArtifactChestGenerator:
         if sb.time_stop_duration: 
             if not self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP):
                 return False
-        if sb.shrapnel_extra_shards:
+        if sb.shrapnel_extra_shards or sb.shrapnel_cooldown:
             if not self.player.artifacts_handler.is_present(ArtifactType.SHRAPNEL):
                 return False
         return True
