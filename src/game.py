@@ -374,7 +374,7 @@ class Game:
             self.player.get_stats().BONUS_ORBS_COLLECTED += int(eo.is_enemy_bonus_orb())
             play_sfx('energy_collected')
             eo.kill()
-            self.feedback_buffer.append(Feedback(f'+{energy_collected_actually:.0f}e', color=Color(NICER_MAGENTA_HEX)))
+            self.feedback_buffer.append(Feedback(f'+{energy_collected_actually:.0f}e', 1., color=Color(NICER_MAGENTA_HEX)))
         for oil_spill in self.oil_spills():
             if not oil_spill.intersects(self.player): continue
             if not oil_spill.is_activated(): continue
@@ -517,14 +517,14 @@ class Game:
             # lift the block and either give energy or extra bullets
             energy_collected = self.player.energy.change(PLAYER_SHOT_COST * 1.35)
             self.player.get_stats().ENERGY_COLLECTED += energy_collected
-            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 2., color=Color(NICER_MAGENTA_HEX)))
+            self.feedback_buffer.append(Feedback(f'+{energy_collected:.0f}e', 1., color=Color(NICER_MAGENTA_HEX)))
             self.feedback_buffer.append(Feedback('block lifted', 2., color=Color('yellow')))
             return
         damage_dealt_actual = -enemy.get_health().change(-damage)
         enemy.get_health().current_value = round(enemy.get_health().current_value)
         self.player.get_stats().DAMAGE_DEALT += damage_dealt_actual
         if get_damage_feedback:
-            self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.0f}hp', 2., color=Color('orange'), at_pos=enemy.get_pos()))
+            self.feedback_buffer.append(Feedback(f'-{damage_dealt_actual:.0f}hp', color=Color('orange'), at_pos=enemy.get_pos()))
         enemy.update(0.)
         if enemy.is_alive(): return
         enemy.kill()
@@ -538,7 +538,7 @@ class Game:
             self.new_level()
             self.animation_handler.add_animation(enemy.get_pos(), AnimationType.BOSS_DIED, enemy_size=enemy.get_size())
             self.kill_projectiles()
-        self.feedback_buffer.append(Feedback(f'+{reward_actually_collected:.0f}e', 2., color=Color(NICER_MAGENTA_HEX)))
+        self.feedback_buffer.append(Feedback(f'+{reward_actually_collected:.0f}e', 1., color=Color(NICER_MAGENTA_HEX)))
         play_sfx('enemy_killed')
     
     def player_get_damage(self, damage: float, ignore_invul_timer: bool = False) -> float:
@@ -548,7 +548,7 @@ class Game:
         self.player.invulnerability_timer.reset()
         damage_taken_actual = -self.player.health.change(-damage)
         self.player.get_stats().DAMAGE_TAKEN += damage_taken_actual
-        self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 2., color=Color('red'), at_pos='player'))
+        self.feedback_buffer.append(Feedback(f'-{damage_taken_actual:.0f}hp', 1., color=Color('red'), at_pos='player'))
         if not self.player.health.is_alive(): self.player.kill()
         play_sfx('damage_taken')
         return damage_taken_actual
