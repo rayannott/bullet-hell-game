@@ -6,17 +6,19 @@ from pygame import Vector2, Color
 from src.utils import Timer
 from src.enums import AnimationType
 from front.utils import ColorGradient
-from config import BACKGROUND_COLOR_HEX, BOSS_ENEMY_COLOR_HEX
+from config import BACKGROUND_COLOR_HEX, BOSS_ENEMY_COLOR_HEX, NICER_MAGENTA_HEX
 
 
 WHITE = Color('white')
 YELLOW = Color('yellow')
+NICER_MAGENTA = Color(NICER_MAGENTA_HEX)
 BG_COLOR = Color(BACKGROUND_COLOR_HEX)
 BOSS_COLOR = Color(BOSS_ENEMY_COLOR_HEX)
 
 yellow_to_bg_gradient = ColorGradient(YELLOW, BG_COLOR)
 boss_to_bg_gradient = ColorGradient(BOSS_COLOR, BG_COLOR)
 white_to_bg_gradient = ColorGradient(WHITE, BG_COLOR)
+magenta_to_bg_gradient = ColorGradient(NICER_MAGENTA, BG_COLOR)
 
 
 
@@ -44,10 +46,16 @@ def draw_boss_died(animation: 'Animation'):
         pygame.draw.circle(animation.surface, boss_to_bg_gradient(p), animation.pos, boss_size * (1. + i * p), width=i)
 
 
+def draw_energy_orb_collected(animation: 'Animation'):
+    p = animation.life_timer.get_percent_full()
+    pygame.draw.circle(animation.surface, magenta_to_bg_gradient(p), animation.pos, 10, width=3)
+    
+
 ANIM_TYPE_TO_FUNC_DUR = {
     AnimationType.ACCURATE_SHOT: (draw_accurate_shot, 0.5),
     AnimationType.ENEMY_SPAWNED: (draw_enemy_spawned, 0.45),
     AnimationType.BOSS_DIED: (draw_boss_died, 1.5),
+    AnimationType.ENERGY_ORB_COLLECTED: (draw_energy_orb_collected, 0.4),
 }
 
 

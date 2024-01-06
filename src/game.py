@@ -372,6 +372,7 @@ class Game:
                 actually_added = self.player.add_extra_bullets(eo.num_extra_bullets)
                 self.feedback_buffer.append(Feedback(f'+{actually_added}eb', color=Color('white')))
             self.player.get_stats().BONUS_ORBS_COLLECTED += int(eo.is_enemy_bonus_orb())
+            self.animation_handler.add_animation(eo.get_pos(), AnimationType.ENERGY_ORB_COLLECTED)
             play_sfx('energy_collected')
             eo.kill()
             self.feedback_buffer.append(Feedback(f'+{energy_collected_actually:.0f}e', 1., color=Color(NICER_MAGENTA_HEX)))
