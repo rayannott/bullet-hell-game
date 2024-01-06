@@ -16,6 +16,7 @@ BOSS_COLOR = Color(BOSS_ENEMY_COLOR_HEX)
 
 yellow_to_bg_gradient = ColorGradient(YELLOW, BG_COLOR)
 boss_to_bg_gradient = ColorGradient(BOSS_COLOR, BG_COLOR)
+white_to_bg_gradient = ColorGradient(WHITE, BG_COLOR)
 
 
 
@@ -32,22 +33,23 @@ def draw_accurate_shot(animation: 'Animation'):
 
 def draw_enemy_spawned(animation: 'Animation'):
     enemy_size = animation.kwargs['enemy_size'] # type: ignore
-    # TODO
-    ...
+    p = animation.life_timer.get_percent_full()
+    pygame.draw.circle(animation.surface, white_to_bg_gradient(p), animation.pos, enemy_size * (1. + 2. * p), width=3)
+
     print('enemy spawned', animation.life_timer.get_percent_full())
 
 
 def draw_boss_died(animation: 'Animation'):
     boss_size = animation.kwargs['enemy_size'] # type: ignore
     p = animation.life_timer.get_percent_full()
-    pygame.draw.circle(animation.surface, boss_to_bg_gradient(p), animation.pos, boss_size * (1. + 3. * p), width=3)
+    pygame.draw.circle(animation.surface, boss_to_bg_gradient(p), animation.pos, boss_size * (1. + 3. * p), width=4)
     print('boss died', animation.life_timer.get_percent_full())
 
 
 ANIM_TYPE_TO_FUNC_DUR = {
-    AnimationType.ACCURATE_SHOT: (draw_accurate_shot, 0.45),
-    AnimationType.ENEMY_SPAWNED: (draw_enemy_spawned, 0.85),
-    AnimationType.BOSS_DIED: (draw_boss_died, 1.2),
+    AnimationType.ACCURATE_SHOT: (draw_accurate_shot, 0.5),
+    AnimationType.ENEMY_SPAWNED: (draw_enemy_spawned, 0.45),
+    AnimationType.BOSS_DIED: (draw_boss_died, 1.5),
 }
 
 
