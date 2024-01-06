@@ -11,6 +11,7 @@ from src.artifacts import Artifact
 from src.entity import Entity, DummyEntity
 from src.corpse import Corpse
 from src.aoe_effect import AOEEffect, AOEEffectEffectType
+from src.line import Line, LineType
 from src.mine import Mine
 from src.oil_spill import OilSpill
 from src.player import Player
@@ -72,6 +73,8 @@ class Game:
         self.e_aoe_effects: list[AOEEffect] = []
         self.e_artifact_chests: list[ArtifactChest] = []
 
+        self.e_lines: list[Line] = []
+
         # timers:
         self.remove_dead_entities_timer = Timer(max_time=REMOVE_DEAD_ENTITIES_EVERY)
         self.one_wave_timer = Timer(max_time=WAVE_DURATION)
@@ -124,6 +127,8 @@ class Game:
         yield from (ent for ent in self.e_aoe_effects if include_dead or ent.is_alive())
     def artifact_chests(self, include_dead: bool = False) -> Generator[ArtifactChest, None, None]:
         yield from (ent for ent in self.e_artifact_chests if include_dead or ent.is_alive())
+    def lines(self, include_dead: bool = False) -> Generator[Line, None, None]:
+        yield from (ln for ln in self.e_lines if include_dead or ln.is_alive())
 
     def is_running(self) -> bool:
         return self.player.is_alive()
@@ -247,6 +252,8 @@ class Game:
         self.spawn_buffered_entities()
         for entity in self.all_entities_iter(with_enemies=not self.time_frozen, with_projectiles=not self.time_frozen):
             entity.update(time_delta)
+        for line in self.lines():
+            line.update(time_delta)
         self.process_timers(time_delta)
         self.process_collisions()
         self.process_dash()
@@ -589,6 +596,9 @@ class Game:
         else:
             raise ValueError(f'Unknown entity type {ent_type}')
 
+    def add_line(self, line: Line) -> None:
+        self.e_lines.append(line)
+
     def remove_dead_entities(self):
         """
         Remove all dead entities.
@@ -600,6 +610,7 @@ class Game:
         self.e_projectiles: list[Projectile] = list(self.projectiles())
         self.e_energy_orbs: list[EnergyOrb] = list(self.energy_orbs())
         self.e_enemies: list[Enemy] = list(self.enemies())
+        self.e_lines: list[Line] = list(self.lines())
 
     def get_random_screen_position_for_entity(self, entity_size: float) -> Vector2:
         """

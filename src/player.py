@@ -85,8 +85,7 @@ class Player(Entity):
         towards_gravity_point = (self.gravity_point - self.pos)
         dist_to_gravity_point = towards_gravity_point.magnitude()
         t = (dist_to_gravity_point / 1500.) ** 0.8
-        self.speed = (self.speed_range[0] + (self.get_max_speed() - self.speed_range[0]) * t *
-            (OIL_SPILL_SPEED_MULTIPLIER if self.effect_flags.OIL_SPILL else 1.))
+        self.speed = (self.speed_range[0] + (self.get_max_speed() - self.speed_range[0]) * t * self.effect_flags.SLOWNESS)
         if dist_to_gravity_point > self.get_size() * 0.2:
             self.vel = (towards_gravity_point).normalize() * self.speed
         else:
