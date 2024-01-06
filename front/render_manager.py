@@ -160,6 +160,8 @@ class RenderManager:
             self.draw_mine(mine)
         for art_chest in self.game.artifact_chests():
             self.draw_artifact_chest(art_chest)
+        for line in self.game.lines():
+            pygame.draw.line(self.surface, line.color, line.p1, line.p2, width=2)
         self.ult_picker.render()
         self.dash_animation()
         self.draw_player()
