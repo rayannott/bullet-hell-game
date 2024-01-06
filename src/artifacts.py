@@ -43,8 +43,8 @@ class StatsBoost:
     def __str__(self) -> str:
         formats = ('+{:.0f}hp', '+{:.1f}reg', '+{:.0f}dmg', 
             '+{:.0f}spd', '-{:.2f}cd', '-{:.0f}size', 
-            '+{:.0f}shld size', '+{:.1f}shld dur', 
-            '-{:.1f}mine cd', '+{}max eb', '+{:.1f}ts dur', '+{}shrapnel shards', '-{:.1f}shrapnel cd')
+            '+{:.0f}shld size', '+{:.0f}shld dur', 
+            '-{:.0f}mine cd', '+{}max eb', '+{:.0f}ts dur', '+{}shrapnel shards', '-{:.0f}shrapnel cd')
         res = '|'.join(
             format_.format(val) for format_, val in zip(formats, self, strict=True) if val
         )
@@ -298,6 +298,7 @@ class Shrapnel(Artifact):
             cost=SHRAPNEL_COST,
         )
         self.num_shards = 4 + self.total_stats_boost.shrapnel_extra_shards
+
     
     def update(self, time_delta: float):
         super().update(time_delta)
@@ -335,7 +336,7 @@ class Shrapnel(Artifact):
         return 'Shrapnel'
 
     def get_verbose_string(self) -> str:
-        return f'Shrapnel(shards={self.num_shards})'
+        return f'Shrapnel({self.num_shards}shards {self.cooldown:.0f}cd)'
 
 
 class InactiveArtifact(Artifact):
