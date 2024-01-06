@@ -7,7 +7,7 @@ from pygame import Vector2, Color
 
 from src.enums import EntityType
 from src.utils import random_unit_vector
-from config import TRAIL_MAX_LENGTH
+from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 
 class Entity(ABC):
@@ -34,6 +34,7 @@ class Entity(ABC):
         self.vel = vel if vel is not None else random_unit_vector()
         self._is_alive = is_alive
         self.render_trail = render_trail
+        self.render_trail_buffer = 1.
         self.can_spawn_entities = can_spawn_entities
         self.turn_coefficient = turn_coefficient
         self.trail = deque(maxlen=TRAIL_MAX_LENGTH)
@@ -53,7 +54,10 @@ class Entity(ABC):
         if self.speed > 0. and self.vel.magnitude_squared() > 0.:
             self.vel.scale_to_length(self.speed * time_delta)
             self.pos += self.vel
-        if self.render_trail: self.trail.append(self.pos.copy())
+        self.render_trail_buffer += time_delta
+        if self.render_trail and self.render_trail_buffer > 1/TRAIL_POINTS_PER_SECOND:
+            self.trail.append(self.pos.copy())
+            self.render_trail_buffer = 0.
 
     def intersects(self, other: 'Entity') -> bool:
         """
