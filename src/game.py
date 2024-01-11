@@ -433,11 +433,11 @@ class Game:
             play_sfx('explosion')
         for aoe_effect in self.aoe_effects():
             if not aoe_effect.intersects(self.player): continue
-            if not aoe_effect.affects_player: continue
+            if not aoe_effect.should_apply_to_entity(self.player): continue
             if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
                 self.player_get_damage(aoe_effect.damage)
                 self.reason_of_death = f'impact AOE damage'
-            aoe_effect.applied_effect_player = True
+            aoe_effect.check_entity_applied_effect(self.player)
         for artifact_chest in self.artifact_chests():
             if not artifact_chest.intersects(self.player): continue
             if not artifact_chest.can_be_picked_up(): continue
@@ -506,7 +506,6 @@ class Game:
                 else:
                     raise NotImplementedError(f'Unknown AOEEffectEffectType {aoe_effect.effect_type}')
                 aoe_effect.check_entity_applied_effect(enemy)
-            aoe_effect.applied_effect_enemies = True
 
         # check if the Boss just died
         for enemy in self.enemies(include_dead=True):
