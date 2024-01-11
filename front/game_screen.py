@@ -96,10 +96,10 @@ class GameScreen(Screen):
                         effect_type=AOEEffectEffectType.ENEMY_BLOCK_ON, 
                         affects_enemies=True, affects_player=False, 
                         color=Color('orange'),
-                        animation_lingering_time=1.2))
+                        animation_lingering_time=5.))
                 elif event.key == pygame.K_n:
                     self.game.add_line(
-                        Line(Vector2(pygame.mouse.get_pos()), self.game.player.get_pos().copy(), LineType.EFFECTS, damage=10)
+                        Line(Vector2(pygame.mouse.get_pos()), self.game.player.get_pos().copy(), LineType.DAMAGE, damage=10)
                     )
             else:
                 if event.key == pygame.K_p:

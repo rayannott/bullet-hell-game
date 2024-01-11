@@ -5,7 +5,7 @@ from pygame import Vector2, Color
 from front.utils import ColorGradient
 from src.entity import Entity
 from src.enums import EntityType, AOEEffectEffectType
-from src.utils import Timer
+from src.utils import AppliedToEntityManager, Timer
 
 from config import BACKGROUND_COLOR_HEX
 
@@ -27,11 +27,7 @@ class AOEEffect(Entity):
             size=size,
             color=color,
         )
-        self.affects_enemies = affects_enemies
-        self.affects_player = affects_player
-        self.applied_effect_to = set()
-        if not affects_player or effect_type == AOEEffectEffectType.ENEMY_BLOCK_ON: 
-            self.applied_effect_to.add(0)
+        self.application_manager = AppliedToEntityManager(affects_player, affects_enemies)
 
         self.effect_type = effect_type
         self.color_gradient = ColorGradient(color, Color(BACKGROUND_COLOR_HEX))
@@ -43,10 +39,4 @@ class AOEEffect(Entity):
         self.set_color(self.color_gradient(self.lifetime_timer.get_percent_full()))
         if not self.lifetime_timer.running(): self.kill()
         return super().update(time_delta)
-
-    def should_apply_to_entity(self, ent: Entity) -> bool:
-        return not ent.get_id() in self.applied_effect_to
-
-    def check_entity_applied_effect(self, ent: Entity) -> None:
-        self.applied_effect_to.add(ent.get_id())
     

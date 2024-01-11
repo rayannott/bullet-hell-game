@@ -433,11 +433,11 @@ class Game:
             play_sfx('explosion')
         for aoe_effect in self.aoe_effects():
             if not aoe_effect.intersects(self.player): continue
-            if not aoe_effect.should_apply_to_entity(self.player): continue
+            if not aoe_effect.application_manager.should_apply(self.player): continue
             if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
                 self.player_get_damage(aoe_effect.damage)
                 self.reason_of_death = f'impact AOE damage'
-            aoe_effect.check_entity_applied_effect(self.player)
+            aoe_effect.application_manager.check_applied(self.player)
         for artifact_chest in self.artifact_chests():
             if not artifact_chest.intersects(self.player): continue
             if not artifact_chest.can_be_picked_up(): continue
@@ -450,12 +450,15 @@ class Game:
             for ac in self.artifact_chests(): ac.kill()
         for line in self.lines():
             if not line.intersects(self.player): continue
+            if not line.applied_manager.should_apply(self.player): continue
             if line.line_type == LineType.EFFECTS:
                 self.player.effect_flags.SLOWNESS = line.kwargs.get('slow', 1.)
+                # effects are applied continuously
             elif line.line_type == LineType.DAMAGE:
-                ...
+                self.player_get_damage(line.kwargs.get('damage', 0.))
+                self.reason_of_death = f'impact line damage'
+                line.applied_manager.check_applied(self.player)
             
-
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks
         # player bullets collide with enemies
@@ -498,17 +501,28 @@ class Game:
                 mine.kill()
         # enemy-aoe_effect collisions
         for aoe_effect in self.aoe_effects():
-            if not aoe_effect.affects_enemies: continue
+            if not aoe_effect.application_manager.affects_enemies: continue
             for enemy in self.enemies():
                 if not aoe_effect.intersects(enemy): continue
-                if not aoe_effect.should_apply_to_entity(enemy): continue
+                if not aoe_effect.application_manager.should_apply(enemy): continue
                 if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
                     self.deal_damage_to_enemy(enemy, aoe_effect.damage)
                 elif aoe_effect.effect_type == AOEEffectEffectType.ENEMY_BLOCK_ON:
                     enemy.has_block = True
                 else:
                     raise NotImplementedError(f'Unknown AOEEffectEffectType {aoe_effect.effect_type}')
-                aoe_effect.check_entity_applied_effect(enemy)
+                aoe_effect.application_manager.check_applied(enemy)
+        
+        for line in self.lines():
+            if not line.applied_manager.affects_enemies: continue
+            for enemy in self.enemies():
+                if not line.intersects(enemy): continue
+                if not line.applied_manager.should_apply(enemy): continue
+                if line.line_type == LineType.DAMAGE:
+                    self.deal_damage_to_enemy(enemy, line.kwargs.get('damage', 0.))
+                    line.applied_manager.check_applied(enemy)
+                else:
+                    raise NotImplementedError(f'Unknown LineType to be applied to an enemy: {line.line_type}')
 
         # check if the Boss just died
         for enemy in self.enemies(include_dead=True):

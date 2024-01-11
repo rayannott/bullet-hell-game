@@ -6,6 +6,8 @@ from pygame import Color, Vector2
 from scipy.interpolate import make_interp_spline, BSpline
 import numpy as np
 
+from src.enums import EntityType
+
 
 def random_unit_vector() -> Vector2:
     alpha = random.random() * 2 * math.pi
@@ -107,11 +109,16 @@ class AppliedToEntityManager:
         self.affects_enemies = affects_enemies
     
     def should_apply(self, entity) -> bool:
-        # TODO: add contents
-        ...
+        id_in_applied_to = entity.get_id() in self.applied_to
+        if entity.get_type() == EntityType.PLAYER:
+            return self.affects_player and not id_in_applied_to
+        elif entity.get_type() == EntityType.ENEMY:
+            return self.affects_enemies and not id_in_applied_to
+        else:
+            raise NotImplementedError(f'Unknown entity type {entity.get_type()}')            
     
     def check_applied(self, entity) -> None:
-        ...
+        self.applied_to.add(entity.get_id())
 
 
 class Interpolate2D:
