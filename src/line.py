@@ -4,7 +4,7 @@ from enum import Enum, auto
 from pygame import Vector2, Color
 
 from src.entity import Entity
-from src.utils import Timer
+from src.utils import Timer, AppliedToEntityManager
 
 
 class LineType(Enum):
@@ -25,17 +25,21 @@ class Line:
         p1: Vector2,
         p2: Vector2,
         line_type: LineType,
+        affects_player: bool = True,
+        affects_enemies: bool = True,
         **kwargs: Unpack[LineKwargs]
     ):
         self.p1 = p1
         self.p2 = p2
         self.line_type = line_type
+        self.affects_player = affects_player
+        self.affects_enemies = affects_enemies
         self.life_timer = Timer(max_time=5.)
         self._is_alive = True
         self.color = Color('white')
         self.can_spawn_entities = False
         self.kwargs = kwargs
-        self.applied_effect_to = set()
+        self.applied_manager = AppliedToEntityManager(affects_player, affects_enemies)
 
     def intersects(self, ent: Entity) -> bool:
         """Checks if the enemy is affected by the dash.
