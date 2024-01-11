@@ -4,15 +4,10 @@ from pygame import Vector2, Color
 
 from front.utils import ColorGradient
 from src.entity import Entity
-from src.enums import EntityType
+from src.enums import EntityType, AOEEffectEffectType
 from src.utils import Timer
 
 from config import BACKGROUND_COLOR_HEX
-
-
-class AOEEffectEffectType(Enum):
-    DAMAGE = auto()
-    ENEMY_BLOCK_ON = auto()
 
 
 class AOEEffect(Entity):

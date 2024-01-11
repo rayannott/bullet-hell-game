@@ -10,12 +10,12 @@ from config.settings import Settings
 from src.artifacts import Artifact
 from src.entity import Entity, DummyEntity
 from src.corpse import Corpse
-from src.aoe_effect import AOEEffect, AOEEffectEffectType
+from src.aoe_effect import AOEEffect
 from src.line import Line, LineType
 from src.mine import Mine
 from src.oil_spill import OilSpill
 from src.player import Player
-from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType, AnimationType
+from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType, AnimationType, AOEEffectEffectType
 from src.projectile import Projectile, ProjectileType
 from src.utils import Timer, Feedback, random_unit_vector
 from src.energy_orb import EnergyOrb
@@ -452,6 +452,9 @@ class Game:
             if not line.intersects(self.player): continue
             if line.line_type == LineType.EFFECTS:
                 self.player.effect_flags.SLOWNESS = line.kwargs.get('slow', 1.)
+            elif line.line_type == LineType.DAMAGE:
+                ...
+            
 
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks

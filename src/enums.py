@@ -54,3 +54,8 @@ class AnimationType(Enum):
     ENEMY_SPAWNED = auto()
     BOSS_DIED = auto()
     ENERGY_ORB_COLLECTED = auto()
+
+
+class AOEEffectEffectType(Enum):
+    DAMAGE = auto()
+    ENEMY_BLOCK_ON = auto()
