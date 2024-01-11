@@ -99,6 +99,21 @@ class Feedback:
     color: Color = field(default_factory=default_color)
 
 
+class AppliedToEntityManager:
+    """Interface class for effects that can be applied to some entities."""
+    def __init__(self, affects_player: bool, affects_enemies: bool):
+        self.applied_to = set()
+        self.affects_player = affects_player
+        self.affects_enemies = affects_enemies
+    
+    def should_apply(self, entity) -> bool:
+        # TODO: add contents
+        ...
+    
+    def check_applied(self, entity) -> None:
+        ...
+
+
 class Interpolate2D:
     """
     A cubic interpolator for a sequence of 2D points.
