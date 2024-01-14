@@ -75,7 +75,7 @@ class ArtifactChestGenerator:
             StatsBoost(shrapnel_extra_shards=5),
             StatsBoost(mine_cooldown=2.),
             StatsBoost(damage=20., cooldown=0.07),
-            StatsBoost(shrapnel_cooldown=4),
+            StatsBoost(shrapnel_cooldown=5),
             StatsBoost(time_stop_duration=2.5),
             StatsBoost(bullet_shield_size=25.),
             StatsBoost(size=1., regen=1.),
