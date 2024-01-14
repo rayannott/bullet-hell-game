@@ -310,14 +310,14 @@ class Shrapnel(Artifact):
         self.player.energy.change(-self.cost)
         self.cooldown_timer.reset(self.cooldown)
         direction: Vector2 = (self.player.gravity_point - self.player.get_pos()).normalize()
-        for _ in range(self.num_shards + self.player.extra_bullets):
-            direction_ = direction.rotate(random.uniform(-12, 12))
+        for _ in range(self.num_shards + int(1.5 * self.player.extra_bullets)):
+            direction_ = direction.rotate(random.uniform(-9, 9))
             self.player.entities_buffer.append(
                 Projectile(
                     pos=self.player.get_pos() + direction_ * self.player.get_size() * 1.5,
                     vel=direction_,
                     projectile_type=ProjectileType.PLAYER_BULLET,
-                    damage=self.player.get_damage() * 0.25,
+                    damage=self.player.get_damage() * 0.3,
                     lifetime=1.5,
                     speed=self.player.speed + PROJECTILE_DEFAULT_SPEED,
                 )

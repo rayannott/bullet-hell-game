@@ -349,7 +349,7 @@ class MinerEnemy(Enemy):
             player=player,
             color=Color('#103d9e'),
             speed=ENEMY_DEFAULT_SPEED * 1.2,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 1.4 + 18. * (self._player_level - 1),
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2.2,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.3,
             reward=ENEMY_DEFAULT_REWARD * (2. + 0.1 * self._player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
