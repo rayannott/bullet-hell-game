@@ -14,7 +14,7 @@ from src.utils import Timer, random_unit_vector
 from config import (BULLET_SHIELD_SIZE, BULLET_SHIELD_COOLDOWN,
     BULLET_SHIELD_DURATION, BULLET_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE,
     TIME_STOP_DEFAULT_DURATION, TIME_STOP_COOLDOWN, TIME_STOP_COST,
-    DASH_COOLDOWN, DASH_COST, DASH_DURATION,
+    DASH_COOLDOWN, DASH_COST, DASH_DURATION, SHRAPNEL_COOLDOWN, SHRAPNEL_COST
 )
 
 
@@ -286,9 +286,6 @@ class TimeStop(Artifact):
         return self.duration_timer.running()
 
 
-SHRAPNEL_COOLDOWN = 10.
-SHRAPNEL_COST = 340.
-
 class Shrapnel(Artifact):
     def __init__(self, player):
         super().__init__(
@@ -314,13 +311,13 @@ class Shrapnel(Artifact):
         self.cooldown_timer.reset(self.cooldown)
         direction: Vector2 = (self.player.gravity_point - self.player.get_pos()).normalize()
         for _ in range(self.num_shards + self.player.extra_bullets):
-            direction_ = direction.rotate(random.uniform(-10, 10))
+            direction_ = direction.rotate(random.uniform(-12, 12))
             self.player.entities_buffer.append(
                 Projectile(
                     pos=self.player.get_pos() + direction_ * self.player.get_size() * 1.5,
                     vel=direction_,
                     projectile_type=ProjectileType.PLAYER_BULLET,
-                    damage=self.player.get_damage() / self.num_shards * 4.,
+                    damage=self.player.get_damage() * 0.25,
                     lifetime=1.5,
                     speed=self.player.speed + PROJECTILE_DEFAULT_SPEED,
                 )
