@@ -1,3 +1,4 @@
+from __future__ import annotations
 import itertools
 import math
 import random
@@ -5,6 +6,7 @@ from itertools import repeat
 
 from pygame import Vector2, Color
 
+import src.player
 from src.entity import Entity
 from src.utils import Timer
 from src.enums import EntityType, ArtifactType
@@ -54,7 +56,7 @@ class ArtifactChest(Entity):
 
 
 class ArtifactChestGenerator:
-    def __init__(self, player):
+    def __init__(self, player: src.player.Player):
         # each of these can be collected only once
         self.player = player
         active_art_types = list(ArtifactType)

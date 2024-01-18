@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 import random, math
@@ -7,6 +8,7 @@ from scipy.interpolate import make_interp_spline, BSpline
 import numpy as np
 
 from src.enums import EntityType
+import src.entity
 
 
 def random_unit_vector() -> Vector2:
@@ -108,7 +110,7 @@ class AppliedToEntityManager:
         self.affects_player = affects_player
         self.affects_enemies = affects_enemies
     
-    def should_apply(self, entity) -> bool:
+    def should_apply(self, entity: src.entity.Entity) -> bool:
         id_in_applied_to = entity.get_id() in self.applied_to
         if entity.get_type() == EntityType.PLAYER:
             return self.affects_player and not id_in_applied_to
