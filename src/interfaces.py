@@ -23,6 +23,12 @@ class CanSpawnEntitiesInterface:
     def add(self, entity: src.entity.Entity) -> None:
         self.entities_buffer.append(entity)
     
+    def get_entities_buffer(self) -> list[src.entity.Entity]:
+        return self.entities_buffer
+    
+    def clear(self) -> None:
+        self.entities_buffer.clear()
+
 
 class FollowsEntityInterface:
     def __init__(self, entity: src.entity.Entity) -> None:
@@ -47,3 +53,12 @@ class RendersTrailInterface:
 
     def get_trail(self) -> deque[Vector2]:
         return self.trail
+
+
+class CanShootPlayerInterface: #? do I need this?
+    def __init__(self, cooldown: float) -> None:
+        self.cooldown_timer = Timer(max_time=cooldown)
+    
+    def tick_can_shoot(self, time_delta: float) -> bool:
+        """Returns True if the object can shoot."""
+        ...

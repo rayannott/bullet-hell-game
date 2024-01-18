@@ -180,7 +180,7 @@ class MineSpawn(Artifact):
         vel: Vector2 = self.player.get_vel() + random_unit_vector()
         vel.scale_to_length(20.)
         pos: Vector2 = self.player.get_pos()
-        self.player.entities_buffer.append(Mine(pos=pos-vel, 
+        self.player.i_can_spawn_entities.add(Mine(pos=pos-vel, 
                                     damage=MINE_DEFAULT_DAMAGE + 10. * (self.player.level - 1)))
         self.cooldown_timer.reset(self.cooldown)
     
@@ -313,7 +313,7 @@ class Shrapnel(Artifact):
         direction: Vector2 = (self.player.gravity_point - self.player.get_pos()).normalize()
         for _ in range(self.num_shards + int(1.5 * self.player.extra_bullets)):
             direction_ = direction.rotate(random.uniform(-9, 9))
-            self.player.entities_buffer.append(
+            self.player.i_can_spawn_entities.add(
                 Projectile(
                     pos=self.player.get_pos() + direction_ * self.player.get_size() * 1.5,
                     vel=direction_,

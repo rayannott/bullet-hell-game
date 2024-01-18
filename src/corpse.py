@@ -32,7 +32,8 @@ class Corpse(Entity):
             self.give_blocks_timer.reset()
 
     def give_blocks(self):
-        self.entities_buffer.append(
+        assert self.i_can_spawn_entities
+        self.i_can_spawn_entities.add(
             AOEEffect(
                 self.get_pos(),
                 BLOCKS_FOR_ENEMIES_EFFECT_SIZE,

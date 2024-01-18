@@ -28,6 +28,7 @@ class Projectile(Entity):
             homing_target: Entity | None = None,
             turn_coefficient: float = 1.,
             render_trail: bool = False,
+            can_spawn_entities: bool = False,
         ):
         super().__init__(
             pos=pos,
@@ -38,6 +39,7 @@ class Projectile(Entity):
             homing_target=homing_target,
             render_trail=render_trail,
             turn_coefficient=turn_coefficient,
+            can_spawn_entities=can_spawn_entities,
         )
         self.projectile_type = projectile_type
         self.damage = damage
@@ -78,6 +80,7 @@ class ExplosiveProjectile(Projectile):
             lifetime=lifetime,
             homing_target=homing_target,
             render_trail=True,
+            can_spawn_entities=True,
         )
         self.num_subprojectiles = num_subprojectiles
         self.can_spawn_entities = True
@@ -85,9 +88,10 @@ class ExplosiveProjectile(Projectile):
     
     def on_natural_death(self):
         N = self.num_subprojectiles
+        assert self.i_can_spawn_entities
         for i in range(N):
             direction = Vector2(1., 0.).rotate(i * 360. / N + random.uniform(-10, 10))
-            self.entities_buffer.append(
+            self.i_can_spawn_entities.add(
                 Projectile(
                     pos=self.pos.copy() + direction * (self.size * 1.5),
                     vel=direction,

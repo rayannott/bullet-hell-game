@@ -331,9 +331,9 @@ class Game:
         """
         new_ent = []
         for entity in self.all_entities_iter(with_player=True, include_dead=True):
-            if entity.can_spawn_entities:
-                new_ent.extend(entity.entities_buffer)
-                entity.entities_buffer.clear()
+            if entity.i_can_spawn_entities:
+                new_ent.extend(entity.i_can_spawn_entities.get_entities_buffer())
+                entity.i_can_spawn_entities.clear()
         for ent in new_ent:
             self.add_entity(ent)
 

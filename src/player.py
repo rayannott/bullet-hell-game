@@ -144,7 +144,8 @@ class Player(Entity):
         self.shoot_cooldown_timer.reset(with_max_time=self.get_shoot_coolodown())
         self.get_stats().PROJECTILES_FIRED += 1
         direction = self.vel.normalize()
-        self.entities_buffer.append(self.get_projectile(direction))
+        assert self.i_can_spawn_entities
+        self.i_can_spawn_entities.add(self.get_projectile(direction))
 
     def get_projectile(self, direction: Vector2) -> Projectile:
         return Projectile(

@@ -14,6 +14,7 @@ from src.player import Player
 from src.utils import Slider, Timer, random_unit_vector
 from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile, DefinedTrajectoryProjectile
 from src.oil_spill import OilSpill
+from src.interfaces import CanSpawnEntitiesInterface
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_RATE,
     PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
@@ -79,6 +80,7 @@ class Enemy(Entity):
         self.num_bullets_caught = 0
 
         self.damage_on_collision = damage_on_collision
+        self.i_can_spawn_entities: CanSpawnEntitiesInterface # to avoid typing errors (this is never None)
         self.shoots_player = True
         self.post_init()
 
@@ -119,7 +121,7 @@ class Enemy(Entity):
     def shoot_normal(self, **kwargs):
         speed_mult = kwargs.get('speed_mult', 1.)
         direction = self.get_shoot_direction()
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             Projectile(
                 pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
                 vel=direction,
@@ -133,7 +135,7 @@ class Enemy(Entity):
         speed_mult = kwargs.get('speed_mult', 1.)
         player_level = self.homing_target.get_level()
         direction = self.get_shoot_direction()
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             HomingProjectile(
                 pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
                 vel=direction,
@@ -146,7 +148,7 @@ class Enemy(Entity):
 
     def shoot_explosive(self, num_of_subprojectiles: int = 6):
         direction = self.get_shoot_direction()
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             ExplosiveProjectile(
                 pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
                 vel=direction,
@@ -162,7 +164,7 @@ class Enemy(Entity):
             for i in range(5)
         ]
         random.shuffle(points_around_player)
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             DefinedTrajectoryProjectile(
                 points=[self.pos.copy(), *points_around_player, self.homing_target.get_pos()],
                 damage=self.damage,
@@ -174,11 +176,11 @@ class Enemy(Entity):
             self.shoot_def_trajectory_one()
 
     def on_natural_death(self):
-        self.entities_buffer.append(Corpse(self))
+        self.i_can_spawn_entities.add(Corpse(self))
     
     def on_killed_by_player(self):
         reward, bullets = (self.reward * 0.5, int(self.reward / 100)) if random.random() < PROBABILITY_SPAWN_EXTRA_BULLET_ORB else (self.reward, 0)
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             EnergyOrb(self.pos, reward, 0.25, num_extra_bullets=bullets, is_enemy_bonus_orb=True)
         )
     
@@ -286,7 +288,7 @@ class TankEnemy(Enemy):
     def on_natural_death(self):
         super().on_natural_death()
         for _ in range(random.randint(3, 7)):
-            self.entities_buffer.append(
+            self.i_can_spawn_entities.add(
                 BasicEnemy(
                     pos=self.pos + random_unit_vector() * 150,
                     player=self.homing_target, # type: ignore
@@ -329,7 +331,7 @@ class ArtilleryEnemy(Enemy):
         self.spread = math.pi / 2.
         for _ in range(random.randint(1, 5)):
             self.shoot_homing(speed_mult=1.4)
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             FastEnemy(
                 pos=self.pos + random_unit_vector() * 150,
                 player=self.homing_target, # type: ignore
@@ -386,13 +388,13 @@ class MinerEnemy(Enemy):
         if (self.homing_target.get_pos() - self.pos).magnitude_squared() < MINER_DETONATION_RADIUS**2:
             self.kill()
             for _ in range(random.randint(0, 3) + self._player_level // 4):
-                self.entities_buffer.append(
+                self.i_can_spawn_entities.add(
                     Mine(
                         self.homing_target.pos + random_unit_vector() * random.uniform(50., 200. + 30 * self._player_level),
                         damage=MINE_DEFAULT_DAMAGE + 8. * self._player_level,
                     )
                 )
-            self.entities_buffer.append(
+            self.i_can_spawn_entities.add(
                 AOEEffect(
                     pos=self.pos,
                     size=MINER_DETONATION_RADIUS * 1.5,
@@ -479,13 +481,13 @@ class BossEnemy(Enemy):
         towards_player = self._player_pos - self.pos
         # precision of spawning oil spills increases with level and difficulty
         inprecision = 0.5 - 0.03 * (self._player_level + self.difficulty - 3)
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             OilSpill(pos=self.get_pos() + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
                 size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
         )
     
     def give_blocks(self):
-        self.entities_buffer.append(
+        self.i_can_spawn_entities.add(
             AOEEffect(
                 self.get_pos(),
                 BLOCKS_FOR_ENEMIES_EFFECT_SIZE,

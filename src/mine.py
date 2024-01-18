@@ -35,7 +35,8 @@ class Mine(Entity):
         return super().update(time_delta)
     
     def kill(self):
-        self.entities_buffer.append(
+        assert self.i_can_spawn_entities
+        self.i_can_spawn_entities.add(
             AOEEffect(
                 pos=self.pos,
                 size=MINE_AOE_EFFECT_SIZE,

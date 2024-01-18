@@ -8,7 +8,7 @@ from pygame import Vector2, Color
 
 from src.enums import EntityType
 from src.utils import random_unit_vector
-from src.interfaces import RendersTrailInterface
+from src.interfaces import RendersTrailInterface, CanSpawnEntitiesInterface
 from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 
@@ -35,18 +35,15 @@ class Entity(ABC):
         self.speed = speed
         self.vel = vel if vel is not None else random_unit_vector()
         self._is_alive = is_alive
-        # self.render_trail = render_trail
-        # self.render_trail_buffer = 1.
         self.can_spawn_entities = can_spawn_entities
         self.turn_coefficient = turn_coefficient
-        # self.trail = deque(maxlen=TRAIL_MAX_LENGTH)
-        self.entities_buffer: list[Entity] = []
         self.color = color if color is not None else Color('white')
         self.homing_target = homing_target
         self._id = random.randrange(2**32)
 
         # interfaces:
         self.i_render_trail = RendersTrailInterface() if render_trail else None
+        self.i_can_spawn_entities = CanSpawnEntitiesInterface() if can_spawn_entities else None
     
     @abstractmethod
     def update(self, time_delta: float):
