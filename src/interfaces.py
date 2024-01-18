@@ -1,7 +1,10 @@
+from __future__ import annotations
+from collections import deque
 from pygame import Vector2
 
 from src.utils import Timer
-from src.entity import Entity
+import src.entity
+from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 
 class CanDieInterface:
@@ -15,16 +18,14 @@ class CanDieInterface:
 
 class CanSpawnEntitiesInterface:
     def __init__(self) -> None:
-        self.entities_buffer: list[Entity] = []
+        self.entities_buffer: list[src.entity.Entity] = []
     
-    def add(self, entity: Entity) -> None:
+    def add(self, entity: src.entity.Entity) -> None:
         self.entities_buffer.append(entity)
     
-    
-
 
 class FollowsEntityInterface:
-    def __init__(self, entity: Entity) -> None:
+    def __init__(self, entity: src.entity.Entity) -> None:
         self.entity = entity
     
     ...
@@ -32,6 +33,17 @@ class FollowsEntityInterface:
 
 class RendersTrailInterface:
     def __init__(self):
-        self.trail: list[Vector2] = []
+        self.render_trail_pseudo_timer = 1.
+        self.trail: deque[Vector2] = deque(maxlen=TRAIL_MAX_LENGTH)
     
-    ...
+    def tick_check_should_add(self, time_delta: float) -> bool:
+        """Increases timer var. Returns True if the new point should be added."""
+        self.render_trail_pseudo_timer += time_delta
+        return self.render_trail_pseudo_timer >= 1. / TRAIL_POINTS_PER_SECOND
+    
+    def add(self, pos: Vector2):
+        self.trail.append(pos)
+        self.render_trail_pseudo_timer = 0.
+
+    def get_trail(self) -> deque[Vector2]:
+        return self.trail

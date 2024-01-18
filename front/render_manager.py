@@ -289,16 +289,16 @@ class RenderManager:
                 pygame.draw.circle(self.surface, NICER_GREEN, a + (b - a) * i / N, 2)
 
     def draw_entity_trail(self, entity: Entity):
-        _trail_len = len(entity.trail)
+        if not entity.i_render_trail: return
+        _trail_len = len(entity.i_render_trail.get_trail())
         color_gradient = ColorGradient(BLACK, entity.get_color())
-        for i, pos in enumerate(entity.trail):
+        for i, pos in enumerate(entity.i_render_trail.get_trail()):
             pygame.draw.circle(self.surface, color_gradient(i / _trail_len), pos, 3., width=1)
 
     def draw_entity_basics(self, entity: Entity):
         pygame.draw.circle(self.surface, entity.get_color(), entity.get_pos(), entity.get_size())
         self.entities_drawn += 1
-        if entity.render_trail:
-            self.draw_entity_trail(entity)
+        self.draw_entity_trail(entity)
         if self.debug: self.draw_entity_debug(entity)
 
     def draw_mine(self, mine: Mine):

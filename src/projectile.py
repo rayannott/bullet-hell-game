@@ -26,7 +26,8 @@ class Projectile(Entity):
             speed: float = PROJECTILE_DEFAULT_SPEED,
             lifetime: float = PROJECTILE_DEFAULT_LIFETIME,
             homing_target: Entity | None = None,
-            turn_coefficient: float = 1.
+            turn_coefficient: float = 1.,
+            render_trail: bool = False,
         ):
         super().__init__(
             pos=pos,
@@ -35,6 +36,7 @@ class Projectile(Entity):
             speed=speed,
             vel=vel,
             homing_target=homing_target,
+            render_trail=render_trail,
             turn_coefficient=turn_coefficient,
         )
         self.projectile_type = projectile_type
@@ -75,11 +77,11 @@ class ExplosiveProjectile(Projectile):
             speed=speed,
             lifetime=lifetime,
             homing_target=homing_target,
+            render_trail=True,
         )
         self.num_subprojectiles = num_subprojectiles
         self.can_spawn_entities = True
         self.homing_target = homing_target
-        self.render_trail = True
     
     def on_natural_death(self):
         N = self.num_subprojectiles
@@ -116,9 +118,9 @@ class HomingProjectile(Projectile):
             lifetime=lifetime,
             homing_target=homing_target,
             turn_coefficient=turn_coefficient,
+            render_trail=True,
         )
         self.homing_target = homing_target
-        self.render_trail = True
 
 
 class DefinedTrajectoryProjectile(Projectile):
@@ -143,7 +145,6 @@ class DefinedTrajectoryProjectile(Projectile):
             lifetime=lifetime,
             turn_coefficient=turn_coefficient,
         )
-        # self.render_trail = True
 
     def update(self, time_delta: float):
         if not self._is_alive: return

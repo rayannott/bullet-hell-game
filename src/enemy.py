@@ -52,6 +52,7 @@ class Enemy(Entity):
             damage_spread: float = ENEMY_DEFAULT_DAMAGE_SPREAD,
             spread: float = ENEMY_DEFAULT_SHOOTING_SPREAD,
             turn_coefficient: float = 1.,
+            render_trail: bool = False,
         ):
         super().__init__(
             pos=pos,
@@ -62,6 +63,7 @@ class Enemy(Entity):
             can_spawn_entities=True,
             homing_target=player,
             turn_coefficient=turn_coefficient,
+            render_trail=render_trail,
         )
         self.has_block = False
         self.homing_target: Player # to avoid typing errors (this is always a player)
@@ -356,9 +358,9 @@ class MinerEnemy(Enemy):
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE,
             turn_coefficient=0.4,
+            render_trail=True
         )
         self.shoots_player = False
-        self.render_trail = True
         self.dash_cooldown_timer = Timer(max_time=6.)
         self.dash_active_timer = Timer(max_time=0.5 + 0.04 * self._player_level)
         self.dash_active_timer.turn_off()

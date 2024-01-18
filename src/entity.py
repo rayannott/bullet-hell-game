@@ -8,6 +8,7 @@ from pygame import Vector2, Color
 
 from src.enums import EntityType
 from src.utils import random_unit_vector
+from src.interfaces import RendersTrailInterface
 from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 
@@ -34,15 +35,18 @@ class Entity(ABC):
         self.speed = speed
         self.vel = vel if vel is not None else random_unit_vector()
         self._is_alive = is_alive
-        self.render_trail = render_trail
-        self.render_trail_buffer = 1.
+        # self.render_trail = render_trail
+        # self.render_trail_buffer = 1.
         self.can_spawn_entities = can_spawn_entities
         self.turn_coefficient = turn_coefficient
-        self.trail = deque(maxlen=TRAIL_MAX_LENGTH)
+        # self.trail = deque(maxlen=TRAIL_MAX_LENGTH)
         self.entities_buffer: list[Entity] = []
         self.color = color if color is not None else Color('white')
         self.homing_target = homing_target
         self._id = random.randrange(2**32)
+
+        # interfaces:
+        self.i_render_trail = RendersTrailInterface() if render_trail else None
     
     @abstractmethod
     def update(self, time_delta: float):
@@ -56,10 +60,10 @@ class Entity(ABC):
         if self.speed > 0. and self.vel.magnitude_squared() > 0.:
             self.vel.scale_to_length(self.speed * time_delta)
             self.pos += self.vel
-        self.render_trail_buffer += time_delta
-        if self.render_trail and self.render_trail_buffer > 1/TRAIL_POINTS_PER_SECOND:
-            self.trail.append(self.pos.copy())
-            self.render_trail_buffer = 0.
+        if self.i_render_trail:
+            if self.i_render_trail.tick_check_should_add(time_delta):
+                self.i_render_trail.add(self.pos.copy())
+                
 
     def intersects(self, other: 'Entity') -> bool:
         """
