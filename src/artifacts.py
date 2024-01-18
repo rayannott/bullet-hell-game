@@ -155,6 +155,7 @@ class BulletShield(Artifact):
 
 class MineSpawn(Artifact):
     def __init__(self, player):
+        # TODO: __future__ import annotations and add type hinting for player
         super().__init__(
             artifact_type=ArtifactType.MINE_SPAWN, 
             player=player,

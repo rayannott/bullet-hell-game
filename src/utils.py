@@ -121,6 +121,7 @@ class AppliedToEntityManager:
     
     def check_applied(self, entity) -> None:
         self.applied_to.add(entity.get_id())
+        # TODO from __future__ import annotations add hints
 
 
 class Interpolate2D:
