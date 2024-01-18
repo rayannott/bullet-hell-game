@@ -47,9 +47,11 @@ class ArtifactChest(Entity):
     def update(self, time_delta: float):
         if not self._is_alive: return
         super().update(time_delta)
-        self.life_timer.tick(time_delta)
         self.t += time_delta
         self.pos = 15 * Vector2(math.cos(self.t), math.sin(self.t)) + self.init_pos
+        self.life_timer.tick(time_delta)
+        if not self.life_timer.running():
+            self.kill()
 
     def __repr__(self) -> str:
         return f'ArtifactChest({self.artifact})'
