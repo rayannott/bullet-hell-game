@@ -65,6 +65,7 @@ class Enemy(Entity):
             homing_target=player,
             turn_coefficient=turn_coefficient,
             render_trail=render_trail,
+            lifetime=lifetime,
         )
         self.has_block = False
         self.homing_target: Player # to avoid typing errors (this is always a player)
@@ -109,10 +110,6 @@ class Enemy(Entity):
         super().update(time_delta)
         self.cooldown.tick(time_delta)
         # TODO: use interface for CanDie instead of checking for lifetime_cooldown
-        self.lifetime_cooldown.tick(time_delta)
-        if not self.lifetime_cooldown.running():
-            self.kill()
-            self.on_natural_death()
         if not self.shoots_player: return
         if not self.cooldown.running():
             self.shoot()

@@ -150,7 +150,7 @@ class RenderManager:
             self.draw_enemy(enemy)
         for energy_orb in self.game.energy_orbs():
             self.draw_entity_basics(energy_orb)
-            draw_circular_status_bar(self.surface, energy_orb.get_pos(), energy_orb._life_timer.get_slider(reverse=True),
+            draw_circular_status_bar(self.surface, energy_orb.get_pos(), energy_orb.i_has_lifetime.timer.get_slider(reverse=True),
                 energy_orb.get_size() * 2., color=energy_orb.color, draw_full=True, width=1)
         for corpse in self.game.corpses():
             self.draw_entity_basics(corpse)
@@ -201,13 +201,12 @@ class RenderManager:
         self.draw_entity_basics(art_chest)
         pos = art_chest.get_pos(); size = art_chest.get_size()
         _color = (WHITE if art_chest.artifact.artifact_type == ArtifactType.STATS else RED) if can_be_picked_up else GRAY
+        draw_circular_status_bar(self.surface, pos, art_chest.i_has_lifetime.timer.get_slider(reverse=True),
+            size * 1.2, color=WHITE, width=2)
         for i in range(3):
             pygame.draw.circle(self.surface, _color, pos, size * i / 3 + 3, width=3)
-        if can_be_picked_up:
-            draw_circular_status_bar(self.surface, pos, art_chest.life_timer.get_slider(reverse=True),
-                size * 1.2, color=WHITE, width=2)
-            label = Label(str(art_chest.artifact), self.surface, position=pos + Vector2(-size, -size * 1.5))
-            label.update()
+        label = Label(str(art_chest.artifact), self.surface, position=pos + Vector2(-size, -size * 1.5))
+        label.update()
 
     def draw_enemy(self, enemy: Enemy):
         self.draw_entity_basics(enemy)

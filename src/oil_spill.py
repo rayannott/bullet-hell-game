@@ -16,20 +16,18 @@ class OilSpill(Entity):
             render_trail=False,
             can_spawn_entities=False,
             color=Color('#a37d37'),
+            lifetime=OIL_SPILL_LIFETIME,
         )
         self.ACTIVATED_COLOR = self.color
         self.INACTIVE_COLOR = Color('#453820')
-        self._lifetime_timer = Timer(max_time=OIL_SPILL_LIFETIME)
         self._activation_timer = Timer(max_time=1.5)
     
     def is_activated(self) -> bool:
         return not self._activation_timer.running()
 
     def update(self, time_delta: float):
+        super().update(time_delta)
         if not self.is_alive(): return
-        # TODO: use interface for CanDie instead of checking for _lifetime_timer
-        self._lifetime_timer.tick(time_delta)
-        if not self._lifetime_timer.running(): self.kill()
         self._activation_timer.tick(time_delta)
         if self.is_activated():
             self.color = self.ACTIVATED_COLOR

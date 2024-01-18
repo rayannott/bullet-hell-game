@@ -3,7 +3,7 @@ from pygame import Vector2, Color
 
 from src.entity import Entity
 from src.enums import EntityType, ProjectileType
-from src.utils import Timer, Interpolate2D
+from src.utils import Interpolate2D
 from config import (PROJECTILE_DEFAULT_SIZE, PROJECTILE_DEFAULT_DAMAGE,
                         PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME)
 
@@ -40,22 +40,16 @@ class Projectile(Entity):
             render_trail=render_trail,
             turn_coefficient=turn_coefficient,
             can_spawn_entities=can_spawn_entities,
+            lifetime=lifetime,
         )
         self.projectile_type = projectile_type
         self.damage = damage
-        self.lifetime = lifetime
         self.color = PROJECTILE_COLOR_MAP[projectile_type]
         self.ricochet_count = 0
-        self.life_timer = Timer(max_time=self.lifetime)
 
     def update(self, time_delta: float):
         super().update(time_delta)
         if not self._is_alive: return
-        # TODO: use interface for CanDie instead of checking for life_timer
-        self.life_timer.tick(time_delta)
-        if not self.life_timer.running():
-            self.kill()
-            self.on_natural_death()
 
     def on_natural_death(self):
         pass
@@ -83,7 +77,6 @@ class ExplosiveProjectile(Projectile):
             can_spawn_entities=True,
         )
         self.num_subprojectiles = num_subprojectiles
-        self.can_spawn_entities = True
         self.homing_target = homing_target
     
     def on_natural_death(self):
@@ -124,7 +117,6 @@ class HomingProjectile(Projectile):
             turn_coefficient=turn_coefficient,
             render_trail=True,
         )
-        self.homing_target = homing_target
 
 
 class DefinedTrajectoryProjectile(Projectile):
@@ -153,7 +145,7 @@ class DefinedTrajectoryProjectile(Projectile):
     def update(self, time_delta: float):
         if not self._is_alive: return
         super().update(time_delta)
-        t = min(self.life_timer.get_percent_full(), 1.)
+        t = min(self.i_has_lifetime.timer.get_percent_full(), 1.)
         self.pos = self.traj(t)
         self.vel = self.traj.derivative(t)
         self.speed = self.vel.magnitude()

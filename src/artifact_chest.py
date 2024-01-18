@@ -8,7 +8,6 @@ from pygame import Vector2, Color
 
 import src.player
 from src.entity import Entity
-from src.utils import Timer
 from src.enums import EntityType, ArtifactType
 from src.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop, Shrapnel
 from config import ARTIFACT_CHEST_SIZE, ARTIFACT_CHEST_LIFETIME
@@ -26,10 +25,10 @@ class ArtifactChest(Entity):
             type=EntityType.ARTIFACT_CHEST,
             size=ARTIFACT_CHEST_SIZE,
             color=Color('yellow'),
+            lifetime=ARTIFACT_CHEST_LIFETIME,
         )
         self.init_pos = pos.copy()
         self.artifact = artifact
-        self.life_timer = Timer(max_time=ARTIFACT_CHEST_LIFETIME)
         self.t = 0
     
     def can_be_picked_up(self) -> bool:
@@ -49,10 +48,6 @@ class ArtifactChest(Entity):
         super().update(time_delta)
         self.t += time_delta
         self.pos = 15 * Vector2(math.cos(self.t), math.sin(self.t)) + self.init_pos
-        # TODO: use interface for CanDie instead of checking for life_timer
-        self.life_timer.tick(time_delta)
-        if not self.life_timer.running():
-            self.kill()
 
     def __repr__(self) -> str:
         return f'ArtifactChest({self.artifact})'

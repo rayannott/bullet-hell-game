@@ -7,13 +7,14 @@ import src.entity
 from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 
-class CanDieInterface:
+class HasLifetimeInterface:
     def __init__(self, lifetime: float) -> None:
         self.timer = Timer(max_time=lifetime)
     
     def tick_is_alive(self, time_delta: float) -> bool:
         """Returns True if the object is still alive."""
-        ...
+        self.timer.tick(time_delta)
+        return self.timer.running()
 
 
 class CanSpawnEntitiesInterface:
@@ -28,13 +29,6 @@ class CanSpawnEntitiesInterface:
     
     def clear(self) -> None:
         self.entities_buffer.clear()
-
-
-class FollowsEntityInterface:
-    def __init__(self, entity: src.entity.Entity) -> None:
-        self.entity = entity
-    
-    ...
 
 
 class RendersTrailInterface:

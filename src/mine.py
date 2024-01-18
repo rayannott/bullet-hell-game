@@ -18,20 +18,18 @@ class Mine(Entity):
             type=EntityType.MINE,
             size=MINE_SIZE,
             color=Color('#851828'),
-            can_spawn_entities=True
+            can_spawn_entities=True,
+            lifetime=MINE_LIFETIME,
         )
         self.damage = damage
         self.activation_timer = Timer(max_time=MINE_ACTIVATION_TIME)
         self.aoe_damage = aoe_damage
-        self.lifetime_timer = Timer(max_time=MINE_LIFETIME)
 
     def is_activated(self) -> bool:
         return not self.activation_timer.running()
 
     def update(self, time_delta: float):
-        self.lifetime_timer.tick(time_delta)
         self.activation_timer.tick(time_delta)
-        if not self.lifetime_timer.running(): self.kill()
         return super().update(time_delta)
     
     def kill(self):

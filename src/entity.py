@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
-from collections import deque
 from typing import Optional
-import random
+import random, math
 
 import pygame
 from pygame import Vector2, Color
 
 from src.enums import EntityType
 from src.utils import random_unit_vector
-from src.interfaces import RendersTrailInterface, CanSpawnEntitiesInterface
+from src.interfaces import RendersTrailInterface, CanSpawnEntitiesInterface, HasLifetimeInterface
 from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 
@@ -28,6 +27,7 @@ class Entity(ABC):
         color: pygame.Color | None = None,
         homing_target: Optional['Entity'] = None,
         turn_coefficient: float = 1.,
+        lifetime: float = math.inf,
     ):
         self.pos = pos
         self.type = type
@@ -35,8 +35,8 @@ class Entity(ABC):
         self.speed = speed
         self.vel = vel if vel is not None else random_unit_vector()
         self._is_alive = is_alive
-        self.can_spawn_entities = can_spawn_entities
         self.turn_coefficient = turn_coefficient
+        self.lifetime = lifetime
         self.color = color if color is not None else Color('white')
         self.homing_target = homing_target
         self._id = random.randrange(2**32)
@@ -44,6 +44,7 @@ class Entity(ABC):
         # interfaces:
         self.i_render_trail = RendersTrailInterface() if render_trail else None
         self.i_can_spawn_entities = CanSpawnEntitiesInterface() if can_spawn_entities else None
+        self.i_has_lifetime = HasLifetimeInterface(lifetime)
     
     @abstractmethod
     def update(self, time_delta: float):
@@ -51,6 +52,11 @@ class Entity(ABC):
         Update the entity. This is called every game tick.
         """
         if not self.is_alive(): return
+        if self.i_has_lifetime:
+            if not self.i_has_lifetime.tick_is_alive(time_delta):
+                self.kill()
+                self.on_natural_death()
+                return
         if self.homing_target is not None:
             self.vel = ((self.homing_target.get_pos() - self.pos).normalize() * self.turn_coefficient + 
                         self.vel * (1 - self.turn_coefficient))
@@ -60,7 +66,12 @@ class Entity(ABC):
         if self.i_render_trail:
             if self.i_render_trail.tick_check_should_add(time_delta):
                 self.i_render_trail.add(self.pos.copy())
-                
+    
+    def on_natural_death(self):
+        """
+        Called when the entity dies naturally (e.g. lifetime ends).
+        """
+        pass
 
     def intersects(self, other: 'Entity') -> bool:
         """

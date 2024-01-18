@@ -79,6 +79,7 @@ class Animation:
         # choose duration and draw function based on animation type:
         self._draw, duration = ANIM_TYPE_TO_FUNC_DUR[animation_type]
         self.life_timer = Timer(max_time=duration)
+        # TODO: maybe replace with the interface?
     
     def draw(self):
         self._draw(self)
