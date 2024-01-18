@@ -104,6 +104,7 @@ class Enemy(Entity):
         if not self.health.is_alive(): self.kill()
         super().update(time_delta)
         self.cooldown.tick(time_delta)
+        # TODO: use interface for CanDie instead of checking for lifetime_cooldown
         self.lifetime_cooldown.tick(time_delta)
         if not self.lifetime_cooldown.running():
             self.kill()

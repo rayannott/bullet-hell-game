@@ -49,6 +49,7 @@ class ArtifactChest(Entity):
         super().update(time_delta)
         self.t += time_delta
         self.pos = 15 * Vector2(math.cos(self.t), math.sin(self.t)) + self.init_pos
+        # TODO: use interface for CanDie instead of checking for life_timer
         self.life_timer.tick(time_delta)
         if not self.life_timer.running():
             self.kill()

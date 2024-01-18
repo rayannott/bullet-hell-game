@@ -71,6 +71,7 @@ class Line:
 
     def update(self, time_delta: float):
         if not self._is_alive: return
+        # TODO: use interface for CanDie instead of checking for life_timer
         self.life_timer.tick(time_delta)
         if not self.life_timer.running():
             self.kill()

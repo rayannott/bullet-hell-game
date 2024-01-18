@@ -40,6 +40,7 @@ class EnergyOrb(Entity): # TODO: change this to EntityLifetime
     def update(self, time_delta: float) -> None:
         super().update(time_delta)
         if not self._is_alive: return
+        # TODO: use interface for CanDie instead of checking for _life_timer
         self._life_timer.tick(time_delta)
         if not self._life_timer.running():
             self.kill()

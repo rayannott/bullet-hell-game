@@ -27,11 +27,12 @@ class OilSpill(Entity):
 
     def update(self, time_delta: float):
         if not self.is_alive(): return
+        # TODO: use interface for CanDie instead of checking for _lifetime_timer
         self._lifetime_timer.tick(time_delta)
+        if not self._lifetime_timer.running(): self.kill()
         self._activation_timer.tick(time_delta)
         if self.is_activated():
             self.color = self.ACTIVATED_COLOR
             self.size += OIL_SPILL_SIZE_GROWTH_RATE * time_delta
         else:
             self.color = self.INACTIVE_COLOR
-        if not self._lifetime_timer.running(): self.kill()

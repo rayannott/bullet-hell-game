@@ -35,8 +35,9 @@ class AOEEffect(Entity):
         self.lifetime_timer = Timer(max_time=animation_lingering_time)
 
     def update(self, time_delta: float):
+        # TODO: use interface for CanDie instead of checking for lifetime_timer
         self.lifetime_timer.tick(time_delta)
-        self.set_color(self.color_gradient(self.lifetime_timer.get_percent_full()))
         if not self.lifetime_timer.running(): self.kill()
+        self.set_color(self.color_gradient(self.lifetime_timer.get_percent_full()))
         return super().update(time_delta)
     
