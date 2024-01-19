@@ -54,7 +54,7 @@ class ArtifactChest(Entity):
 
 
 class ArtifactChestGenerator:
-    def __init__(self, player: src.player.Player):
+    def __init__(self, player: src.entities.player.Player):
         # each of these can be collected only once
         self.player = player
         active_art_types = list(ArtifactType)
