@@ -267,6 +267,7 @@ class TankEnemy(Enemy):
             lifetime=ENEMY_DEFAULT_LIFETIME + 3. * self._player_level,
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.4,
             damage=ENEMY_DEFAULT_DAMAGE * (1. + 0.1 * self._player_level),
+            turn_coefficient=0.42,
         )
         self._spread = 1. + 0.03 * (self._player_level + player.settings.difficulty)
         self.cooldown.set_percent_full(0.8)
