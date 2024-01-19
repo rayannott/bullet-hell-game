@@ -1,9 +1,9 @@
 from pygame import Color
-from src.aoe_effect import AOEEffect, AOEEffectEffectType
+from src.entities.aoe_effect import AOEEffect, AOEEffectEffectType
 
-from src.entity import Entity
-from src.enums import EntityType
-from src.utils import Timer
+from src.entities.entity import Entity
+from src.utils.enums import EntityType
+from src.utils.utils import Timer
 from config import LIGHT_ORANGE_HEX, BLOCKS_FOR_ENEMIES_EFFECT_SIZE, CORPSE_GIVE_BLOCKS_COOLDOWN
 
 LIGHT_ORANGE = Color(LIGHT_ORANGE_HEX)

@@ -4,17 +4,17 @@ import random
 from pygame import Vector2, Color
 
 from front.sounds import play_sfx
-from src.aoe_effect import AOEEffect, AOEEffectEffectType
-from src.energy_orb import EnergyOrb
-from src.entity import Entity
-from src.corpse import Corpse
-from src.enums import EntityType, EnemyType, ProjectileType
-from src.mine import Mine
-from src.player import Player
-from src.utils import Slider, Timer, random_unit_vector
-from src.projectile import Projectile, HomingProjectile, ExplosiveProjectile, DefinedTrajectoryProjectile
-from src.oil_spill import OilSpill
-from src.interfaces import CanSpawnEntitiesInterface
+from src.entities.aoe_effect import AOEEffect, AOEEffectEffectType
+from src.entities.energy_orb import EnergyOrb
+from src.entities.entity import Entity
+from src.entities.corpse import Corpse
+from src.utils.enums import EntityType, EnemyType, ProjectileType
+from src.entities.mine import Mine
+from src.entities.player import Player
+from src.utils.utils import Slider, Timer, random_unit_vector
+from src.entities.projectile import Projectile, HomingProjectile, ExplosiveProjectile, DefinedTrajectoryProjectile
+from src.entities.oil_spill import OilSpill
+from src.misc.interfaces import CanSpawnEntitiesInterface
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_RATE,
     PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,

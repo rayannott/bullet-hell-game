@@ -3,9 +3,9 @@ from enum import Enum, auto
 from pygame import Vector2, Color
 
 from front.utils import ColorGradient
-from src.entity import Entity
-from src.enums import EntityType, AOEEffectEffectType
-from src.utils import AppliedToEntityManager, Timer
+from src.entities.entity import Entity
+from src.utils.enums import EntityType, AOEEffectEffectType
+from src.utils.utils import AppliedToEntityManager, Timer
 
 from config import BACKGROUND_COLOR_HEX
 

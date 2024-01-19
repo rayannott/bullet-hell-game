@@ -10,15 +10,15 @@ import pygame_gui
 
 from front.inventory_info import InventoryInfo
 from front.stats_window import StatsWindow
-from src.aoe_effect import AOEEffect
-from src.artifact_chest import ArtifactChest
-from src.artifacts import BulletShield, Dash, MineSpawn, TimeStop, Shrapnel
-from src.enums import ArtifactType, EnemyType, AOEEffectEffectType
-from src.line import Line, LineType
-from src.oil_spill import OilSpill
-from src.player_utils import Achievements
+from src.entities.aoe_effect import AOEEffect
+from src.entities.artifact_chest import ArtifactChest
+from src.misc.artifacts import BulletShield, Dash, MineSpawn, TimeStop, Shrapnel
+from src.utils.enums import ArtifactType, EnemyType, AOEEffectEffectType
+from src.misc.line import Line, LineType
+from src.entities.oil_spill import OilSpill
+from src.utils.player_utils import Achievements
 
-from src.utils import Feedback, random_unit_vector
+from src.utils.utils import Feedback, random_unit_vector
 from src.game import Game
 
 from front.sounds import play_sfx

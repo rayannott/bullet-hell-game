@@ -3,16 +3,16 @@ import random
 
 import pygame
 from pygame import Color, Vector2, freetype
-from src.artifact_chest import ArtifactChest
-from src.artifacts import Artifact
-from src.enemy import Enemy
-from src.enums import ArtifactType, EnemyType, ProjectileType
+from src.entities.artifact_chest import ArtifactChest
+from src.misc.artifacts import Artifact
+from src.entities.enemy import Enemy
+from src.utils.enums import ArtifactType, EnemyType, ProjectileType
 
 from src.game import Game
-from src.entity import Entity
-from src.mine import Mine
-from src.projectile import Projectile
-from src.utils import Slider, Timer
+from src.entities.entity import Entity
+from src.entities.mine import Mine
+from src.entities.projectile import Projectile
+from src.utils.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (PLAYER_SHOT_COST, GAME_DEBUG_RECT_SIZE, LIGHT_MAGENTA_HEX, NICER_RED_HEX, GRAY_HEX, 
     WAVE_DURATION, BM, BULLET_SHIELD_SIZE, NICER_MAGENTA_HEX, NICER_GREEN_HEX, BOSS_ENEMY_COLOR_HEX,

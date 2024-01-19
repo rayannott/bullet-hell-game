@@ -13,7 +13,7 @@ from front.utils import paint
 from config import MENU_BUTTONS_SIZE, NICER_GREEN_HEX
 from config.settings import Settings
 from config.paths import ACHIEVEMENTS_FILE, SAVES_DIR, SAVES_FILE
-from src.player_utils import Achievements
+from src.utils.player_utils import Achievements
 
 
 NICER_GREEN = pygame.Color(NICER_GREEN_HEX)

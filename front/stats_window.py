@@ -8,7 +8,7 @@ from config import (LIGHT_MAGENTA_HEX, NICER_GREEN_HEX, NICER_YELLOW_HEX,
     LIGHT_ORANGE_HEX, NICER_RED_HEX, NICER_BLUE_HEX, LIGHT_BLUE_HEX,
     SAVES_FILE, MAX_NUM_OF_SAVES,
 )
-from src.artifacts import ArtifactsHandler, StatsBoost
+from src.misc.artifacts import ArtifactsHandler, StatsBoost
 
 
 (LIGHT_MAGENTA, NICER_GREEN, LIGHT_ORANGE, 

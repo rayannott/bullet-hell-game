@@ -1,9 +1,9 @@
 from pygame import Vector2, Color
 
-from src.entity import Entity
-from src.enums import EntityType
-from src.utils import Timer
-from src.aoe_effect import AOEEffect, AOEEffectEffectType
+from src.entities.entity import Entity
+from src.utils.enums import EntityType
+from src.utils.utils import Timer
+from src.entities.aoe_effect import AOEEffect, AOEEffectEffectType
 from config import (MINE_SIZE, MINE_ACTIVATION_TIME, MINE_LIFETIME, MINE_DEFAULT_DAMAGE, MINE_AOE_EFFECT_SIZE)
 
 

@@ -7,7 +7,7 @@ from pygame import Color, Vector2
 from scipy.interpolate import make_interp_spline, BSpline
 import numpy as np
 
-from src.enums import EntityType
+from src.utils.enums import EntityType
 
 
 def random_unit_vector() -> Vector2:

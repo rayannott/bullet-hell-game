@@ -1,9 +1,9 @@
 import random
 from pygame import Vector2, Color
 
-from src.entity import Entity
-from src.enums import EntityType, ProjectileType
-from src.utils import Interpolate2D
+from src.entities.entity import Entity
+from src.utils.enums import EntityType, ProjectileType
+from src.utils.utils import Interpolate2D
 from config import (PROJECTILE_DEFAULT_SIZE, PROJECTILE_DEFAULT_DAMAGE,
                         PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME)
 

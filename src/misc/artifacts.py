@@ -5,12 +5,12 @@ import random
 from pygame import Vector2
 from config.back import PROJECTILE_DEFAULT_SPEED
 
-from src.entity import Entity
-from src.mine import Mine
-from src.projectile import Projectile
-from src.enums import ArtifactType, ProjectileType
-from src.exceptions import NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
-from src.utils import Timer, random_unit_vector
+from src.entities.entity import Entity
+from src.entities.mine import Mine
+from src.entities.projectile import Projectile
+from src.utils.enums import ArtifactType, ProjectileType
+from src.utils.exceptions import NotEnoughEnergy, OnCooldown, ShieldRunning, ArtifactMissing, TimeStopRunning
+from src.utils.utils import Timer, random_unit_vector
 from config import (BULLET_SHIELD_SIZE, BULLET_SHIELD_COOLDOWN,
     BULLET_SHIELD_DURATION, BULLET_SHIELD_COST, MINE_COOLDOWN, MINE_COST, MINE_DEFAULT_DAMAGE,
     TIME_STOP_DEFAULT_DURATION, TIME_STOP_COOLDOWN, TIME_STOP_COST,

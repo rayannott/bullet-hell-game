@@ -3,8 +3,8 @@ from enum import Enum, auto
 
 from pygame import Vector2, Color
 
-from src.entity import Entity
-from src.utils import Timer, AppliedToEntityManager
+from src.entities.entity import Entity
+from src.utils.utils import Timer, AppliedToEntityManager
 
 
 class LineType(Enum):

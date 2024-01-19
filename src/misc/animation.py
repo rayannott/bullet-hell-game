@@ -3,8 +3,8 @@ from typing import TypedDict, Unpack, NotRequired
 import pygame
 from pygame import Vector2, Color
 
-from src.utils import Timer
-from src.enums import AnimationType
+from src.utils.utils import Timer
+from src.utils.enums import AnimationType
 from front.utils import ColorGradient
 from config import BACKGROUND_COLOR_HEX, BOSS_ENEMY_COLOR_HEX, NICER_MAGENTA_HEX
 

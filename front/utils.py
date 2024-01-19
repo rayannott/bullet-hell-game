@@ -5,7 +5,7 @@ from typing import Literal
 import pygame, pygame_gui
 from pygame import Color, Vector2, freetype
 
-from src.utils import Slider, Timer
+from src.utils.utils import Slider, Timer
 from config import FONT_FILE
 
 freetype.init()

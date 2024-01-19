@@ -2,7 +2,7 @@ import pygame
 from pygame import Vector2
 
 from front.utils import TextBox
-from src.player import Player
+from src.entities.player import Player
 from config.front import LIGHT_ORANGE_HEX, NICER_RED_HEX
 
 

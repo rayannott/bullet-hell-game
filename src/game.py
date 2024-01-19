@@ -7,22 +7,22 @@ import pygame
 from pygame import Vector2, Color
 
 from config.settings import Settings
-from src.artifacts import Artifact
-from src.entity import Entity, DummyEntity
-from src.corpse import Corpse
-from src.aoe_effect import AOEEffect
-from src.line import Line, LineType
-from src.mine import Mine
-from src.oil_spill import OilSpill
-from src.player import Player
-from src.enums import ArtifactType, EntityType, EnemyType, ProjectileType, AnimationType, AOEEffectEffectType
-from src.projectile import Projectile, ProjectileType
-from src.utils import Timer, Feedback, random_unit_vector
-from src.energy_orb import EnergyOrb
-from src.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, TimeStopRunning
-from src.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
-from src.artifact_chest import ArtifactChest
-from src.animation import Animation, AnimationHandler
+from src.misc.artifacts import Artifact
+from src.entities.entity import Entity, DummyEntity
+from src.entities.corpse import Corpse
+from src.entities.aoe_effect import AOEEffect
+from src.misc.line import Line, LineType
+from src.entities.mine import Mine
+from src.entities.oil_spill import OilSpill
+from src.entities.player import Player
+from src.utils.enums import ArtifactType, EntityType, EnemyType, ProjectileType, AnimationType, AOEEffectEffectType
+from src.entities.projectile import Projectile, ProjectileType
+from src.utils.utils import Timer, Feedback, random_unit_vector
+from src.entities.energy_orb import EnergyOrb
+from src.utils.exceptions import ArtifactMissing, OnCooldown, NotEnoughEnergy, ShootingDirectionUndefined, ShieldRunning, TimeStopRunning
+from src.entities.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
+from src.entities.artifact_chest import ArtifactChest
+from src.misc.animation import Animation, AnimationHandler
 
 from config import (REMOVE_DEAD_ENTITIES_EVERY, ENERGY_ORB_DEFAULT_ENERGY, ENERGY_ORB_LIFETIME_RANGE, 
     NICER_MAGENTA_HEX, NICER_BLUE_HEX, NICER_YELLOW_HEX, NICER_GREEN_HEX,

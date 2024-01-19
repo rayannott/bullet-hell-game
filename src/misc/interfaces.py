@@ -2,8 +2,8 @@ from __future__ import annotations
 from collections import deque
 from pygame import Vector2
 
-from src.utils import Timer
-import src.entity
+from src.utils.utils import Timer
+import src.entities.entity
 from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 
@@ -19,12 +19,12 @@ class HasLifetimeInterface:
 
 class CanSpawnEntitiesInterface:
     def __init__(self) -> None:
-        self.entities_buffer: list[src.entity.Entity] = []
+        self.entities_buffer: list[src.entities.entity.Entity] = []
     
-    def add(self, entity: src.entity.Entity) -> None:
+    def add(self, entity: src.entities.entity.Entity) -> None:
         self.entities_buffer.append(entity)
     
-    def get_entities_buffer(self) -> list[src.entity.Entity]:
+    def get_entities_buffer(self) -> list[src.entities.entity.Entity]:
         return self.entities_buffer
     
     def clear(self) -> None:

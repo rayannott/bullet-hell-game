@@ -6,10 +6,10 @@ from itertools import repeat
 
 from pygame import Vector2, Color
 
-import src.player
-from src.entity import Entity
-from src.enums import EntityType, ArtifactType
-from src.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop, Shrapnel
+import src.entities.player
+from src.entities.entity import Entity
+from src.utils.enums import EntityType, ArtifactType
+from src.misc.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop, Shrapnel
 from config import ARTIFACT_CHEST_SIZE, ARTIFACT_CHEST_LIFETIME
 
 

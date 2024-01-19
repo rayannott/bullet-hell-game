@@ -5,9 +5,9 @@ import random, math
 import pygame
 from pygame import Vector2, Color
 
-from src.enums import EntityType
-from src.utils import random_unit_vector
-from src.interfaces import RendersTrailInterface, CanSpawnEntitiesInterface, HasLifetimeInterface
+from src.utils.enums import EntityType
+from src.utils.utils import random_unit_vector
+from src.misc.interfaces import RendersTrailInterface, CanSpawnEntitiesInterface, HasLifetimeInterface
 from config import TRAIL_MAX_LENGTH, TRAIL_POINTS_PER_SECOND
 
 

@@ -1,6 +1,6 @@
 from pygame import Color, Vector2
 
-from src.entity import Entity, EntityType
+from src.entities.entity import Entity, EntityType
 from config import ENERGY_ORB_SIZE, NICER_MAGENTA_HEX, LIGHT_MAGENTA_HEX
 
 

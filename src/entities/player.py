@@ -3,15 +3,15 @@ import random
 from pygame import Vector2, Color
 from config.settings import Settings
 from front.sounds import play_sfx
-from src.artifacts import ArtifactsHandler, Artifact
-from src.artifact_chest import ArtifactChestGenerator
+from src.misc.artifacts import ArtifactsHandler, Artifact
+from src.entities.artifact_chest import ArtifactChestGenerator
 
-from src.entity import Entity
-from src.enums import ArtifactType, EntityType, ProjectileType
-from src.exceptions import ArtifactMissing, NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ArtifactCollected
-from src.projectile import Projectile
-from src.utils import Slider, Timer
-from src.player_utils import Stats, Achievements, EffectFlags
+from src.entities.entity import Entity
+from src.utils.enums import ArtifactType, EntityType, ProjectileType
+from src.utils.exceptions import ArtifactMissing, NotEnoughEnergy, OnCooldown, ShootingDirectionUndefined, ArtifactCollected
+from src.entities.projectile import Projectile
+from src.utils.utils import Slider, Timer
+from src.utils.player_utils import Stats, Achievements, EffectFlags
 
 from config import (PLAYER_SIZE, PLAYER_DEFAULT_MAX_HEALTH, PLAYER_DEFAULT_SPEED_RANGE, PLAYER_DEFAULT_REGEN_RATE,
     OIL_SPILL_DAMAGE_PER_SECOND, OIL_SPILL_SPEED_MULTIPLIER, PLAYER_INVULNERABILITY_TIME, PLAYER_SPEED_INCREASE,
