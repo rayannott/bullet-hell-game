@@ -47,12 +47,3 @@ class RendersTrailInterface:
 
     def get_trail(self) -> deque[Vector2]:
         return self.trail
-
-
-class CanShootPlayerInterface: #? do I need this?
-    def __init__(self, cooldown: float) -> None:
-        self.cooldown_timer = Timer(max_time=cooldown)
-    
-    def tick_can_shoot(self, time_delta: float) -> bool:
-        """Returns True if the object can shoot."""
-        ...
