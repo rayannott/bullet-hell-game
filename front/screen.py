@@ -59,7 +59,7 @@ class Screen(ABC):
         ...
     
     def run(self) -> FpsInfo:
-        """Main loop. Returns the average FPS."""
+        """Main loop. Returns the FPSinfo object."""
         while self.is_running:
             time_delta = self.clock.tick(self.framerate)/1000.0
             self.fps_info.update(time_delta)
