@@ -113,7 +113,6 @@ class AnimationHandler:
             animation.update(time_delta)
         if not self.clean_up_timer.running():
             removed = self.clean_up()
-            print(f'Cleaned up {removed} animations.')
             self.clean_up_timer.reset()
     
     def clean_up(self) -> int:
