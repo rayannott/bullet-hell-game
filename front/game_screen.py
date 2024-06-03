@@ -12,7 +12,7 @@ from front.inventory_info import InventoryInfo
 from front.stats_window import StatsWindow
 from src.entities.aoe_effect import AOEEffect
 from src.entities.artifact_chest import ArtifactChest
-from src.misc.artifacts import BulletShield, Dash, MineSpawn, TimeStop, Shrapnel
+from src.misc.artifacts import BulletShield, Dash, MineSpawn, Rage, TimeStop, Shrapnel
 from src.utils.enums import ArtifactType, EnemyType, AOEEffectEffectType
 from src.misc.line import Line, LineType
 from src.entities.oil_spill import OilSpill
@@ -89,6 +89,8 @@ class GameScreen(Screen):
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), MineSpawn(self.game.player)))
                 elif event.key == pygame.K_d:
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Dash(self.game.player)))
+                elif event.key == pygame.K_r:
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Rage(self.game.player)))
                 elif event.key == pygame.K_o:
                     self.game.add_entity(OilSpill(Vector2(pygame.mouse.get_pos())))
                 elif event.key == pygame.K_b:
@@ -143,6 +145,8 @@ class GameScreen(Screen):
                 self.game.player_try_ultimate(artifact_type=ArtifactType.TIME_STOP)
             elif event.key == pygame.K_x:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.SHRAPNEL)
+            elif event.key == pygame.K_r:
+                self.game.player_try_ultimate(artifact_type=ArtifactType.RAGE)
     
     def update(self, time_delta: float):
         self.game.update(time_delta)

@@ -3,7 +3,7 @@ import random
 from pygame import Vector2, Color
 from config.settings import Settings
 from front.sounds import play_sfx
-from src.misc.artifacts import ArtifactsHandler, Artifact
+from src.misc.artifacts import ArtifactsHandler, Artifact, Rage
 from src.entities.artifact_chest import ArtifactChestGenerator
 
 from src.entities.entity import Entity
@@ -183,6 +183,12 @@ class Player(Entity):
             # self.get_stats().SHRAPNELS_ACTIVATED += 1
             # play_sfx('shrapnel')
             return
+        if artifact_type == ArtifactType.RAGE:
+            self.artifacts_handler.get_rage().rage()
+            # TODO
+            # self.get_stats().RAGES_ACTIVATED += 1
+            # play_sfx('rage')
+            return
         raise ArtifactMissing(f'artifact missing for {artifact_type.name.title()}')
     
     def add_artifact(self, artifact: Artifact):
@@ -217,7 +223,7 @@ class Player(Entity):
 
     def get_regen(self) -> float: return self.regeneration_rate + self.boosts.regen
 
-    def get_shoot_coolodown(self) -> float: return self.shoot_cooldown - self.boosts.cooldown
+    def get_shoot_coolodown(self) -> float: return max(self.shoot_cooldown - self.boosts.cooldown, 0.2)
 
     def get_size(self) -> float: return self.size - self.boosts.size
 

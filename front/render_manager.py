@@ -31,6 +31,7 @@ YELLOW = Color('yellow')
 WHITE = Color('white')
 RED = Color(NICER_RED_HEX)
 GRAY = Color(GRAY_HEX)
+DARK_PURPLE = Color('#772277')
 BLACK = Color('black')
 BOSS_ENEMY_COLOR = Color(BOSS_ENEMY_COLOR_HEX)
 ALMOST_BG_COLOR = Color('#080808')
@@ -267,6 +268,12 @@ class RenderManager:
             player.artifacts_handler.get_time_stop().is_on()):
             draw_circular_status_bar(self.surface, player.get_pos(), 
                 player.artifacts_handler.get_time_stop().duration_timer.get_slider(reverse=True), player.get_size() + 15., draw_full=True)
+        # rage:
+        if (player.artifacts_handler.is_present(ArtifactType.RAGE) and
+            player.artifacts_handler.get_rage().is_on()):
+            draw_circular_status_bar(self.surface, player.get_pos(), 
+                player.artifacts_handler.get_rage().duration_timer.get_slider(reverse=True), player.get_size() + 3., draw_full=True)
+            _indicator_color = DARK_PURPLE
 
     def draw_projectile(self, projectile: Projectile):
         if projectile.projectile_type == ProjectileType.DEF_TRAJECTORY:

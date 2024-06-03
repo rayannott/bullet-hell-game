@@ -337,6 +337,41 @@ class Shrapnel(Artifact):
         return f'Shrapnel({self.num_shards}shards {self.cooldown:.0f}cd)'
 
 
+class Rage(Artifact):
+    def __init__(self, player, cooldown=35, cost=300):
+        super().__init__(ArtifactType.RAGE, player, cooldown, cost)
+        self.duration = 8
+        self.duration_timer = Timer(max_time=self.duration)
+        self.duration_timer.turn_off()
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.duration_timer.tick(time_delta)
+        if self.duration_timer.running():
+            self.player.boosts += StatsBoost(damage=15, speed=1500, cooldown=1)
+            self.player.health.change(-6 * time_delta)
+            # TODO: make this count towards the player's stats
+            # and affect the reason of death
+
+    def rage(self):
+        if self.player.energy.get_value() < self.cost:
+            raise NotEnoughEnergy('not enough energy for rage')
+        if self.cooldown_timer.running():
+            raise OnCooldown(f'rage on cooldown: {self.cooldown_timer.get_time_left():.1f}')
+        self.player.energy.change(-self.cost)
+        self.duration_timer.reset(self.duration)
+        self.cooldown_timer.reset()
+
+    def is_on(self) -> bool:
+        return self.duration_timer.running()
+    
+    def get_short_string(self) -> str:
+        return 'Rage'
+    
+    def get_verbose_string(self) -> str:
+        return f'Rage({self.duration:.0f}dur)'
+
+
 class InactiveArtifact(Artifact):
     def __init__(self, stats_boost: StatsBoost):
         super().__init__(artifact_type=ArtifactType.STATS, player=None, cooldown=0, cost=0)
@@ -368,6 +403,7 @@ class ArtifactsHandler:
         self.dash: Dash | None = None
         self.time_stop: TimeStop | None = None
         self.shrapnel: Shrapnel | None = None
+        self.rage: Rage | None = None
 
     def get_total_stats_boost(self) -> StatsBoost:
         return sum((artifact.stats_boost for artifact in self.inactive_artifacts), StatsBoost())
@@ -387,6 +423,8 @@ class ArtifactsHandler:
             yield self.time_stop
         if self.shrapnel is not None:
             yield self.shrapnel
+        if self.rage is not None:
+            yield self.rage
     
     def add_artifact(self, artifact: Artifact):
         if isinstance(artifact, InactiveArtifact):
@@ -401,6 +439,8 @@ class ArtifactsHandler:
             self.time_stop = artifact
         elif isinstance(artifact, Shrapnel):
             self.shrapnel = artifact
+        elif isinstance(artifact, Rage):
+            self.rage = artifact
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact.artifact_type}')
     
@@ -415,6 +455,8 @@ class ArtifactsHandler:
             return self.time_stop is not None
         elif artifact_type == ArtifactType.SHRAPNEL:
             return self.shrapnel is not None
+        elif artifact_type == ArtifactType.RAGE:
+            return self.rage is not None
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact_type}')
     
@@ -438,7 +480,11 @@ class ArtifactsHandler:
         if self.shrapnel is None:
             raise ArtifactMissing('[?] shrapnel is missing')
         return self.shrapnel
-    
+    def get_rage(self) -> Rage:
+        if self.rage is None:
+            raise ArtifactMissing('[?] rage is missing')
+        return self.rage
+
     def __repr__(self) -> str:
         active_artivacts = ' | '.join(map(str, self.iterate_active()))
         return f'ArtifactsHandler({active_artivacts}; {self.inactive_artifacts})'

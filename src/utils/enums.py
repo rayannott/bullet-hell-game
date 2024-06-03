@@ -47,6 +47,7 @@ class ArtifactType(Enum):
     DASH = auto()
     TIME_STOP = auto()
     SHRAPNEL = auto()
+    RAGE = auto()
 
 
 class AnimationType(Enum):
