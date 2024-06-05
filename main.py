@@ -12,12 +12,13 @@ def main():
 
 def play_through_sound_effects():
     from front.sounds import play_sfx, SOUND_EFFECTS
+
     for k in SOUND_EFFECTS:
         play_sfx(k)
         print(k)
         input()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
     # play_through_sound_effects()
