@@ -215,12 +215,11 @@ class BasicEnemy(Enemy):
         )
 
     def shoot(self):
+        self.shoot_normal()
         if self.difficulty == 5:
             self.shoot_explosive()
-        if self.difficulty >= 4:
+        elif self.difficulty >= 4:
             self.shoot_def_trajectory()
-        else:
-            self.shoot_normal()
 
 
 class FastEnemy(Enemy):
@@ -361,8 +360,9 @@ class MinerEnemy(Enemy):
             render_trail=True
         )
         self.shoots_player = False
-        self.dash_cooldown_timer = Timer(max_time=6.)
-        self.dash_active_timer = Timer(max_time=0.5 + 0.04 * self._player_level)
+        self.dash_cooldown_timer = Timer(max_time=5.)
+        self.dash_cooldown_timer.set_percent_full(0.5)
+        self.dash_active_timer = Timer(max_time=0.5 + 0.05 * self._player_level)
         self.dash_active_timer.turn_off()
         self.COLOR_IN_DASH = Color('#d3e8e3')
         self.NORMAL_COLOR = self.color
@@ -378,7 +378,7 @@ class MinerEnemy(Enemy):
             self.dash_cooldown_timer.reset()
         if self.is_in_dash():
             self.dash_active_timer.tick(time_delta)
-            self.speed = ENEMY_DEFAULT_SPEED * 4 + self._player_level // 2.
+            self.speed = ENEMY_DEFAULT_SPEED * 4 + 10. * self._player_level
             self.color = self.COLOR_IN_DASH
         else:
             self.speed = ENEMY_DEFAULT_SPEED * 1.2
@@ -399,10 +399,15 @@ class MinerEnemy(Enemy):
                     effect_type=AOEEffectEffectType.DAMAGE,
                     color=self.color,
                     animation_lingering_time=0.8,
-                    damage=self.damage_on_collision * 0.7,
+                    damage=self.damage_on_collision,
                 )
             )
         super().update(time_delta)
+
+
+class JesterEnemy(Enemy):
+    """Does not shoot, moves irratically, spawns oil spills."""
+    # TODO
 
 
 class BossEnemy(Enemy):

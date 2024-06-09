@@ -27,6 +27,7 @@ class EnemyType(Enum):
     ARTILLERY = auto()
     BOSS = auto()
     MINER = auto()
+    JESTER = auto()
 
 
 class ProjectileType(Enum):

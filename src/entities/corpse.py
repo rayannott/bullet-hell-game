@@ -20,7 +20,7 @@ class Corpse(Entity):
             color=Color('gray'),
             can_spawn_entities=True,
         )
-        self.damage_on_collision = 70.
+        self.damage_on_collision = 90.
         self.give_blocks_timer = Timer(CORPSE_GIVE_BLOCKS_COOLDOWN)
         self.give_blocks_timer.set_percent_full(0.5)
 
