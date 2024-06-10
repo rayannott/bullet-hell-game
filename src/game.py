@@ -273,6 +273,7 @@ class Game:
             self.deal_damage_to_enemy(enemy, self.player.get_damage() * 1.5)
             self.player.get_stats().DASHED_THROUGH_ENEMIES += 1
             self.feedback_buffer.append(Feedback('x', 3.5, color=NICER_GREEN, at_pos=enemy.get_pos()))
+        self.player.invulnerability_timer.reset()
         self.player.dash_needs_processing = False
     
     def register_new_achievements(self):
