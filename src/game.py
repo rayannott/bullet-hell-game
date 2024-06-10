@@ -398,13 +398,13 @@ class Game:
                 self.player.artifacts_handler.get_bullet_shield().point_inside_shield(projectile.get_pos())
             ):
                 projectile.kill()
-                self.feedback_buffer.append(Feedback(f'blocked', 1., color=pygame.Color('yellow')))
+                self.feedback_buffer.append(Feedback('blocked', 1., color=pygame.Color('yellow')))
                 self.player.get_stats().BULLET_SHIELD_BULLETS_BLOCKED += 1
                 play_sfx('shield_blocked')
                 continue
             if not projectile.intersects(self.player): continue
             if self.time_frozen: continue
-            self.player_get_damage(projectile.damage)
+            self.player_get_damage(projectile.get_damage())
             self.player.get_stats().BULLETS_CAUGHT += 1
             projectile.kill()
             self.reason_of_death = f'caught Bullet::{projectile.projectile_type.name.title()}'
@@ -458,7 +458,7 @@ class Game:
                 # effects are applied continuously
             elif line.line_type == LineType.DAMAGE:
                 self.player_get_damage(line.kwargs.get('damage', 0.))
-                self.reason_of_death = f'impact line damage'
+                self.reason_of_death = 'impact line damage'
                 line.applied_manager.check_applied(self.player)
             
     def process_collisions_enemies(self) -> None:
@@ -474,7 +474,7 @@ class Game:
                 if is_ricochet:
                     self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
                     self.feedback_buffer.append(Feedback('ricochet!', 2., color=Color('pink'), at_pos=enemy.get_pos()))
-                self.deal_damage_to_enemy(enemy, bullet.damage)
+                self.deal_damage_to_enemy(enemy, bullet.get_damage())
                 enemy.caught_bullet()
                 play_sfx('accurate_shot')
                 self.animation_handler.add_animation(enemy.get_pos(), AnimationType.ACCURATE_SHOT, bullet_vel=bullet.get_vel(), enemy_size=enemy.get_size())

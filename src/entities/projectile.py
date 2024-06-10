@@ -51,6 +51,11 @@ class Projectile(Entity):
         super().update(time_delta)
         if not self._is_alive: return
 
+    def get_damage(self) -> float:
+        """Return the damage scaled by the time alive and number of ricochets."""
+        return (self.damage * (1 + 0.5 * self.i_has_lifetime.timer.get_percent_full()**2)
+                + 10 * self.ricochet_count)
+
     def on_natural_death(self):
         pass
 
