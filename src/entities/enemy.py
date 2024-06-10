@@ -420,8 +420,8 @@ class JesterEnemy(Enemy):
             enemy_type=EnemyType.JESTER,
             player=player,
             color=Color('#ede664'),
-            speed=ENEMY_DEFAULT_SPEED * 1.3 + 10. * _player_level,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 3.,
+            speed=ENEMY_DEFAULT_SPEED + 5. * _player_level,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
             reward=ENEMY_DEFAULT_REWARD * (1.6 + 0.1 * _player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 6. * (_player_level - 1),
@@ -450,7 +450,7 @@ class JesterEnemy(Enemy):
         inprecision = 0.2 - 0.08 * (self.difficulty - 3)**3
         self.i_can_spawn_entities.add(
             OilSpill(pos=self.get_pos() + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
-                size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
+                size=OIL_SPILL_SIZE * 0.7)
         )
 
 
