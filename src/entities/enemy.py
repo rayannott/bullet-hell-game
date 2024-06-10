@@ -6,7 +6,7 @@ from pygame import Vector2, Color
 from front.sounds import play_sfx
 from src.entities.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.entities.energy_orb import EnergyOrb
-from src.entities.entity import Entity
+from src.entities.entity import Entity, DummyEntity
 from src.entities.corpse import Corpse
 from src.utils.enums import EntityType, EnemyType, ProjectileType
 from src.entities.mine import Mine
@@ -34,6 +34,7 @@ ENEMY_SIZE_MAP = {
     EnemyType.ARTILLERY: ENEMY_DEFAULT_SIZE * 2,
     EnemyType.MINER: ENEMY_DEFAULT_SIZE * 0.92,
     EnemyType.BOSS: ENEMY_DEFAULT_SIZE * 2.6,
+    EnemyType.JESTER: ENEMY_DEFAULT_SIZE * 1.5,
 }
 
 
@@ -407,7 +408,50 @@ class MinerEnemy(Enemy):
 
 class JesterEnemy(Enemy):
     """Does not shoot, moves irratically, spawns oil spills."""
-    # TODO
+    def __init__(self, 
+            pos: Vector2,
+            player: Player,
+        ):
+        _player_level = player.get_level()
+        self.difficulty = player.settings.difficulty
+        self._player_pos = player.get_pos()
+        super().__init__(
+            pos=pos,
+            enemy_type=EnemyType.JESTER,
+            player=player,
+            color=Color('#ede664'),
+            speed=ENEMY_DEFAULT_SPEED * 1.3 + 10. * _player_level,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 3.,
+            shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
+            reward=ENEMY_DEFAULT_REWARD * (1.6 + 0.1 * _player_level),
+            lifetime=ENEMY_DEFAULT_LIFETIME + 6. * (_player_level - 1),
+            damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.15,
+            turn_coefficient=0.4,
+        )
+        self.shoots_player = False
+        self.spawn_oil_spills_timer = Timer(max_time=5.)
+        self.homing_target = DummyEntity(self._player_pos) # type: ignore
+        self.change_go_to_timer = Timer(max_time=2.)
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.spawn_oil_spills_timer.tick(time_delta)
+        if not self.spawn_oil_spills_timer.running():
+            self.spawn_oil_spills()
+            self.spawn_oil_spills_timer.reset()
+        self.change_go_to_timer.tick(time_delta)
+        if not self.change_go_to_timer.running():
+            self.homing_target = DummyEntity(self._player_pos + random_unit_vector() * random.uniform(100., 300.)) # type: ignore
+            self.change_go_to_timer.reset()
+    
+    def spawn_oil_spills(self):
+        towards_player = self._player_pos - self.pos
+        # precision of spawning oil spills increases with level and difficulty
+        inprecision = 0.2 - 0.08 * (self.difficulty - 3)**3
+        self.i_can_spawn_entities.add(
+            OilSpill(pos=self.get_pos() + towards_player * random.uniform(1. - inprecision, 1. + inprecision), 
+                size=OIL_SPILL_SIZE * random.uniform(0.5, 1.5))
+        )
 
 
 class BossEnemy(Enemy):
@@ -508,5 +552,6 @@ ENEMY_TYPE_TO_CLASS = {
     EnemyType.ARTILLERY: ArtilleryEnemy,
     EnemyType.TANK: TankEnemy,
     EnemyType.MINER: MinerEnemy,
+    EnemyType.JESTER: JesterEnemy,
     EnemyType.BOSS: BossEnemy,
 }

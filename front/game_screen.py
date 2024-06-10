@@ -72,6 +72,8 @@ class GameScreen(Screen):
                 elif event.key == pygame.K_5:
                     self.game.spawn_enemy(EnemyType.MINER)
                 elif event.key == pygame.K_6:
+                    self.game.spawn_enemy(EnemyType.JESTER)
+                elif event.key == pygame.K_7:
                     self.game.spawn_enemy(EnemyType.BOSS)
                 elif event.key == pygame.K_i:
                     print('--- debug info ---')

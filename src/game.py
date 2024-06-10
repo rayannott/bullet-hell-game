@@ -46,6 +46,7 @@ def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, 
         EnemyType.ARTILLERY: level * 10.,
         EnemyType.TANK: 10. + level * 5.,
         EnemyType.MINER: 40. + level * 4.,
+        EnemyType.JESTER: 10. + level * 5.,
         EnemyType.BOSS: 0.,
     }
 
