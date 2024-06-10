@@ -414,7 +414,7 @@ class Game:
             self.player_get_damage(enemy.damage_on_collision, ignore_invul_timer=enemy.enemy_type == EnemyType.BOSS)
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             enemy.kill()
-            self.feedback_buffer.append(Feedback('collided!', 3.5, color=Color('pink')))
+            self.feedback_buffer.append(Feedback('collided', 3.5, color=Color('pink')))
             self.reason_of_death = f'collided with Enemy::{enemy.enemy_type.name.title()}'
         for corpse in self.corpses():
             if not corpse.intersects(self.player): continue
@@ -422,7 +422,7 @@ class Game:
             self.player.get_stats().ENEMIES_COLLIDED_WITH += 1
             corpse.kill()
             self.feedback_buffer.append(Feedback('collided!', 3.5, color=Color('pink')))
-            self.reason_of_death = f'collided with Corpse'
+            self.reason_of_death = 'collided with Corpse'
             # play_sfx('fart')
         for mine in self.mines():
             if not mine.intersects(self.player): continue
@@ -431,14 +431,14 @@ class Game:
             self.player.get_stats().MINES_STEPPED_ON += 1
             mine.kill()
             self.feedback_buffer.append(Feedback('mine!', 3.5, color=Color('pink')))
-            self.reason_of_death = f'stepped on a mine'
+            self.reason_of_death = 'stepped on a mine'
             play_sfx('explosion')
         for aoe_effect in self.aoe_effects():
             if not aoe_effect.intersects(self.player): continue
             if not aoe_effect.application_manager.should_apply(self.player): continue
             if aoe_effect.effect_type == AOEEffectEffectType.DAMAGE:
                 self.player_get_damage(aoe_effect.damage)
-                self.reason_of_death = f'impact AOE damage'
+                self.reason_of_death = 'impact AOE damage'
             aoe_effect.application_manager.check_applied(self.player)
         for artifact_chest in self.artifact_chests():
             if not artifact_chest.intersects(self.player): continue
