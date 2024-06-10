@@ -432,6 +432,7 @@ class JesterEnemy(Enemy):
         self.spawn_oil_spills_timer = Timer(max_time=5.)
         self.homing_target = DummyEntity(self._player_pos) # type: ignore
         self.change_go_to_timer = Timer(max_time=2.)
+        self.change_go_to_timer.set_percent_full(0.5)
 
     def update(self, time_delta: float):
         super().update(time_delta)
