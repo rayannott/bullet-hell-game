@@ -181,7 +181,7 @@ class MineSpawn(Artifact):
         vel.scale_to_length(20.)
         pos: Vector2 = self.player.get_pos()
         self.player.i_can_spawn_entities.add(Mine(pos=pos-vel, 
-                                    damage=MINE_DEFAULT_DAMAGE + 10. * (self.player.level - 1)))
+                                    damage=MINE_DEFAULT_DAMAGE + 20. * (self.player.level - 1)))
         self.cooldown_timer.reset(self.cooldown)
     
     def get_short_string(self):

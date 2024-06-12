@@ -388,11 +388,11 @@ class MinerEnemy(Enemy):
             self.color = self.NORMAL_COLOR
         if (self.homing_target.get_pos() - self.pos).magnitude_squared() < MINER_DETONATION_RADIUS**2:
             self.kill()
-            for _ in range(random.randint(0, 3) + self._player_level // 4):
+            for _ in range(random.randint(1, 5) + self._player_level // 3):
                 self.i_can_spawn_entities.add(
                     Mine(
                         self.homing_target.pos + random_unit_vector() * random.uniform(50., 200. + 30 * self._player_level),
-                        damage=MINE_DEFAULT_DAMAGE + 8. * self._player_level,
+                        damage=MINE_DEFAULT_DAMAGE + 15. * self._player_level,
                     )
                 )
             self.i_can_spawn_entities.add(
