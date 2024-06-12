@@ -228,7 +228,6 @@ class Dash(Artifact):
         self.cooldown_timer.reset()
         self.path_animation_lingering_timer.reset()
         self.player.set_pos(pos_dash_to)
-        self.player.invulnerability_timer.reset()
 
     def dash_path_intersects_enemy(self, enemy: Entity) -> bool:
         """Checks if the enemy is affected by the dash.
@@ -311,7 +310,7 @@ class Shrapnel(Artifact):
         self.player.energy.change(-self.cost)
         self.cooldown_timer.reset(self.cooldown)
         direction: Vector2 = (self.player.gravity_point - self.player.get_pos()).normalize()
-        for _ in range(self.num_shards + int(1.5 * self.player.extra_bullets)):
+        for _ in range(self.num_shards + 2 * self.player.extra_bullets):
             direction_ = direction.rotate(random.uniform(-9, 9))
             self.player.i_can_spawn_entities.add(
                 Projectile(

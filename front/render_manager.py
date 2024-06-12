@@ -214,7 +214,7 @@ class RenderManager:
         # do not draw health bar if enemy can always be killed with one shot 
         can_one_shot = enemy.health.max_value <= self.game.player.get_damage() - self.game.player.damage_spread
         draw_circular_status_bar(self.surface, enemy.get_pos(), enemy.get_health(),
-            enemy.get_size() * 1.2, color=NICER_GREEN, draw_full=not can_one_shot, width=2)
+            enemy.get_size() * 1., color=NICER_GREEN, draw_full=not can_one_shot, width=3)
         if enemy.has_block:
             block_vec = Vector2(enemy.get_size(), 0.) * 1.2
             delta = Vector2(0., 4)
