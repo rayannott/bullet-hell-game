@@ -11,7 +11,7 @@ class Mine(Entity):
     def __init__(self,
         pos: Vector2,
         damage: float = MINE_DEFAULT_DAMAGE,
-        aoe_damage: float = MINE_DEFAULT_DAMAGE // 2,
+        aoe_damage: float = MINE_DEFAULT_DAMAGE * 0.7,
     ):
         super().__init__(
             pos=pos,

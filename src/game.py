@@ -370,6 +370,7 @@ class Game:
         self.process_collisions_player()
         if not self.time_frozen:
             self.process_collisions_enemies()
+            self.process_other_collisions()
 
     def process_collisions_player(self) -> None:
         # player collides with anything:
@@ -545,6 +546,16 @@ class Game:
                 self.player.get_achievements().KILL_BOSS_WITHIN_ONE_SECOND = True
                 self.feedback_buffer.append(Feedback('[A] killed the boss within one second', 3., color=BLUE))
                 play_sfx('new_achievement')
+
+    def process_other_collisions(self) -> None:
+        for aoe_effect in self.aoe_effects():
+            if aoe_effect.effect_type != AOEEffectEffectType.DAMAGE: continue
+            for mine in self.mines():
+                if not mine.is_activated(): continue
+                if not mine.intersects(aoe_effect): continue
+                aoe_effect.application_manager.check_applied(mine)
+                mine.kill()
+                print(f'mine {mine} killed by aoe effect {aoe_effect}')
 
     def deal_damage_to_enemy(self, enemy: Enemy, damage: float, get_damage_feedback: bool = True) -> None:
         if enemy.has_block:

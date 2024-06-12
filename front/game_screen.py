@@ -12,6 +12,7 @@ from front.inventory_info import InventoryInfo
 from front.stats_window import StatsWindow
 from src.entities.aoe_effect import AOEEffect
 from src.entities.artifact_chest import ArtifactChest
+from src.entities.mine import Mine
 from src.misc.artifacts import BulletShield, Dash, MineSpawn, Rage, TimeStop, Shrapnel
 from src.utils.enums import ArtifactType, EnemyType, AOEEffectEffectType
 from src.misc.line import Line, LineType
@@ -101,6 +102,8 @@ class GameScreen(Screen):
                         affects_enemies=True, affects_player=False, 
                         color=Color('orange'),
                         animation_lingering_time=5.))
+                elif event.key == pygame.K_m:
+                    self.game.add_entity(Mine(Vector2(pygame.mouse.get_pos())))
                 elif event.key == pygame.K_n:
                     self.game.add_line(
                         Line(Vector2(pygame.mouse.get_pos()), self.game.player.get_pos().copy(), LineType.DAMAGE, damage=10)
