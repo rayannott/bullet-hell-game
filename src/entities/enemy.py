@@ -16,7 +16,7 @@ from src.entities.projectile import Projectile, HomingProjectile, ExplosiveProje
 from src.entities.oil_spill import OilSpill
 from src.misc.interfaces import CanSpawnEntitiesInterface
 from config import (ENEMY_DEFAULT_SPEED, ENEMY_DEFAULT_SIZE, BOSS_DEFAULT_REGEN_RATE,
-    PROJECTILE_DEFAULT_SPEED, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
+    PROJECTILE_DEFAULT_SPEED, PROJECTILE_DEFAULT_LIFETIME, ENEMY_DEFAULT_SHOOTING_SPREAD, BOSS_DEFAULT_OIL_SPILL_SPAWN_COOLDOWN,
     ENEMY_DEFAULT_LIFETIME, OIL_SPILL_SIZE, ENEMY_DEFAULT_MAX_HEALTH, ENEMY_DEFAULT_SHOOT_COOLDOWN,
     ENEMY_DEFAULT_REWARD, ENEMY_DEFAULT_DAMAGE, ENEMY_DEFAULT_DAMAGE_SPREAD, ENEMY_DEFAULT_COLLISION_DAMAGE,
     BOSS_ENEMY_COLOR_HEX, BOSS_GIVE_BLOCKS_COOLDOWN, PROBABILITY_SPAWN_EXTRA_BULLET_ORB, MINE_DEFAULT_DAMAGE, 
@@ -118,7 +118,8 @@ class Enemy(Entity):
 
     def shoot_normal(self, **kwargs):
         speed_mult = kwargs.get('speed_mult', 1.)
-        direction = self.get_shoot_direction()
+        direction = kwargs.get('direction', self.get_shoot_direction())
+        lifetime = kwargs.get('lifetime', PROJECTILE_DEFAULT_LIFETIME )
         self.i_can_spawn_entities.add(
             Projectile(
                 pos=self.pos.copy() + direction * (self.size * random.uniform(1.5, 2.5)),
@@ -126,6 +127,7 @@ class Enemy(Entity):
                 damage=self.damage + random.uniform(-self.damage_spread, self.damage_spread),
                 projectile_type=ProjectileType.NORMAL,
                 speed=self.speed + PROJECTILE_DEFAULT_SPEED * random.uniform(0.8, 1.4) * speed_mult,
+                lifetime=lifetime,
             )
         )
     
@@ -407,7 +409,7 @@ class MinerEnemy(Enemy):
 
 
 class JesterEnemy(Enemy):
-    """Does not shoot, moves irratically, spawns oil spills."""
+    """Shoots in all directions, moves irratically, spawns oil spills."""
     def __init__(self, 
             pos: Vector2,
             player: Player,
@@ -428,7 +430,6 @@ class JesterEnemy(Enemy):
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE*1.15,
             turn_coefficient=0.4,
         )
-        self.shoots_player = False
         self.spawn_oil_spills_timer = Timer(max_time=5.)
         self.homing_target = DummyEntity(self._player_pos) # type: ignore
         self.change_go_to_timer = Timer(max_time=2.)
@@ -444,6 +445,12 @@ class JesterEnemy(Enemy):
         if not self.change_go_to_timer.running():
             self.homing_target = DummyEntity(self._player_pos + random_unit_vector() * random.uniform(100., 300.)) # type: ignore
             self.change_go_to_timer.reset()
+    
+    def shoot(self):
+        N = 24
+        for i in range(N):
+            direction = Vector2(0., 1.).rotate(i * 360. / N)
+            self.shoot_normal(direction=direction, lifetime=0.5, speed_mult=0.7)
     
     def spawn_oil_spills(self):
         towards_player = self._player_pos - self.pos
