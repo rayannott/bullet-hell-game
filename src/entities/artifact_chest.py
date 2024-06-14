@@ -9,7 +9,7 @@ from pygame import Vector2, Color
 import src.entities.player
 from src.entities.entity import Entity
 from src.utils.enums import EntityType, ArtifactType
-from src.misc.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop, Shrapnel, Rage
+from src.misc.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop, Shrapnel, Rage, EnergyShield
 from config import ARTIFACT_CHEST_SIZE, ARTIFACT_CHEST_LIFETIME
 
 
@@ -124,6 +124,8 @@ class ArtifactChestGenerator:
             return Shrapnel(self.player)
         elif artifact_type == ArtifactType.RAGE:
             return Rage(self.player)
+        elif artifact_type == ArtifactType.ENERGY_SHIELD:
+            return EnergyShield(self.player)
         else:
             raise NotImplementedError(f'Unknown artifact type: {artifact_type}')
 

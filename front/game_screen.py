@@ -13,7 +13,7 @@ from front.stats_window import StatsWindow
 from src.entities.aoe_effect import AOEEffect
 from src.entities.artifact_chest import ArtifactChest
 from src.entities.mine import Mine
-from src.misc.artifacts import BulletShield, Dash, MineSpawn, Rage, TimeStop, Shrapnel
+from src.misc.artifacts import BulletShield, Dash, MineSpawn, Rage, TimeStop, Shrapnel, EnergyShield
 from src.utils.enums import ArtifactType, EnemyType, AOEEffectEffectType
 from src.misc.line import Line, LineType
 from src.entities.oil_spill import OilSpill
@@ -94,6 +94,8 @@ class GameScreen(Screen):
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Dash(self.game.player)))
                 elif event.key == pygame.K_r:
                     self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), Rage(self.game.player)))
+                elif event.key == pygame.K_e:
+                    self.game.add_entity(ArtifactChest(Vector2(pygame.mouse.get_pos()), EnergyShield(self.game.player)))
                 elif event.key == pygame.K_o:
                     self.game.add_entity(OilSpill(Vector2(pygame.mouse.get_pos())))
                 elif event.key == pygame.K_b:

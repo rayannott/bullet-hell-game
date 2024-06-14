@@ -3,7 +3,7 @@ import random
 from pygame import Vector2, Color
 from config.settings import Settings
 from front.sounds import play_sfx
-from src.misc.artifacts import ArtifactsHandler, Artifact, Rage
+from src.misc.artifacts import ArtifactsHandler, Artifact
 from src.entities.artifact_chest import ArtifactChestGenerator
 
 from src.entities.entity import Entity

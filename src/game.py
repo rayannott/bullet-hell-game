@@ -249,6 +249,8 @@ class Game:
     def update(self, time_delta: float) -> None:
         if not self.is_running() or self.paused: return
         self.time += time_delta
+        if self.player.artifacts_handler.is_present(ArtifactType.ENERGY_SHIELD):
+            self.player_get_damage(self.player.artifacts_handler.get_energy_shield().release_damage(time_delta))
         self.time_frozen = self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP) and self.player.artifacts_handler.get_time_stop().is_on()
         self.spawn_buffered_entities()
         for entity in self.all_entities_iter(with_enemies=not self.time_frozen, with_projectiles=not self.time_frozen):
@@ -592,6 +594,10 @@ class Game:
     def player_get_damage(self, damage: float, ignore_invul_timer: bool = False) -> float:
         if not ignore_invul_timer and self.player.invulnerability_timer.running(): 
             self.player.invulnerability_timer.turn_off()
+            return 0.
+        if self.player.artifacts_handler.is_present(ArtifactType.ENERGY_SHIELD):
+            energy_shield = self.player.artifacts_handler.get_energy_shield()
+            energy_shield.get_damage_absorbed(damage)
             return 0.
         self.player.invulnerability_timer.reset()
         damage_taken_actual = -self.player.health.change(-damage)

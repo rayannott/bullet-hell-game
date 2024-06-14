@@ -49,6 +49,7 @@ class ArtifactType(Enum):
     TIME_STOP = auto()
     SHRAPNEL = auto()
     RAGE = auto()
+    ENERGY_SHIELD = auto()
 
 
 class AnimationType(Enum):

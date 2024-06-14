@@ -371,6 +371,42 @@ class Rage(Artifact):
         return f'Rage({self.duration:.0f}dur)'
 
 
+class EnergyShield(Artifact):
+    """
+    Always active. 
+    Absorbs damage and releases it gradually.
+    Can be activated by the player to force start the release process.
+    """
+    def __init__(self, player):
+        super().__init__(
+            artifact_type=ArtifactType.ENERGY_SHIELD,
+            player=player,
+            cooldown=5,
+            cost=100,
+        )
+        self.player_max_health = player.health.max_value
+        self.current_damage_absorbed = 0.
+
+    def get_damage_absorbed(self, damage: float):
+        self.current_damage_absorbed += damage
+
+    def release_damage(self, time_delta: float) -> float:
+        if self.current_damage_absorbed <= 0:
+            return 0.
+        self.current_damage_absorbed = max(0., self.current_damage_absorbed - 8. * time_delta)
+        return 10. * time_delta
+        
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+    
+    def get_short_string(self) -> str:
+        return 'Shield'
+    
+    def get_verbose_string(self) -> str:
+        return 'EnergyShield'
+
+
 class InactiveArtifact(Artifact):
     def __init__(self, stats_boost: StatsBoost):
         super().__init__(artifact_type=ArtifactType.STATS, player=None, cooldown=0, cost=0)
@@ -403,6 +439,7 @@ class ArtifactsHandler:
         self.time_stop: TimeStop | None = None
         self.shrapnel: Shrapnel | None = None
         self.rage: Rage | None = None
+        self.energy_shield: EnergyShield | None = None
 
     def get_total_stats_boost(self) -> StatsBoost:
         return sum((artifact.stats_boost for artifact in self.inactive_artifacts), StatsBoost())
@@ -440,6 +477,8 @@ class ArtifactsHandler:
             self.shrapnel = artifact
         elif isinstance(artifact, Rage):
             self.rage = artifact
+        elif isinstance(artifact, EnergyShield):
+            self.energy_shield = artifact
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact.artifact_type}')
     
@@ -456,6 +495,8 @@ class ArtifactsHandler:
             return self.shrapnel is not None
         elif artifact_type == ArtifactType.RAGE:
             return self.rage is not None
+        elif artifact_type == ArtifactType.ENERGY_SHIELD:
+            return self.energy_shield is not None
         else:
             raise NotImplementedError(f'unknown artifact type: {artifact_type}')
     
@@ -483,6 +524,10 @@ class ArtifactsHandler:
         if self.rage is None:
             raise ArtifactMissing('[?] rage is missing')
         return self.rage
+    def get_energy_shield(self) -> EnergyShield:
+        if self.energy_shield is None:
+            raise ArtifactMissing('[?] energy shield is missing')
+        return self.energy_shield
 
     def __repr__(self) -> str:
         active_artivacts = ' | '.join(map(str, self.iterate_active()))
