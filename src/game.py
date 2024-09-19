@@ -236,6 +236,10 @@ class Game:
             # spawn boss at the end of the wave unless one is already alive
             if self.is_boss_alive():
                 self.feedback_buffer.append(Feedback('boss is still alive!', 2., color=Color('red')))
+                ach = self.player.get_achievements()
+                if not ach.TRIGGER_BOSS_ALREADY_EXISTS:
+                    ach.TRIGGER_BOSS_ALREADY_EXISTS = True
+                    self.feedback_buffer.append(Feedback('[A] triggered boss already exists', 3., color=BLUE))
                 return
             self.spawn_enemy(EnemyType.BOSS)
         self.new_energy_orb_timer.tick(time_delta)
