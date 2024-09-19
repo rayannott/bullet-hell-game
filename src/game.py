@@ -1,4 +1,5 @@
 from collections import deque
+import math
 import random
 from typing import Generator
 import itertools
@@ -407,7 +408,11 @@ class Game:
                 continue
             if not projectile.intersects(self.player): continue
             if self.time_frozen: continue
-            self.player_get_damage(projectile.get_damage())
+            damage_dealt = self.player_get_damage(projectile.get_damage())
+            if math.isclose(damage_dealt, self.player.health.max_value):
+                self.player.health.set_percent_full(0.01)
+                self.player._is_alive = True
+                self.feedback_buffer.append(Feedback('death prevented', 4., color=Color('red')))
             self.player.get_stats().BULLETS_CAUGHT += 1
             projectile.kill()
             self.reason_of_death = f'caught Bullet::{projectile.projectile_type.name.title()}'
