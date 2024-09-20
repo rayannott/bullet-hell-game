@@ -12,22 +12,23 @@ class OilSpill(Entity):
             pos=pos,
             size=size,
             type=EntityType.OIL_SPILL,
-            speed=0.,
+            speed=0.0,
             render_trail=False,
             can_spawn_entities=False,
-            color=Color('#a37d37'),
+            color=Color("#a37d37"),
             lifetime=OIL_SPILL_LIFETIME,
         )
         self.ACTIVATED_COLOR = self.color
-        self.INACTIVE_COLOR = Color('#453820')
+        self.INACTIVE_COLOR = Color("#453820")
         self._activation_timer = Timer(max_time=1.5)
-    
+
     def is_activated(self) -> bool:
         return not self._activation_timer.running()
 
     def update(self, time_delta: float):
         super().update(time_delta)
-        if not self.is_alive(): return
+        if not self.is_alive():
+            return
         self._activation_timer.tick(time_delta)
         if self.is_activated():
             self.color = self.ACTIVATED_COLOR

@@ -4,11 +4,18 @@ from src.entities.entity import Entity
 from src.utils.enums import EntityType
 from src.utils.utils import Timer
 from src.entities.aoe_effect import AOEEffect, AOEEffectEffectType
-from config import (MINE_SIZE, MINE_ACTIVATION_TIME, MINE_LIFETIME, MINE_DEFAULT_DAMAGE, MINE_AOE_EFFECT_SIZE)
+from config import (
+    MINE_SIZE,
+    MINE_ACTIVATION_TIME,
+    MINE_LIFETIME,
+    MINE_DEFAULT_DAMAGE,
+    MINE_AOE_EFFECT_SIZE,
+)
 
 
 class Mine(Entity):
-    def __init__(self,
+    def __init__(
+        self,
         pos: Vector2,
         damage: float = MINE_DEFAULT_DAMAGE,
         aoe_damage: float = MINE_DEFAULT_DAMAGE * 0.7,
@@ -17,7 +24,7 @@ class Mine(Entity):
             pos=pos,
             type=EntityType.MINE,
             size=MINE_SIZE,
-            color=Color('#851828'),
+            color=Color("#851828"),
             can_spawn_entities=True,
             lifetime=MINE_LIFETIME,
         )
@@ -31,7 +38,7 @@ class Mine(Entity):
     def update(self, time_delta: float):
         self.activation_timer.tick(time_delta)
         return super().update(time_delta)
-    
+
     def kill(self):
         assert self.i_can_spawn_entities
         self.i_can_spawn_entities.add(

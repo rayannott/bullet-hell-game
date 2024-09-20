@@ -5,6 +5,7 @@ class EntityType(Enum):
     """
     Enumeration of all entity types.
     """
+
     DUMMY = auto()
     OIL_SPILL = auto()
     CORPSE = auto()
@@ -21,6 +22,7 @@ class EnemyType(Enum):
     """
     Enumeration of all enemy types.
     """
+
     BASIC = auto()
     FAST = auto()
     TANK = auto()
@@ -34,6 +36,7 @@ class ProjectileType(Enum):
     """
     Enumeration of all projectile types.
     """
+
     PLAYER_BULLET = auto()
     NORMAL = auto()
     HOMING = auto()

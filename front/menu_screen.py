@@ -1,6 +1,8 @@
-import pickle, shelve
+import pickle
+import shelve
 
-import pygame, pygame_gui
+import pygame
+import pygame_gui
 
 from front.screen import Screen
 from front.game_screen import GameScreen
@@ -17,7 +19,7 @@ from src.utils.player_utils import Achievements
 
 
 NICER_GREEN = pygame.Color(NICER_GREEN_HEX)
-WHITE = pygame.Color('white')
+WHITE = pygame.Color("white")
 
 
 class MenuScreen(Screen):
@@ -32,31 +34,41 @@ class MenuScreen(Screen):
                 saves.clear()
         if not ACHIEVEMENTS_FILE.exists():
             # this is global achievements
-            with ACHIEVEMENTS_FILE.open('wb') as f:
+            with ACHIEVEMENTS_FILE.open("wb") as f:
                 pickle.dump(Achievements(), f)
 
         start_game_btn_rect = pygame.Rect(0, 0, 0, 0)
         start_game_btn_rect.size = MENU_BUTTONS_SIZE
         start_game_btn_rect.center = self.surface.get_rect().center
         start_game_btn_rect.y -= MENU_BUTTONS_SIZE[1]
-        self.start_game_btn = pygame_gui.elements.UIButton(start_game_btn_rect, 'PLAY', self.manager)
+        self.start_game_btn = pygame_gui.elements.UIButton(
+            start_game_btn_rect, "PLAY", self.manager
+        )
 
         stats_btn_rect = pygame.Rect(0, 0, 0, 0)
         stats_btn_rect.size = MENU_BUTTONS_SIZE
         stats_btn_rect.topleft = start_game_btn_rect.bottomleft
-        self.stats_btn = pygame_gui.elements.UIButton(stats_btn_rect, 'STATS', self.manager)
+        self.stats_btn = pygame_gui.elements.UIButton(
+            stats_btn_rect, "STATS", self.manager
+        )
 
         settings_btn_rect = pygame.Rect(0, 0, 0, 0)
         settings_btn_rect.size = MENU_BUTTONS_SIZE
         settings_btn_rect.topleft = stats_btn_rect.bottomleft
-        self.settings_btn = pygame_gui.elements.UIButton(settings_btn_rect, 
-            'SETTINGS', self.manager, allow_double_clicks=True, tool_tip_text='Double click to open console')
+        self.settings_btn = pygame_gui.elements.UIButton(
+            settings_btn_rect,
+            "SETTINGS",
+            self.manager,
+            allow_double_clicks=True,
+            tool_tip_text="Double click to open console",
+        )
 
         rules_btn_rect = pygame.Rect(0, 0, 0, 0)
         rules_btn_rect.size = MENU_BUTTONS_SIZE
         rules_btn_rect.topleft = settings_btn_rect.bottomleft
-        self.rules_btn = pygame_gui.elements.UIButton(rules_btn_rect, 'RULES', self.manager)
-
+        self.rules_btn = pygame_gui.elements.UIButton(
+            rules_btn_rect, "RULES", self.manager
+        )
 
         self.console_window = None
         self.stats_window = None
@@ -89,8 +101,8 @@ class MenuScreen(Screen):
                     pygame_gui.windows.UIMessageWindow(
                         rect=pygame.Rect(0, 0, 400, 400),
                         manager=self.manager,
-                        window_title='FPS Warning',
-                        html_message=str_verdict + '\n' + str(fps_info),
+                        window_title="FPS Warning",
+                        html_message=str_verdict + "\n" + str(fps_info),
                     )
             elif event.ui_element == self.stats_btn:
                 if self.stats_window is not None:
@@ -108,15 +120,18 @@ class MenuScreen(Screen):
             if event.key == pygame.K_a:
                 if self.achievements_window is not None:
                     self.achievements_window.kill()
-                with ACHIEVEMENTS_FILE.open('rb') as f:
+                with ACHIEVEMENTS_FILE.open("rb") as f:
                     ach_global: Achievements = pickle.load(f)
-                html_text = '\n'.join('-+'[v] + ' ' + paint(k, (NICER_GREEN if v else WHITE)) for k, v in ach_global.items_pretty()) 
+                html_text = "\n".join(
+                    "-+"[v] + " " + paint(k, (NICER_GREEN if v else WHITE))
+                    for k, v in ach_global.items_pretty()
+                )
                 self.achievements_window = pygame_gui.windows.UIConfirmationDialog(
                     rect=pygame.Rect(50, 50, 450, 800),
                     action_long_desc=html_text,
                     manager=self.manager,
-                    window_title='All possible achievements',
-                    action_short_name='Ok',
+                    window_title="All possible achievements",
+                    action_short_name="Ok",
                     blocking=False,
                 )
         super().process_ui_event(event)
