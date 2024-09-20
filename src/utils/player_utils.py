@@ -22,23 +22,34 @@ class Stats:
     BONUS_ORBS_COLLECTED: int = 0
     BLOCKS_LIFTED: int = 0
 
-    DAMAGE_TAKEN: float = 0.
-    DAMAGE_DEALT: float = 0.
-    ENERGY_COLLECTED: float = 0.
-    OIL_SPILL_TIME_SPENT: float = 0.
+    DAMAGE_TAKEN: float = 0.0
+    DAMAGE_DEALT: float = 0.0
+    ENERGY_COLLECTED: float = 0.0
+    OIL_SPILL_TIME_SPENT: float = 0.0
 
     def get_accuracy(self) -> float:
-        return self.ACCURATE_SHOTS / self.PROJECTILES_FIRED if self.PROJECTILES_FIRED > 0 else 0.
+        return (
+            self.ACCURATE_SHOTS / self.PROJECTILES_FIRED
+            if self.PROJECTILES_FIRED > 0
+            else 0.0
+        )
 
     def get_as_dict(self) -> dict:
         return self.__dict__
-    
+
     @staticmethod
     def _snakecase_to_title(snakecase: str) -> str:
-        return ' '.join(snakecase.split('_')).title()
-    
+        return " ".join(snakecase.split("_")).title()
+
     def get_pretty_stats(self) -> list[tuple[str, str]]:
-        return [(f'{self._snakecase_to_title(k)}', f'{str(v) if isinstance(v, int) else f"{v:.2f}"}') for k, v in self.__dict__.items() if v > 0]
+        return [
+            (
+                f"{self._snakecase_to_title(k)}",
+                f'{str(v) if isinstance(v, int) else f"{v:.2f}"}',
+            )
+            for k, v in self.__dict__.items()
+            if v > 0
+        ]
 
 
 @dataclass
@@ -46,12 +57,13 @@ class EffectFlags:
     """
     Flags for effects that can be applied to the player.
     """
+
     OIL_SPILL: bool = False
-    SLOWNESS: float = 1. # slowness multiplier
+    SLOWNESS: float = 1.0  # slowness multiplier
 
     def reset(self):
         self.OIL_SPILL = False
-        self.SLOWNESS = 1.
+        self.SLOWNESS = 1.0
 
 
 @dataclass
@@ -59,6 +71,7 @@ class Achievements:
     """
     Achievement flags.
     """
+
     REACH_LEVEL_5_WITH_NO_CORPSES: bool = False
     REACH_LEVEL_5_WITHOUT_TAKING_DAMAGE: bool = False
     REACH_LEVEL_5_WITH_100_PERCENT_ACCURACY: bool = False
@@ -74,25 +87,26 @@ class Achievements:
     COLLIDE_WITH_15_ENEMIES: bool = False
     DASH_THROUGH_10_ENEMIES: bool = False
     LIFT_20_BLOCKS: bool = False
-    SPEND_ONE_MINUTE_IN_OIL_SPILLS: bool = False # TODO: add logic
+    SPEND_ONE_MINUTE_IN_OIL_SPILLS: bool = False  # TODO: add logic
     KILL_BOSS_WITH_RICOCHET: bool = False
     KILL_BOSS_WITHOUT_BULLETS: bool = False
     KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False
     KILL_BOSS_WITHIN_ONE_SECOND: bool = False
     TRIGGER_BOSS_ALREADY_EXISTS: bool = False
 
-    def update(self, other: 'Achievements'):
+    def update(self, other: "Achievements"):
         for k, v in other.__dict__.items():
-            if v: setattr(self, k, v)
+            if v:
+                setattr(self, k, v)
 
     @staticmethod
     def _snakecase_to_title(snakecase: str) -> str:
-        return ' '.join(snakecase.split('_')).title()
-    
+        return " ".join(snakecase.split("_")).title()
+
     def items_pretty(self) -> Generator[tuple[str, bool], None, None]:
         for k, v in self.__dict__.items():
             yield (self._snakecase_to_title(k), v)
-    
+
     def achievements_pretty(self) -> list[str]:
         return [k for k, v in self.items_pretty() if v]
 

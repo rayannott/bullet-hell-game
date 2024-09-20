@@ -9,14 +9,26 @@ from pygame import Vector2, Color
 import src.entities.player
 from src.entities.entity import Entity
 from src.utils.enums import EntityType, ArtifactType
-from src.misc.artifacts import Artifact, BulletShield, Dash, MineSpawn, InactiveArtifact, StatsBoost, TimeStop, Shrapnel, Rage
+from src.misc.artifacts import (
+    Artifact,
+    BulletShield,
+    Dash,
+    MineSpawn,
+    InactiveArtifact,
+    StatsBoost,
+    TimeStop,
+    Shrapnel,
+    Rage,
+)
 from config import ARTIFACT_CHEST_SIZE, ARTIFACT_CHEST_LIFETIME
 
 
 class ArtifactChest(Entity):
     """Shows what's inside on hover.
     Is picked up on collision with player."""
-    def __init__(self,
+
+    def __init__(
+        self,
         pos: Vector2,
         artifact: Artifact,
     ):
@@ -24,19 +36,19 @@ class ArtifactChest(Entity):
             pos=pos,
             type=EntityType.ARTIFACT_CHEST,
             size=ARTIFACT_CHEST_SIZE,
-            color=Color('yellow'),
+            color=Color("yellow"),
             lifetime=ARTIFACT_CHEST_LIFETIME,
         )
         self.init_pos = pos.copy()
         self.artifact = artifact
         self.t = 0
-    
+
     def can_be_picked_up(self) -> bool:
-        return self.t > 1.
+        return self.t > 1.0
 
     def get_artifact(self) -> Artifact:
         return self.artifact
-    
+
     def set_pos(self, pos: Vector2):
         self.init_pos = pos.copy()
 
@@ -44,13 +56,14 @@ class ArtifactChest(Entity):
         return self.init_pos
 
     def update(self, time_delta: float):
-        if not self._is_alive: return
+        if not self._is_alive:
+            return
         super().update(time_delta)
         self.t += time_delta
         self.pos = 15 * Vector2(math.cos(self.t), math.sin(self.t)) + self.init_pos
 
     def __repr__(self) -> str:
-        return f'ArtifactChest({self.artifact})'
+        return f"ArtifactChest({self.artifact})"
 
 
 class ArtifactChestGenerator:
@@ -64,31 +77,40 @@ class ArtifactChestGenerator:
 
         # and these too
         _inactive_artifacts = [
-            StatsBoost(speed=600.),
+            StatsBoost(speed=600.0),
             StatsBoost(regen=1.5),
-            StatsBoost(damage=15.),
-            StatsBoost(regen=0.5, speed=300.),
-            StatsBoost(bullet_shield_duration=2.),
-            StatsBoost(size=2.),
+            StatsBoost(damage=15.0),
+            StatsBoost(regen=0.5, speed=300.0),
+            StatsBoost(bullet_shield_duration=2.0),
+            StatsBoost(size=2.0),
             StatsBoost(add_max_extra_bullets=4),
-            StatsBoost(damage=20.),
+            StatsBoost(damage=20.0),
             StatsBoost(shrapnel_extra_shards=5),
-            StatsBoost(mine_cooldown=3.),
-            StatsBoost(damage=20., cooldown=0.07),
-            StatsBoost(shrapnel_cooldown=5.),
+            StatsBoost(mine_cooldown=3.0),
+            StatsBoost(damage=20.0, cooldown=0.07),
+            StatsBoost(shrapnel_cooldown=5.0),
             StatsBoost(time_stop_duration=2.5),
-            StatsBoost(bullet_shield_size=30.),
-            StatsBoost(size=3., regen=1.),
+            StatsBoost(bullet_shield_size=30.0),
+            StatsBoost(size=3.0, regen=1.0),
             StatsBoost(cooldown=0.1),
         ]
-        self.inactive_artifacts_stats_boosts = dict(zip(_inactive_artifacts, repeat(False)))
+        self.inactive_artifacts_stats_boosts = dict(
+            zip(_inactive_artifacts, repeat(False))
+        )
 
         # Maps the player level to the artifact types to be spawned: S - stats, A - active.
         self.ARTIFACT_SCHEDULE = {
-            2: 'SSS', 3: 'SAA', 4: 'SSS', 5: 'SSA',
-            6: 'SSS', 7: 'SSA', 8: 'SSA', 9: 'SSA', 10: 'SSS',
+            2: "SSS",
+            3: "SAA",
+            4: "SSS",
+            5: "SSA",
+            6: "SSS",
+            7: "SSA",
+            8: "SSA",
+            9: "SSA",
+            10: "SSS",
         }
-    
+
     def should_include_stats_boost(self, sb: StatsBoost) -> bool:
         if sb.bullet_shield_duration or sb.bullet_shield_size:
             if not self.player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD):
@@ -97,20 +119,25 @@ class ArtifactChestGenerator:
         if sb.mine_cooldown:
             if not self.player.artifacts_handler.is_present(ArtifactType.MINE_SPAWN):
                 return False
-        if sb.time_stop_duration: 
+        if sb.time_stop_duration:
             if not self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP):
                 return False
         if sb.shrapnel_extra_shards or sb.shrapnel_cooldown:
             if not self.player.artifacts_handler.is_present(ArtifactType.SHRAPNEL):
                 return False
         return True
-    
-    def get_random_absent_stats_boost_artifact_chest(self, at: Vector2) -> ArtifactChest | None:
-        absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v]
-        if not absent_stats: return None
+
+    def get_random_absent_stats_boost_artifact_chest(
+        self, at: Vector2
+    ) -> ArtifactChest | None:
+        absent_stats = [
+            k for k, v in self.inactive_artifacts_stats_boosts.items() if not v
+        ]
+        if not absent_stats:
+            return None
         stats_boost = random.choice(absent_stats)
         return ArtifactChest(at, InactiveArtifact(stats_boost))
-    
+
     def get_artifact(self, artifact_type: ArtifactType) -> Artifact:
         if artifact_type == ArtifactType.BULLET_SHIELD:
             return BulletShield(self.player)
@@ -125,7 +152,7 @@ class ArtifactChestGenerator:
         elif artifact_type == ArtifactType.RAGE:
             return Rage(self.player)
         else:
-            raise NotImplementedError(f'Unknown artifact type: {artifact_type}')
+            raise NotImplementedError(f"Unknown artifact type: {artifact_type}")
 
     def check_artifact(self, artifact: Artifact) -> bool:
         """Returns True if successful. False if already collected.
@@ -136,7 +163,8 @@ class ArtifactChestGenerator:
                 return False
             self.inactive_artifacts_stats_boosts[artifact.stats_boost] = True
             return True
-        if self.active_artifacts[_type]: return False
+        if self.active_artifacts[_type]:
+            return False
         self.active_artifacts[_type] = True
         return True
 
@@ -149,17 +177,28 @@ class ArtifactChestGenerator:
         absent_active = [k for k, v in self.active_artifacts.items() if not v]
         random.shuffle(absent_active)
         this_level_schedule = self.ARTIFACT_SCHEDULE[player_level]
-        num_stats_to_spawn, num_active_to_spawn = this_level_schedule.count('S'), this_level_schedule.count('A')
+        num_stats_to_spawn, num_active_to_spawn = (
+            this_level_schedule.count("S"),
+            this_level_schedule.count("A"),
+        )
         num_active_to_spawn = min(num_active_to_spawn, len(absent_active))
         # num_stats_to_spawn = min(num_stats_to_spawn, len(absent_stats))
-        if num_active_to_spawn + num_stats_to_spawn == 0: return []
+        if num_active_to_spawn + num_stats_to_spawn == 0:
+            return []
 
-        active_to_spawn = absent_active[:num_active_to_spawn] # active artifact types
-        to_spawn.extend([ArtifactChest(Vector2(), self.get_artifact(_type)) for _type in active_to_spawn])
-    
+        active_to_spawn = absent_active[:num_active_to_spawn]  # active artifact types
+        to_spawn.extend(
+            [
+                ArtifactChest(Vector2(), self.get_artifact(_type))
+                for _type in active_to_spawn
+            ]
+        )
+
         skip = player_level - 2
         to_sample_from = []
-        for k, v in itertools.islice(self.inactive_artifacts_stats_boosts.items(), skip, skip+5):
+        for k, v in itertools.islice(
+            self.inactive_artifacts_stats_boosts.items(), skip, skip + 5
+        ):
             if not v and self.should_include_stats_boost(k):
                 to_sample_from.append(k)
         if len(to_sample_from) <= num_stats_to_spawn:
@@ -167,6 +206,9 @@ class ArtifactChestGenerator:
         else:
             stats_to_spawn = random.sample(to_sample_from, num_stats_to_spawn)
         to_spawn.extend(
-            [ArtifactChest(Vector2(), InactiveArtifact(stats_boost)) for stats_boost in stats_to_spawn]
+            [
+                ArtifactChest(Vector2(), InactiveArtifact(stats_boost))
+                for stats_boost in stats_to_spawn
+            ]
         )
         return to_spawn

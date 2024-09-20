@@ -15,11 +15,13 @@ FRAMERATE = settings.framerate
 
 class Screen(ABC):
     """Abstract class for all screens in the game."""
-    def __init__(self,
-            surface: pygame.Surface,
-            bg_color: str = BACKGROUND_COLOR_HEX,
-            framerate: int = FRAMERATE
-        ):
+
+    def __init__(
+        self,
+        surface: pygame.Surface,
+        bg_color: str = BACKGROUND_COLOR_HEX,
+        framerate: int = FRAMERATE,
+    ):
         self.surface = surface
         self.framerate = framerate
         self.window_size = self.surface.get_rect().size
@@ -33,9 +35,7 @@ class Screen(ABC):
         quit_button_rect.size = QUIT_BUTTON_SIZE
         quit_button_rect.topright = self.surface.get_rect().topright
         self.quit_button = pygame_gui.elements.UIButton(
-            relative_rect=quit_button_rect,
-            text='x',
-            manager=self.manager
+            relative_rect=quit_button_rect, text="x", manager=self.manager
         )
         self.clock = pygame.time.Clock()
         self.fps_info = FpsInfo(framerate)
@@ -43,25 +43,25 @@ class Screen(ABC):
     @abstractmethod
     def process_event(self, event: pygame.event.Event):
         ...
-    
+
     @abstractmethod
     def update(self, time_delta: float):
         ...
-    
+
     def post_run(self):
         ...
 
     def process_ui_event(self, event: pygame.event.Event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            play_sfx('click') # TODO: fix playing only after the window is closed
+            play_sfx("click")  # TODO: fix playing only after the window is closed
             if event.ui_element == self.quit_button:
                 self.is_running = False
         ...
-    
+
     def run(self) -> FpsInfo:
         """Main loop. Returns the FPSinfo object."""
         while self.is_running:
-            time_delta = self.clock.tick(self.framerate)/1000.0
+            time_delta = self.clock.tick(self.framerate) / 1000.0
             self.fps_info.update(time_delta)
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
