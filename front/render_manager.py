@@ -16,6 +16,7 @@ from src.utils.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
 from config import (
     PLAYER_SHOT_COST,
+    PLAYER_DEFAULT_SPEED_RANGE,
     GAME_DEBUG_RECT_SIZE,
     LIGHT_MAGENTA_HEX,
     NICER_RED_HEX,
@@ -407,6 +408,25 @@ class RenderManager:
             player.shoot_cooldown_timer.get_slider(),
             player.get_size() * 2,
         )
+
+        # move arrow
+        if player.vel.magnitude_squared() > 40_000.0:
+            move_direction = player.vel.copy()
+            _mult = math.exp(-player.speed / PLAYER_DEFAULT_SPEED_RANGE[1])
+            angle = 50.0 * _mult
+            move_direction.scale_to_length(player.get_size() * 2.0 / _mult)
+            move_direction_smaller = move_direction.copy()
+            move_direction_smaller.scale_to_length(player.get_size() * 2.0)
+            left = move_direction_smaller.rotate(angle)
+            right = move_direction_smaller.rotate(-angle)
+            mid_point = player.get_pos() + move_direction
+            pygame.draw.line(
+                self.surface, YELLOW, mid_point, player.get_pos() + left, width=3
+            )
+            pygame.draw.line(
+                self.surface, YELLOW, mid_point, player.get_pos() + right, width=3
+            )
+
         # bullet shield:
         if (
             player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD)
