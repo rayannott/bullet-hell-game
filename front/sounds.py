@@ -10,10 +10,10 @@ MUSIC_DIR = SOUNDS_DIR / "music"
 
 
 SOUND_EFFECTS = {
-    file.stem: mixer.Sound(file) for file in SFX_DIR.iterdir() if file.suffix == ".wav"
+    file.stem: mixer.Sound(file) for file in SFX_DIR.glob("*.wav")
 }
 
-BG_MUSIC_FILES = [file for file in MUSIC_DIR.iterdir() if file.suffix == ".mp3"]
+BG_MUSIC_FILES = [file for file in MUSIC_DIR.glob("*.mp3")]
 
 
 def play_sfx(name: str):
