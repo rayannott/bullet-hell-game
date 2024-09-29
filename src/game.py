@@ -65,9 +65,9 @@ BLUE = Color(NICER_BLUE_HEX)
 
 
 STAT_BOOSTS_FROM_ENERGY_ORBS = [
-    StatsBoost(speed=20.0),
-    StatsBoost(regen=0.5),
     StatsBoost(health=10.0),
+    StatsBoost(speed=20.0),
+    StatsBoost(regen=0.2),
 ]
 
 stat_boosts_from_energy_orbs_cycler = itertools.cycle(STAT_BOOSTS_FROM_ENERGY_ORBS)
