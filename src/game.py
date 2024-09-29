@@ -48,7 +48,6 @@ from config import (
     NICER_YELLOW_HEX,
     NICER_GREEN_HEX,
     WAVE_DURATION,
-    GAME_MAX_LEVEL,
     ENERGY_ORB_SIZE,
     ENERGY_ORB_COOLDOWN_RANGE,
     SPAWN_ENEMY_EVERY,
@@ -67,6 +66,7 @@ BLUE = Color(NICER_BLUE_HEX)
 STAT_BOOSTS_FROM_ENERGY_ORBS = [
     StatsBoost(health=10.0),
     StatsBoost(speed=20.0),
+    StatsBoost(damage=3.0),
     StatsBoost(regen=0.2),
 ]
 
@@ -203,7 +203,7 @@ class Game:
         self.feedback_buffer.append(
             Feedback("new wave!", 3.5, color=Color("green"), at_pos="cursor")
         )
-        if self.level >= GAME_MAX_LEVEL:
+        if self.level >= float("inf"):
             return False
         play_sfx("new_level")
         self.level += 1
@@ -303,7 +303,6 @@ class Game:
                         color=BLUE,
                     )
                 )
-
         elif self.level == 10:
             self.is_victory = True
             if not self.player.get_achievements().REACH_LEVEL_10:

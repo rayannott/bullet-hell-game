@@ -76,7 +76,7 @@ class ArtifactChestGenerator:
         del self.active_artifacts[ArtifactType.STATS]
 
         # and these too
-        _inactive_artifacts = [
+        self._inactive_artifacts = [
             StatsBoost(speed=600.0),
             StatsBoost(regen=1.5),
             StatsBoost(damage=15.0),
@@ -95,7 +95,7 @@ class ArtifactChestGenerator:
             StatsBoost(cooldown=0.1),
         ]
         self.inactive_artifacts_stats_boosts = dict(
-            zip(_inactive_artifacts, repeat(False))
+            zip(self._inactive_artifacts, repeat(False))
         )
 
         # Maps the player level to the artifact types to be spawned: S - stats, A - active.
@@ -159,8 +159,6 @@ class ArtifactChestGenerator:
         Sets the artifact as collected."""
         _type = artifact.artifact_type
         if isinstance(artifact, InactiveArtifact):
-            if self.inactive_artifacts_stats_boosts[artifact.stats_boost]:
-                return False
             self.inactive_artifacts_stats_boosts[artifact.stats_boost] = True
             return True
         if self.active_artifacts[_type]:
@@ -172,6 +170,11 @@ class ArtifactChestGenerator:
         """
         Returns a list of ArtifactChests with the artifacts that player does not yet have.
         """
+        if player_level >= 11:
+            return [
+                ArtifactChest(Vector2(), InactiveArtifact(stat_boost))
+                for stat_boost in random.sample(self._inactive_artifacts, 3)
+            ]
         to_spawn: list[ArtifactChest] = []
         # absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v and self.should_include_stats_boost(k)]
         absent_active = [k for k, v in self.active_artifacts.items() if not v]
