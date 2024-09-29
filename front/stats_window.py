@@ -1,4 +1,5 @@
 import shelve
+from collections import Counter
 
 from pygame import Color, Surface, Rect
 import pygame_gui
@@ -92,8 +93,9 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
 
         stats_boosts = [el.stats_boost for el in artifacts_handler.inactive_artifacts]
         total_stats_boots = sum(stats_boosts, StatsBoost())
+        stats_boosts_counter = Counter(stats_boosts)
         stats_boosts_str = (
-            f'stat boosts:\n{TAB*3}{paint(", ".join(map(str, stats_boosts)), NICER_YELLOW)}\n{TAB*3}(total: {paint(str(total_stats_boots), NICER_YELLOW)})'
+            f'stat boosts:\n{TAB*3}{paint(", ".join((f"{cnt} x {sb}" if cnt > 1 else str(sb)) for sb, cnt in stats_boosts_counter.most_common()), NICER_YELLOW)}\n{TAB*3}(total: {paint(str(total_stats_boots), NICER_YELLOW)})'
             if stats_boosts
             else ""
         )
