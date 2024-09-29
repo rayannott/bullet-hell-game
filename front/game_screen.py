@@ -44,6 +44,7 @@ class GameScreen(Screen):
         self.paused_label = Label(
             text="paused", surface=surface, rect=rect, font=HUGE_FONT
         )
+        self.victory_notification_shown = False
 
     def setup_game(self, surface: pygame.Surface, stats_panel_visibility: bool = True):
         play_sfx("start_game")
@@ -214,6 +215,18 @@ class GameScreen(Screen):
             self.show_game_is_over_window()
             play_sfx("game_over")  # TODO: move this to `on_game_over()`
             self.game_is_over_window_shown = True
+        if self.game.is_victory and not self.victory_notification_shown:
+            self.victory_notification_shown = True
+            self.notifications.append(
+                Notification(
+                    "you won!",
+                    Vector2(self.surface.get_rect().center - Vector2(250, 0)),
+                    self.surface,
+                    duration=5.0,
+                    color=Color("green"),
+                    font=HUGE_FONT,
+                )
+            )
         self.render_manager.reset()
         self.process_feedback_buffer()
         self.game.set_last_fps(self.clock.get_fps())

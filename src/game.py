@@ -95,6 +95,8 @@ class Game:
         self.screen_rectangle = screen_rectangle
         self.settings = settings
 
+        self.is_victory = False
+
         self.feedback_buffer: deque[Feedback] = deque()
         self._last_fps: float = 0.0
 
@@ -303,6 +305,7 @@ class Game:
                 )
 
         elif self.level == 10:
+            self.is_victory = True
             if not self.player.get_achievements().REACH_LEVEL_10:
                 self.player.get_achievements().REACH_LEVEL_10 = True
                 self.feedback_buffer.append(
