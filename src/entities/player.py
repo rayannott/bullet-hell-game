@@ -93,6 +93,11 @@ class Player(Entity):
         self.max_extra_bullets = (
             PLAYER_DEFAULT_MAX_EXTRA_BULLETS + self.boosts.add_max_extra_bullets
         )
+        old_percentage_health = self.health.get_percent_full()
+        self.health = Slider(
+            PLAYER_DEFAULT_MAX_HEALTH + self.boosts.health
+        )
+        self.health.set_percent_full(old_percentage_health)
 
         self.speed_velocity_evolution()
         self.health_energy_evolution(time_delta)
@@ -255,9 +260,6 @@ class Player(Entity):
             PLAYER_DEFAULT_SPEED_RANGE[1] + PLAYER_SPEED_INCREASE * (self.level - 1),
         )
         old_percentage_health = self.health.get_percent_full()
-        self.health = Slider(
-            PLAYER_DEFAULT_MAX_HEALTH + 10.0 * (self.level - 1)
-        )  # health keeps percentage full
         self.health.set_percent_full(old_percentage_health)
         self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.08 * (self.level - 1)
         old_percentage_energy = self.energy.get_percent_full()
