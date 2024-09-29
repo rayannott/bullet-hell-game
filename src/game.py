@@ -579,7 +579,7 @@ class Game:
                     Feedback(f"+{actually_added}eb", color=Color("white"))
                 )
             # 10% chance to get a random stat boost from an energy orb
-            if random.random() < 0.1:
+            if random.random() < (0.2 if eo.is_enemy_bonus_orb() else 0.1):
                 artifact = InactiveArtifact(next(stat_boosts_from_energy_orbs_cycler))
                 self.player.artifacts_handler.add_artifact(artifact)
                 self.feedback_buffer.append(
