@@ -8,7 +8,7 @@ import pygame
 from pygame import Vector2, Color
 
 from config.settings import Settings
-from src.misc.artifacts import Artifact
+from src.misc.artifacts import Artifact, InactiveArtifact, StatsBoost
 from src.entities.entity import Entity, DummyEntity
 from src.entities.corpse import Corpse
 from src.entities.aoe_effect import AOEEffect
@@ -62,6 +62,15 @@ from front.sounds import play_sfx
 NICER_YELLOW = Color(NICER_YELLOW_HEX)
 NICER_GREEN = Color(NICER_GREEN_HEX)
 BLUE = Color(NICER_BLUE_HEX)
+
+
+STAT_BOOSTS_FROM_ENERGY_ORBS = [
+    StatsBoost(speed=20.0),
+    StatsBoost(regen=0.5),
+    StatsBoost(health=10.0),
+]
+
+stat_boosts_from_energy_orbs_cycler = itertools.cycle(STAT_BOOSTS_FROM_ENERGY_ORBS)
 
 
 def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, float]:
@@ -565,6 +574,13 @@ class Game:
                 actually_added = self.player.add_extra_bullets(eo.num_extra_bullets)
                 self.feedback_buffer.append(
                     Feedback(f"+{actually_added}eb", color=Color("white"))
+                )
+            # 10% chance to get a random stat boost from an energy orb
+            if random.random() < 0.1:
+                artifact = InactiveArtifact(next(stat_boosts_from_energy_orbs_cycler))
+                self.player.artifacts_handler.add_artifact(artifact)
+                self.feedback_buffer.append(
+                    Feedback(f"+{artifact}", 3.0, color=NICER_YELLOW)
                 )
             self.player.get_stats().BONUS_ORBS_COLLECTED += int(eo.is_enemy_bonus_orb())
             self.animation_handler.add_animation(
