@@ -33,12 +33,14 @@ class StatsPanel:
         )
         self.health_bar = ProgressBar(
             color_gradient_pair=(Color("#751729"), Color("#58ed71")),
+            slider=self.game.player.health,
             relative_rect=pygame.Rect(SM, SM, *GAME_HEALTH_BAR_SIZE),
             manager=manager,
             parent_element=self.panel,
         )
         self.energy_bar = ProgressBar(
             color_gradient_pair=(Color("#0d182b"), Color("#3f7ae8")),
+            slider=self.game.player.energy,
             relative_rect=pygame.Rect(
                 SM, SM + GAME_HEALTH_BAR_SIZE[1], *GAME_ENERGY_BAR_SIZE
             ),
@@ -63,8 +65,8 @@ class StatsPanel:
         if not self.show_stats_panel:
             return
         player = self.game.player
-        self.health_bar.set_slider(player.get_health())
-        self.energy_bar.set_slider(player.get_energy())
+        self.health_bar.update(time_delta)
+        self.energy_bar.update(time_delta)
         self.stats_textbox.set_lines(
             [
                 f'{"difficulty":<16} {self.game.settings.difficulty}',

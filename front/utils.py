@@ -191,22 +191,29 @@ class TextBox:
 
 
 class ProgressBar(pygame_gui.elements.UIStatusBar):
-    def __init__(self, color_gradient_pair: tuple[Color, Color], **kwargs):
-        self.text_to_render = ""
+    def __init__(
+        self, color_gradient_pair: tuple[Color, Color], slider: Slider, **kwargs
+    ):
+        self.slider = slider
+        self.old_text = ""
+        self.new_text = ""
         super().__init__(**kwargs)
-        self.percent_full = 0
         self.color_gradient = ColorGradient(*color_gradient_pair)
 
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.update_percent_full()
+        self.new_text = str(self.slider)
+        if self.old_text != self.new_text:
+            self.status_changed = True
+        self.old_text = self.new_text
+
     def status_text(self):
-        return self.text_to_render
+        return self.new_text
 
-    def update_color(self):
+    def update_percent_full(self):
+        self.percent_full = self.slider.get_percent_full()
         self.bar_filled_colour = self.color_gradient(self.percent_full)
-
-    def set_slider(self, slider: Slider):
-        self.text_to_render = str(slider)
-        self.percent_full = slider.get_percent_full()
-        self.update_color()
 
 
 class Notification(Label):
