@@ -36,6 +36,11 @@ class Slider:
     def set_percent_full(self, percent: float) -> None:
         self.current_value = self.max_value * percent
 
+    def set_new_max_value(self, new_max_value: float) -> None:
+        percent_full = self.get_percent_full()
+        self.max_value = new_max_value
+        self.set_percent_full(percent_full)
+
     def change(self, delta: float) -> float:
         """Change the current value by delta. Return by how much it actually changed."""
         cache_current_value = self.current_value

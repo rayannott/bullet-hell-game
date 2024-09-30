@@ -94,9 +94,7 @@ class Player(Entity):
             PLAYER_DEFAULT_MAX_EXTRA_BULLETS + self.boosts.add_max_extra_bullets
         )
         old_percentage_health = self.health.get_percent_full()
-        self.health = Slider(
-            PLAYER_DEFAULT_MAX_HEALTH + self.boosts.health
-        )
+        self.health.set_new_max_value(PLAYER_DEFAULT_MAX_HEALTH + self.boosts.health)
         self.health.set_percent_full(old_percentage_health)
 
         self.speed_velocity_evolution()
@@ -132,6 +130,7 @@ class Player(Entity):
     def health_energy_evolution(self, time_delta: float):
         e_percent = self.energy.get_percent_full()
         h_percent = self.health.get_percent_full()
+        # todo: rework the energy decay (possibly remove due to movement and increase as regen increases)
         # moving contributes 20% of the energy decay
         energy_decay_rate_velocity = (
             0.2
@@ -259,8 +258,6 @@ class Player(Entity):
             PLAYER_DEFAULT_SPEED_RANGE[0],
             PLAYER_DEFAULT_SPEED_RANGE[1] + PLAYER_SPEED_INCREASE * (self.level - 1),
         )
-        old_percentage_health = self.health.get_percent_full()
-        self.health.set_percent_full(old_percentage_health)
         self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.08 * (self.level - 1)
         old_percentage_energy = self.energy.get_percent_full()
         self.energy = Slider(
