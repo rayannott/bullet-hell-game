@@ -115,6 +115,7 @@ class ArtifactChestGenerator:
         if sb.bullet_shield_duration or sb.bullet_shield_size:
             if not self.player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD):
                 return False
+            # todo: fix sometimes still samples stat boosts for artifacts that are missing
         # no dash-related stats boosts yet
         if sb.mine_cooldown:
             if not self.player.artifacts_handler.is_present(ArtifactType.MINE_SPAWN):
