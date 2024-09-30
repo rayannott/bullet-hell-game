@@ -43,6 +43,8 @@ from src.misc.artifacts import ArtifactsHandler, StatsBoost
 PRETTY_MAGENTA = Color("#8663e6")
 WHITE = Color("white")
 
+MAX_NUM_OF_SAVES = float("inf") # noqa
+
 
 class StatsWindow(pygame_gui.windows.UIMessageWindow):
     def __init__(self, manager: pygame_gui.UIManager, surface: Surface):
