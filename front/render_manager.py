@@ -388,10 +388,13 @@ class RenderManager:
     def draw_player(self):
         player = self.game.player
         self.draw_entity_basics(player)
+
+        player_indicator_default_color = YELLOW if not self.game.is_victory else LIGHTER_MAGENTA
+
         if player.invulnerability_timer.running():
             _indicator_color = RED
         elif player.energy.get_value() > PLAYER_SHOT_COST:
-            _indicator_color = YELLOW
+            _indicator_color = player_indicator_default_color
         else:
             _indicator_color = WHITE
         if player.energy.get_value() > PLAYER_SHOT_COST:
@@ -402,6 +405,8 @@ class RenderManager:
                 player.get_size(),
                 width=6,
             )
+
+        # shoot cooldown indicator
         draw_circular_status_bar(
             self.surface,
             player.get_pos(),
@@ -421,10 +426,10 @@ class RenderManager:
             right = move_direction_smaller.rotate(-angle)
             mid_point = player.get_pos() + move_direction
             pygame.draw.line(
-                self.surface, YELLOW, mid_point, player.get_pos() + left, width=3
+                self.surface, _indicator_color, mid_point, player.get_pos() + left, width=3
             )
             pygame.draw.line(
-                self.surface, YELLOW, mid_point, player.get_pos() + right, width=3
+                self.surface, _indicator_color, mid_point, player.get_pos() + right, width=3
             )
 
         # bullet shield:
