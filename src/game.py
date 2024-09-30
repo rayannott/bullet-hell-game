@@ -584,6 +584,7 @@ class Game:
                 self.feedback_buffer.append(
                     Feedback(f"+{artifact}", 3.0, color=NICER_YELLOW)
                 )
+                play_sfx("artifact_collected")
             self.player.get_stats().BONUS_ORBS_COLLECTED += int(eo.is_enemy_bonus_orb())
             self.animation_handler.add_animation(
                 eo.get_pos(), AnimationType.ENERGY_ORB_COLLECTED
