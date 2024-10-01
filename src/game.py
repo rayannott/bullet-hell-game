@@ -759,10 +759,12 @@ class Game:
         MULT = 0.1
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
             if enem1.intersects(enem2):
-                if enem1.intersects(enem2):
-                    vec_between = enem2.get_pos() - enem1.get_pos()
-                    enem1.pos -= vec_between * MULT
-                    enem2.pos += vec_between * MULT
+                vec_between = enem2.get_pos() - enem1.get_pos()
+                enem1.pos -= vec_between * MULT
+                enem2.pos += vec_between * MULT
+                if self.player.settings.difficulty > 3:
+                    enem1.run_away()
+                    enem2.run_away()
         # enemy-mine collisions
         for mine in self.mines():
             if not mine.is_activated():

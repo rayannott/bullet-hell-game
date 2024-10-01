@@ -45,6 +45,7 @@ class Entity(ABC):
         self.lifetime = lifetime
         self.color = color if color is not None else Color("white")
         self.homing_target = homing_target
+        self.temporary_homing_target: Entity | None = None
         self._id = random.randrange(2**32)
 
         # interfaces:
@@ -67,8 +68,9 @@ class Entity(ABC):
                 self.on_natural_death()
                 return
         if self.homing_target is not None:
+            pos = (self.temporary_homing_target or self.homing_target).get_pos()
             self.vel = (
-                self.homing_target.get_pos() - self.pos
+                pos - self.pos
             ).normalize() * self.turn_coefficient + self.vel * (
                 1 - self.turn_coefficient
             )

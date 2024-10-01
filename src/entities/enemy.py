@@ -92,7 +92,8 @@ class Enemy(Entity):
             lifetime=lifetime,
         )
         self.has_block = False
-        self.homing_target: Player  # to avoid typing errors (this is always a player)
+        # to avoid typing errors (this is always a player)
+        self.homing_target: Player
         self.health = Slider(health)
         self.cooldown = Timer(max_time=shoot_cooldown)
         self.cooldown.set_percent_full(random.random())
@@ -104,8 +105,12 @@ class Enemy(Entity):
         self.damage_spread = damage_spread
         self.num_bullets_caught = 0
 
+        self.runs_away_timer = Timer(max_time=2.0)
+        self.runs_away_timer.turn_off()
+
         self.damage_on_collision = damage_on_collision
-        self.i_can_spawn_entities: CanSpawnEntitiesInterface  # to avoid typing errors (this is never None)
+        # to avoid typing errors (this is never None)
+        self.i_can_spawn_entities: CanSpawnEntitiesInterface
         self.shoots_player = True
         self.post_init()
 
@@ -123,6 +128,11 @@ class Enemy(Entity):
         self.reward *= difficulty_mult
         self.damage_on_collision *= difficulty_mult
 
+    def run_away(self):
+        run_to = self.pos + random_unit_vector() * self.speed * 2.1
+        self.temporary_homing_target = DummyEntity(run_to)
+        self.runs_away_timer.reset()
+
     def get_shoot_direction(self) -> Vector2:
         rot_angle = (
             random.uniform(-self.spread, self.spread) * 180.0 / math.pi
@@ -132,6 +142,8 @@ class Enemy(Entity):
         return self.vel.rotate(rot_angle).normalize()
 
     def shoot(self):
+        if self.runs_away_timer.running():
+            return
         self.shoot_normal()
 
     def update(self, time_delta: float):
@@ -139,6 +151,10 @@ class Enemy(Entity):
             return
         if not self.health.is_alive():
             self.kill()
+        if self.runs_away_timer.running():
+            self.runs_away_timer.tick(time_delta)
+            if not self.runs_away_timer.running():
+                self.temporary_homing_target = None
         super().update(time_delta)
         self.cooldown.tick(time_delta)
         # TODO: use interface for CanDie instead of checking for lifetime_cooldown
@@ -364,7 +380,7 @@ class TankEnemy(Enemy):
             self.i_can_spawn_entities.add(
                 BasicEnemy(
                     pos=self.pos + random_unit_vector() * 150,
-                    player=self.homing_target,  # type: ignore
+                    player=self.homing_target,
                 )
             )
 
@@ -516,7 +532,7 @@ class JesterEnemy(Enemy):
             turn_coefficient=0.4,
         )
         self.spawn_oil_spills_timer = Timer(max_time=5.0)
-        self.homing_target = DummyEntity(self._player_pos)  # type: ignore
+        self.homing_target = player
         self.change_go_to_timer = Timer(max_time=2.0)
         self.change_go_to_timer.set_percent_full(0.5)
 
@@ -528,9 +544,11 @@ class JesterEnemy(Enemy):
             self.spawn_oil_spills_timer.reset()
         self.change_go_to_timer.tick(time_delta)
         if not self.change_go_to_timer.running():
-            self.homing_target = DummyEntity(
-                self._player_pos + random_unit_vector() * random.uniform(100.0, 300.0)
-            )  # type: ignore
+            self.temporary_homing_target = (
+                DummyEntity(self.pos + random_unit_vector() * self.speed * 2.1)
+                if random.random() < 0.5
+                else None
+            )
             self.change_go_to_timer.reset()
 
     def shoot(self):
