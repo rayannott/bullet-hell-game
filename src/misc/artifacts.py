@@ -411,9 +411,9 @@ class Shrapnel(Artifact):
 
 
 class Rage(Artifact):
-    def __init__(self, player, cooldown=35, cost=300):
+    def __init__(self, player, cooldown=24, cost=300):
         super().__init__(ArtifactType.RAGE, player, cooldown, cost)
-        self.duration = 8
+        self.duration = 5
         self.duration_timer = Timer(max_time=self.duration)
         self.duration_timer.turn_off()
 
@@ -421,9 +421,10 @@ class Rage(Artifact):
         super().update(time_delta)
         self.duration_timer.tick(time_delta)
         if self.duration_timer.running():
-            self.player.boosts += StatsBoost(damage=15, speed=1500, cooldown=1)
-            self.player.health.change(-6 * time_delta)
+            self.player.boosts += StatsBoost(speed=3600, cooldown=1)
+            taken = -self.player.health.change(-6 * time_delta)
             # TODO: make this count towards the player's stats
+            self.player.get_stats().DAMAGE_TAKEN += -taken
             # and affect the reason of death
 
     def rage(self):

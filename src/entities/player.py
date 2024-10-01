@@ -90,6 +90,7 @@ class Player(Entity):
         if not self.health.is_alive():
             self.kill()
         self.boosts = self.artifacts_handler.get_total_stats_boost()
+        self.artifacts_handler.update(time_delta)
         self.max_extra_bullets = (
             PLAYER_DEFAULT_MAX_EXTRA_BULLETS + self.boosts.add_max_extra_bullets
         )
@@ -101,7 +102,6 @@ class Player(Entity):
         self.health_energy_evolution(time_delta)
         self.shoot_cooldown_timer.tick(time_delta)
         self.invulnerability_timer.tick(time_delta)
-        self.artifacts_handler.update(time_delta)
         self.effect_flags.reset()
 
     def add_extra_bullets(self, num_to_add: int) -> int:
