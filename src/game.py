@@ -128,6 +128,7 @@ class Game:
         self.collected_artifact_cache: list[Artifact] = []
         self.energy_orbs_spawned = 0
         self.time_frozen = False
+        self.enemy_types_killed_with_ricochet: set[EnemyType] = set()
 
         # animation:
         self.animation_handler = AnimationHandler()
@@ -310,10 +311,17 @@ class Game:
                 self.feedback_buffer.append(
                     Feedback("[A!] you've reached the last level!", 3.0, color=BLUE)
                 )
-            if not self.player.get_achievements().REACH_LEVEL_10_ON_DIFFICULTY_5 and self.settings.difficulty == 5:
+            if (
+                not self.player.get_achievements().REACH_LEVEL_10_ON_DIFFICULTY_5
+                and self.settings.difficulty == 5
+            ):
                 self.player.get_achievements().REACH_LEVEL_10_ON_DIFFICULTY_5 = True
                 self.feedback_buffer.append(
-                    Feedback("[A!!] you've reached the last level on difficulty 5!", 3.0, color=BLUE)
+                    Feedback(
+                        "[A!!] you've reached the last level on difficulty 5!",
+                        3.0,
+                        color=BLUE,
+                    )
                 )
 
         return True
@@ -741,6 +749,17 @@ class Game:
                             at_pos=enemy.get_pos(),
                         )
                     )
+                    self.enemy_types_killed_with_ricochet.add(enemy.enemy_type)
+                    if self.enemy_types_killed_with_ricochet == set(EnemyType) and not self.player.get_achievements().KILL_ALL_ENEMY_TYPES_WITH_RICOCHET:
+                        self.player.get_achievements().KILL_ALL_ENEMY_TYPES_WITH_RICOCHET = True
+                        self.feedback_buffer.append(
+                            Feedback(
+                                "[A!!] killed all enemy types with ricochet!",
+                                3.0,
+                                color=BLUE,
+                            )
+                        )
+                        play_sfx("new_achievement")
                 self.deal_damage_to_enemy(enemy, bullet.get_damage())
                 enemy.caught_bullet()
                 play_sfx("accurate_shot")

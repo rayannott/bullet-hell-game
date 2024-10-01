@@ -94,6 +94,7 @@ class Achievements:
     KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False
     KILL_BOSS_WITHIN_ONE_SECOND: bool = False
     TRIGGER_BOSS_ALREADY_EXISTS: bool = False
+    KILL_ALL_ENEMY_TYPES_WITH_RICOCHET: bool = False
 
     def update(self, other: "Achievements"):
         for k, v in other.__dict__.items():
