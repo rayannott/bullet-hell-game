@@ -510,12 +510,12 @@ class JesterEnemy(Enemy):
             player=player,
             color=Color("#ede664"),
             speed=ENEMY_DEFAULT_SPEED + 5.0 * _player_level,
-            health=ENEMY_DEFAULT_MAX_HEALTH * 2.5,
+            health=ENEMY_DEFAULT_MAX_HEALTH * 1.5,
             shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
             reward=ENEMY_DEFAULT_REWARD * (1.6 + 0.1 * _player_level),
             lifetime=ENEMY_DEFAULT_LIFETIME + 6.0 * (_player_level - 1),
             damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 1.15,
-            turn_coefficient=0.4,
+            turn_coefficient=0.1,
         )
         self.spawn_oil_spills_timer = Timer(max_time=5.0)
         self.homing_target = DummyEntity(self._player_pos)  # type: ignore
