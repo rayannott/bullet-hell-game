@@ -259,11 +259,10 @@ class Player(Entity):
             PLAYER_DEFAULT_SPEED_RANGE[1] + PLAYER_SPEED_INCREASE * (self.level - 1),
         )
         self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE + 0.08 * (self.level - 1)
-        old_percentage_energy = self.energy.get_percent_full()
-        self.energy = Slider(
+        self.energy.set_new_max_value(
             PLAYER_DEFAULT_MAX_ENERGY + PLAYER_ENERGY_INCREASE * (self.level - 1)
         )
-        self.energy.set_percent_full(old_percentage_energy)
+        self.energy.set_percent_full(1.0)
         self.shoot_cooldown = max(
             PLAYER_DEFAULT_SHOOT_COOLDOWN - 0.05 * (self.level - 1), 0.25
         )
