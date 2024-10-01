@@ -310,6 +310,12 @@ class Game:
                 self.feedback_buffer.append(
                     Feedback("[A!] you've reached the last level!", 3.0, color=BLUE)
                 )
+            if not self.player.get_achievements().REACH_LEVEL_10_ON_DIFFICULTY_5 and self.settings.difficulty == 5:
+                self.player.get_achievements().REACH_LEVEL_10_ON_DIFFICULTY_5 = True
+                self.feedback_buffer.append(
+                    Feedback("[A!!] you've reached the last level on difficulty 5!", 3.0, color=BLUE)
+                )
+
         return True
 
     def kill_projectiles(self):

@@ -78,6 +78,7 @@ class Achievements:
     REACH_LEVEL_5_WITHOUT_COLLECTING_ENERGY_ORBS: bool = False
     GET_ALL_LEVEL_5_ACHIEVEMENTS_SIMULTANEOUSLY: bool = False
     REACH_LEVEL_10: bool = False
+    REACH_LEVEL_10_ON_DIFFICULTY_5: bool = False
     RECEIVE_1000_DAMAGE: bool = False
     FIRE_200_PROJECTILES: bool = False
     KILL_100_ENEMIES: bool = False
