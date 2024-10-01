@@ -389,7 +389,9 @@ class RenderManager:
         player = self.game.player
         self.draw_entity_basics(player)
 
-        player_indicator_default_color = YELLOW if not self.game.is_victory else LIGHTER_MAGENTA
+        player_indicator_default_color = (
+            YELLOW if not self.game.is_victory else LIGHTER_MAGENTA
+        )
 
         if player.invulnerability_timer.running():
             _indicator_color = RED
@@ -397,6 +399,24 @@ class RenderManager:
             _indicator_color = player_indicator_default_color
         else:
             _indicator_color = WHITE
+
+        # rage:
+        if (
+            player.artifacts_handler.is_present(ArtifactType.RAGE)
+            and player.artifacts_handler.get_rage().is_on()
+        ):
+            draw_circular_status_bar(
+                self.surface,
+                player.get_pos(),
+                player.artifacts_handler.get_rage().duration_timer.get_slider(
+                    reverse=True
+                ),
+                player.get_size() + 4.0,
+                draw_full=True,
+                width=7,
+            )
+            _indicator_color = DARK_PURPLE
+
         if player.energy.get_value() > PLAYER_SHOT_COST:
             pygame.draw.circle(
                 self.surface,
@@ -426,10 +446,18 @@ class RenderManager:
             right = move_direction_smaller.rotate(-angle)
             mid_point = player.get_pos() + move_direction
             pygame.draw.line(
-                self.surface, _indicator_color, mid_point, player.get_pos() + left, width=3
+                self.surface,
+                _indicator_color,
+                mid_point,
+                player.get_pos() + left,
+                width=4,
             )
             pygame.draw.line(
-                self.surface, _indicator_color, mid_point, player.get_pos() + right, width=3
+                self.surface,
+                _indicator_color,
+                mid_point,
+                player.get_pos() + right,
+                width=4,
             )
 
         # bullet shield:
@@ -463,21 +491,6 @@ class RenderManager:
                 player.get_size() + 15.0,
                 draw_full=True,
             )
-        # rage:
-        if (
-            player.artifacts_handler.is_present(ArtifactType.RAGE)
-            and player.artifacts_handler.get_rage().is_on()
-        ):
-            draw_circular_status_bar(
-                self.surface,
-                player.get_pos(),
-                player.artifacts_handler.get_rage().duration_timer.get_slider(
-                    reverse=True
-                ),
-                player.get_size() + 3.0,
-                draw_full=True,
-            )
-            _indicator_color = DARK_PURPLE
 
     def draw_projectile(self, projectile: Projectile):
         if projectile.projectile_type == ProjectileType.DEF_TRAJECTORY:
