@@ -20,6 +20,8 @@ PROJECTILE_COLOR_MAP = {
     ProjectileType.DEF_TRAJECTORY: Color("#e3b146"),
 }
 
+RED = Color("red")
+
 
 class Projectile(Entity):
     def __init__(
@@ -90,6 +92,7 @@ class ExplosiveProjectile(Projectile):
             render_trail=True,
             can_spawn_entities=True,
         )
+        self._original_color = self.color
         self.num_subprojectiles = num_subprojectiles
         self.homing_target = homing_target
 
@@ -110,7 +113,11 @@ class ExplosiveProjectile(Projectile):
                     lifetime=self.lifetime * 0.8,
                 )
             )
-
+    
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        if self.i_has_lifetime.timer.get_time_left() < 1.0:
+            self.color = random.choice([RED, self._original_color])
 
 class HomingProjectile(Projectile):
     def __init__(
