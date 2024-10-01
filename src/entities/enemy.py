@@ -277,9 +277,20 @@ class BasicEnemy(Enemy):
 
     def shoot(self):
         self.shoot_normal()
-        if self.difficulty == 5:
+
+        match self.difficulty:
+            case 3:
+                SHOOT_EXPLOSIVE_PROB, SHOOT_DEF_TRAJECTORY_PROB = 0.1, 0.0
+            case 4:
+                SHOOT_EXPLOSIVE_PROB, SHOOT_DEF_TRAJECTORY_PROB = 0.2, 0.1
+            case 5:
+                SHOOT_EXPLOSIVE_PROB, SHOOT_DEF_TRAJECTORY_PROB = 0.3, 0.2
+            case _:
+                SHOOT_EXPLOSIVE_PROB, SHOOT_DEF_TRAJECTORY_PROB = 0.0, 0.0
+
+        if random.random() < SHOOT_EXPLOSIVE_PROB:
             self.shoot_explosive()
-        elif self.difficulty >= 4:
+        if random.random() < SHOOT_DEF_TRAJECTORY_PROB:
             self.shoot_def_trajectory()
 
 
