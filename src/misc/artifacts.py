@@ -143,9 +143,7 @@ class Artifact(ABC):
 
     @staticmethod
     def get_artifact_type() -> ArtifactType:
-        raise NotImplementedError(
-            "This artifact doesn't implement get_artifact_type()"
-        )
+        raise NotImplementedError("This artifact doesn't implement get_artifact_type()")
 
 
 class BulletShield(Artifact):
@@ -381,19 +379,21 @@ class Shrapnel(Artifact):
         direction: Vector2 = (
             self.player.gravity_point - self.player.get_pos()
         ).normalize()
-        for _ in range(self.num_shards + 2 * self.player.extra_bullets):
-            direction_ = direction.rotate(random.uniform(-9, 9))
-            self.player.i_can_spawn_entities.add(
-                Projectile(
-                    pos=self.player.get_pos()
-                    + direction_ * self.player.get_size() * 1.5,
-                    vel=direction_,
-                    projectile_type=ProjectileType.PLAYER_BULLET,
-                    damage=self.player.get_damage() * 0.3,
-                    lifetime=1.5,
-                    speed=self.player.speed + PROJECTILE_DEFAULT_SPEED,
+        angle = 9
+        for angle in [3, 20, 50]:
+            for _ in range(self.num_shards + self.player.extra_bullets):
+                direction_ = direction.rotate(random.uniform(-angle, angle))
+                self.player.i_can_spawn_entities.add(
+                    Projectile(
+                        pos=self.player.get_pos()
+                        + direction_ * self.player.get_size() * 1.5,
+                        vel=direction_,
+                        projectile_type=ProjectileType.PLAYER_BULLET,
+                        damage=self.player.get_damage() * 0.3,
+                        lifetime=1.5,
+                        speed=self.player.speed + PROJECTILE_DEFAULT_SPEED * 2,
+                    )
                 )
-            )
         self.player.get_stats().PROJECTILES_FIRED += (
             self.num_shards + self.player.extra_bullets
         )
@@ -455,8 +455,7 @@ class InactiveArtifact(Artifact):
         )
         self.stats_boost = stats_boost
 
-    def update(self, time_delta: float):
-        ...
+    def update(self, time_delta: float): ...
 
     def __repr__(self) -> str:
         return f"InactiveArtifact({self.stats_boost})"
