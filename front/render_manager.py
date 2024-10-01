@@ -417,14 +417,13 @@ class RenderManager:
             )
             _indicator_color = DARK_PURPLE
 
-        if player.energy.get_value() > PLAYER_SHOT_COST:
-            pygame.draw.circle(
-                self.surface,
-                _indicator_color,
-                player.get_pos(),
-                player.get_size(),
-                width=6,
-            )
+        pygame.draw.circle(
+            self.surface,
+            _indicator_color,
+            player.get_pos(),
+            player.get_size(),
+            width=6,
+        )
 
         # shoot cooldown indicator
         draw_circular_status_bar(
