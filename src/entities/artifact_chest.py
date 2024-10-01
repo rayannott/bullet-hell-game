@@ -115,7 +115,6 @@ class ArtifactChestGenerator:
         if sb.bullet_shield_duration or sb.bullet_shield_size:
             if not self.player.artifacts_handler.is_present(ArtifactType.BULLET_SHIELD):
                 return False
-            # todo: fix sometimes still samples stat boosts for artifacts that are missing
         # no dash-related stats boosts yet
         if sb.mine_cooldown:
             if not self.player.artifacts_handler.is_present(ArtifactType.MINE_SPAWN):
@@ -127,17 +126,6 @@ class ArtifactChestGenerator:
             if not self.player.artifacts_handler.is_present(ArtifactType.SHRAPNEL):
                 return False
         return True
-
-    def get_random_absent_stats_boost_artifact_chest(
-        self, at: Vector2
-    ) -> ArtifactChest | None:
-        absent_stats = [
-            k for k, v in self.inactive_artifacts_stats_boosts.items() if not v
-        ]
-        if not absent_stats:
-            return None
-        stats_boost = random.choice(absent_stats)
-        return ArtifactChest(at, InactiveArtifact(stats_boost))
 
     def get_artifact(self, artifact_type: ArtifactType) -> Artifact:
         if artifact_type == ArtifactType.BULLET_SHIELD:
@@ -167,15 +155,21 @@ class ArtifactChestGenerator:
         self.active_artifacts[_type] = True
         return True
 
+    def get_n_uniqie_stat_boost_chests(self, n: int) -> list[ArtifactChest]:
+        return [
+            ArtifactChest(Vector2(), InactiveArtifact(stat_boost))
+            for stat_boost in random.sample(
+                list(filter(self.should_include_stats_boost, self._inactive_artifacts)),
+                n,
+            )
+        ]
+
     def get_artifact_chests(self, player_level: int) -> list[ArtifactChest]:
         """
         Returns a list of ArtifactChests with the artifacts that player does not yet have.
         """
         if player_level >= 11:
-            return [
-                ArtifactChest(Vector2(), InactiveArtifact(stat_boost))
-                for stat_boost in random.sample(self._inactive_artifacts, 3)
-            ]
+            return self.get_n_uniqie_stat_boost_chests(3)
         to_spawn: list[ArtifactChest] = []
         # absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v and self.should_include_stats_boost(k)]
         absent_active = [k for k, v in self.active_artifacts.items() if not v]
@@ -215,4 +209,6 @@ class ArtifactChestGenerator:
                 for stats_boost in stats_to_spawn
             ]
         )
+        missing_num = 3 - len(to_spawn)
+        to_spawn.extend(self.get_n_uniqie_stat_boost_chests(missing_num))
         return to_spawn
