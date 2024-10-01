@@ -361,20 +361,14 @@ class RenderManager:
                     enemy.get_size() * self.soon_shooting_coef_function(1.0 - t),
                     width=3,
                 )
-        else:
-            if enemy.enemy_type == EnemyType.MINER:
-                pygame.draw.circle(
-                    self.surface,
-                    ALMOST_BG_COLOR,
-                    enemy.get_pos(),
-                    MINER_DETONATION_RADIUS,
-                    width=2,
-                )
-                if enemy.dash_cooldown_timer.get_time_left() < 1.0:  # type: ignore
-                    color = random.choice([GRAY, WHITE, RED])
-                    pygame.draw.circle(
-                        self.surface, color, enemy.get_pos(), enemy.get_size(), width=5
-                    )
+        if enemy.enemy_type == EnemyType.MINER:
+            pygame.draw.circle(
+                self.surface,
+                ALMOST_BG_COLOR,
+                enemy.get_pos(),
+                MINER_DETONATION_RADIUS,
+                width=2,
+            )
         if self.debug:
             health_text = f"{enemy.get_health()}"
             label = Label(

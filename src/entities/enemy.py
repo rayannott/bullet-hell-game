@@ -465,6 +465,8 @@ class MinerEnemy(Enemy):
         else:
             self.speed = ENEMY_DEFAULT_SPEED * 1.2
             self.color = self.NORMAL_COLOR
+            if self.dash_cooldown_timer.get_time_left() < 1.0:
+                self.color = random.choice([self.NORMAL_COLOR, self.COLOR_IN_DASH])
         if (
             self.homing_target.get_pos() - self.pos
         ).magnitude_squared() < MINER_DETONATION_RADIUS**2:
