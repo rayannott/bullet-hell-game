@@ -39,6 +39,7 @@ from config import (
     NICER_GREEN_HEX,
     PLAYER_DEFAULT_MAX_EXTRA_BULLETS,
     PLAYER_ENERGY_INCREASE,
+    PLAYER_PER_UNIT_HEALTH_REGEN_COST,
 )
 
 
@@ -130,35 +131,34 @@ class Player(Entity):
     def health_energy_evolution(self, time_delta: float):
         e_percent = self.energy.get_percent_full()
         h_percent = self.health.get_percent_full()
-        # todo: rework the energy decay (possibly remove due to movement and increase as regen increases)
-        # moving contributes 20% of the energy decay
-        energy_decay_rate_velocity = (
-            0.2
-            * PLAYER_DEFAULT_ENERGY_DECAY_RATE
-            * (self.vel.magnitude_squared() > 0.0)
-        )
-        # regenerating health contributes 80% of the energy decay
-        if h_percent == 1.0:
-            energy_decay_rate_health = 0.0
-            low_health_multiplier = 1.0
-        elif h_percent > 0.4:
-            low_health_multiplier = 1.0 if e_percent < 0.8 else 2.0
-            energy_decay_rate_health = (
-                0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 2.5)
-            )
-        else:
-            # unless health is low
-            # then it depends on the energy levels
-            low_health_multiplier = 1.5 if e_percent < 0.6 else 2.5
-            energy_decay_rate_health = (
-                0.8 * PLAYER_DEFAULT_ENERGY_DECAY_RATE * (low_health_multiplier + 2.5)
-            )
-        # decay energy and regenerate health faster when health is low
+        # passive energy decay
         if e_percent > 0.0:
-            self.health.change(self.get_regen() * low_health_multiplier * time_delta)
-        self.energy.change(
-            -(energy_decay_rate_velocity + energy_decay_rate_health) * time_delta
-        )
+            self.energy.change(-self.energy_decay_rate * time_delta)
+
+        if e_percent < 0.3:
+            REGEN_MULT_DUE_TO_ENERGY = 1.0
+        elif e_percent < 0.7:
+            REGEN_MULT_DUE_TO_ENERGY = 1.5
+        else:
+            REGEN_MULT_DUE_TO_ENERGY = 2.0
+
+        if h_percent < 0.3:
+            REGEN_MULT_DUE_TO_HEALTH = 2.0
+        elif h_percent < 0.7:
+            REGEN_MULT_DUE_TO_HEALTH = 1.5
+        else:
+            REGEN_MULT_DUE_TO_HEALTH = 1.0
+
+        if e_percent > 0.0:
+            regen_to_apply = (
+                self.get_regen()
+                * REGEN_MULT_DUE_TO_ENERGY
+                * REGEN_MULT_DUE_TO_HEALTH
+                * time_delta
+            )
+            changed = self.health.change(regen_to_apply)
+            self.energy.change(-changed * PLAYER_PER_UNIT_HEALTH_REGEN_COST)
+
         # other effects
         if self.effect_flags.OIL_SPILL:
             oil_spill_damage_per_sec = OIL_SPILL_DAMAGE_PER_SECOND * (
