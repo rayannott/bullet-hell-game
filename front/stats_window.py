@@ -68,6 +68,8 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         self.dismiss_button.set_text("Close")
     
     def get_current_text(self) -> str:
+        if not self.total_batches:
+            return self.construct_html(())
         header = f'saves batch {self.current_batch + 1}/{self.total_batches}<br>'
         return header + self.construct_html(self.save_batches[self.current_batch])
 
@@ -144,6 +146,8 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         # space
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                if not self.total_batches:
+                    return False
                 self.current_batch = (self.current_batch + 1) % self.total_batches
                 assert self.text_block is not None
                 self.text_block.set_text(self.get_current_text())
