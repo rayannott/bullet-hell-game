@@ -22,7 +22,7 @@ class ConsoleWindow(pygame_gui.windows.UIConsoleWindow):
         super().__init__(rect, manager, "Console")
         self.menu_screen = menu_screen
         self.starting_text = (
-            f'[{datetime.datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}] Console opened'
+            f'[{datetime.datetime.now():%d/%m/%Y, %H:%M:%S}] Console opened'
         )
         self.reset()
         self.AVAILABLE_COMMANDS = {
