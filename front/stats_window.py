@@ -1,7 +1,9 @@
 import shelve
 from collections import Counter
+from itertools import batched
 
-from pygame import Color, Surface, Rect
+from pygame import Color, Event, Surface, Rect
+import pygame
 import pygame_gui
 
 from front.utils import paint
@@ -14,7 +16,6 @@ from config import (
     NICER_BLUE_HEX,
     LIGHT_BLUE_HEX,
     SAVES_FILE,
-    MAX_NUM_OF_SAVES,
 )
 from src.misc.artifacts import ArtifactsHandler, StatsBoost
 
@@ -43,34 +44,32 @@ from src.misc.artifacts import ArtifactsHandler, StatsBoost
 PRETTY_MAGENTA = Color("#8663e6")
 WHITE = Color("white")
 
-MAX_NUM_OF_SAVES = float("inf") # noqa
+BATCH_SIZE = 5
 
 
 class StatsWindow(pygame_gui.windows.UIMessageWindow):
     def __init__(self, manager: pygame_gui.UIManager, surface: Surface):
         rect = Rect(40, 40, 550, 800)
         rect.center = surface.get_rect().center
+
         with shelve.open(str(SAVES_FILE)) as saves:
+            self.save_batches = list(batched(reversed(list(saves.items())), BATCH_SIZE))
+            self.current_batch = 0
+            self.total_batches = len(self.save_batches)
             len_saves = len(saves)
-            if len_saves > MAX_NUM_OF_SAVES:
-                print(
-                    f"[Too many saves] Found {len_saves} saves, deleting {len_saves - MAX_NUM_OF_SAVES} of them:"
-                )
-                for datetime_str in sorted(
-                    saves.keys(), reverse=True, key=lambda x: saves[x].get("score", 0)
-                )[MAX_NUM_OF_SAVES:]:
-                    print(
-                        f'- deleted save {datetime_str}; score={saves[datetime_str].get("score")}'
-                    )
-                    del saves[datetime_str]
-                len_saves = len(saves)
-            text = self.construct_html(saves)
         super().__init__(
             rect=rect,
             manager=manager,
-            window_title=f'Stats ({len_saves} save{"s" * (len_saves != 1)})',
-            html_message=text,
+            window_title=f'Stats ({len_saves} saves)',
+            html_message=self.get_current_text(),
         )
+
+        assert self.dismiss_button is not None
+        self.dismiss_button.set_text("Close")
+    
+    def get_current_text(self) -> str:
+        header = f'saves batch {self.current_batch + 1}/{self.total_batches}<br>'
+        return header + self.construct_html(self.save_batches[self.current_batch])
 
     @staticmethod
     def construct_one_save_html(datetime_str: str, info: dict) -> str:
@@ -133,10 +132,20 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
     """
         return text
 
-    def construct_html(self, saves: shelve.Shelf) -> str:
+    def construct_html(self, saves: tuple[tuple[str, dict], ...]) -> str:
         if len(saves) == 0:
             return "No saves yet"
         texts = []
-        for datetime_str, info in reversed(list(saves.items())):
+        for datetime_str, info in saves:
             texts.append(self.construct_one_save_html(datetime_str, info))
         return "\n\n".join(texts)
+
+    def process_event(self, event: Event) -> bool:
+        # space
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                print("SPACE")
+                self.current_batch = (self.current_batch + 1) % self.total_batches
+                assert self.text_block is not None
+                self.text_block.set_text(self.get_current_text())
+        return super().process_event(event)
