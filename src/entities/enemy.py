@@ -350,12 +350,11 @@ class TankEnemy(Enemy):
     def shoot(self):
         """Shoots in bursts with probability 0.5 and explosive projectiles with probability 0.5."""
         delta_num_proj = [-2, -2, -1, 1, 2][self._difficulty - 1]
+        num = 2 + random.randint(0, 1 + self._player_level + delta_num_proj)
         if random.random() < 0.5:
-            num_subproj = 3 + self._player_level + delta_num_proj
-            self.shoot_explosive(num_of_subprojectiles=num_subproj)
+            self.shoot_explosive(num_of_subprojectiles=num)
             return
-        num_shots = random.randint(2, 2 + int(self._player_level) + delta_num_proj)
-        for _ in range(num_shots):
+        for _ in range(num):
             self.shoot_normal(speed_mult=1.2 + 0.05 * self._player_level)
 
     def on_natural_death(self):
