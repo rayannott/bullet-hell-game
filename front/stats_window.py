@@ -8,6 +8,7 @@ import pygame_gui
 
 from front.utils import paint
 from config import (
+    SAVES_BATCH_SIZE,
     LIGHT_MAGENTA_HEX,
     NICER_GREEN_HEX,
     NICER_YELLOW_HEX,
@@ -44,7 +45,6 @@ from src.misc.artifacts import ArtifactsHandler, StatsBoost
 PRETTY_MAGENTA = Color("#8663e6")
 WHITE = Color("white")
 
-BATCH_SIZE = 5
 
 
 class StatsWindow(pygame_gui.windows.UIMessageWindow):
@@ -53,7 +53,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         rect.center = surface.get_rect().center
 
         with shelve.open(str(SAVES_FILE)) as saves:
-            self.save_batches = list(batched(reversed(list(saves.items())), BATCH_SIZE))
+            self.save_batches = list(batched(reversed(list(saves.items())), SAVES_BATCH_SIZE))
             self.current_batch = 0
             self.total_batches = len(self.save_batches)
             len_saves = len(saves)
@@ -144,7 +144,6 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
         # space
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                print("SPACE")
                 self.current_batch = (self.current_batch + 1) % self.total_batches
                 assert self.text_block is not None
                 self.text_block.set_text(self.get_current_text())

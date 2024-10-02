@@ -1,5 +1,7 @@
 FRAMERATE_MIN_MAX = (30, 220)
 
+SAVES_BATCH_SIZE = 5
+
 SM = 5  # small margin
 BM = 10  # big margin
 
