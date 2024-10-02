@@ -3,6 +3,7 @@ import pickle
 import random
 import shelve
 from typing import Literal
+from pprint import pprint
 
 import pygame
 from pygame import Color, Vector2
@@ -81,7 +82,7 @@ class GameScreen(Screen):
                     self.game.spawn_enemy(EnemyType.BOSS)
                 elif event.key == pygame.K_i:
                     print("--- debug info ---")
-                    print(self.game.get_info())
+                    pprint(self.game.get_info())
                     print("-" * 10)
                 elif event.key == pygame.K_t:
                     self.game.add_entity(
