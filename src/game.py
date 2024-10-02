@@ -25,7 +25,7 @@ from src.utils.enums import (
     AOEEffectEffectType,
 )
 from src.entities.projectile import Projectile
-from src.utils.utils import Timer, Feedback, random_unit_vector
+from src.utils.utils import Timer, Feedback
 from src.entities.energy_orb import EnergyOrb
 from src.utils.exceptions import (
     ArtifactMissing,
@@ -750,7 +750,10 @@ class Game:
                         )
                     )
                     self.enemy_types_killed_with_ricochet.add(enemy.enemy_type)
-                    if self.enemy_types_killed_with_ricochet == set(EnemyType) and not self.player.get_achievements().KILL_ALL_ENEMY_TYPES_WITH_RICOCHET:
+                    if (
+                        self.enemy_types_killed_with_ricochet == set(EnemyType)
+                        and not self.player.get_achievements().KILL_ALL_ENEMY_TYPES_WITH_RICOCHET
+                    ):
                         self.player.get_achievements().KILL_ALL_ENEMY_TYPES_WITH_RICOCHET = True
                         self.feedback_buffer.append(
                             Feedback(
@@ -1017,16 +1020,19 @@ class Game:
             dummy = DummyEntity(pos_candidate, entity_size)
             if (
                 pos_candidate - self.player.get_pos()
-            ).magnitude_squared() > 400.0**2 and not any(
+            ).magnitude_squared() > 800.0**2 and not any(
                 entity.intersects(dummy) for entity in self.all_entities_iter()
             ):
                 return pos_candidate
 
     def get_screen_position_for_enemy(self, enemy_size: float) -> Vector2:
         """Give a position behind the player.
-        If it is outside of the screen, return a random position inside the screen."""
-        player_vel = self.player.get_vel() + random_unit_vector()
-        pos = self.player.get_pos() - player_vel.normalize() * 300.0
+        If it is outside of the screen or the player is not moving,
+        return a random position inside the screen."""
+        vel = self.player.get_vel()
+        if math.isclose(vel.magnitude_squared(), 0.0):
+            return self.get_random_screen_position_for_entity(enemy_size)
+        pos = self.player.get_pos() - vel.normalize() * 800.0
         if self.screen_rectangle.collidepoint(pos):
             return pos
         return self.get_random_screen_position_for_entity(enemy_size)
