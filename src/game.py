@@ -766,7 +766,6 @@ class Game:
                             + random_unit_vector() * random.uniform(20.0, 300.0),
                             energy=80.0,
                             lifetime=4.0,
-                            num_extra_bullets=random.randint(0, 1),
                             is_enemy_bonus_orb=True,
                         )
                     )
