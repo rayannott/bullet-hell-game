@@ -16,6 +16,7 @@ from src.misc.line import Line, LineType
 from src.entities.mine import Mine
 from src.entities.oil_spill import OilSpill
 from src.entities.player import Player
+from src.entities.bomb import Bomb
 from src.utils.enums import (
     ArtifactType,
     EntityType,
@@ -25,7 +26,7 @@ from src.utils.enums import (
     AOEEffectEffectType,
 )
 from src.entities.projectile import Projectile
-from src.utils.utils import Timer, Feedback
+from src.utils.utils import Timer, Feedback, random_unit_vector
 from src.entities.energy_orb import EnergyOrb
 from src.utils.exceptions import (
     ArtifactMissing,
@@ -111,6 +112,7 @@ class Game:
         self.e_mines: list[Mine] = []
         self.e_aoe_effects: list[AOEEffect] = []
         self.e_artifact_chests: list[ArtifactChest] = []
+        self.e_bombs: list[Bomb] = []
 
         self.e_lines: list[Line] = []
 
@@ -151,6 +153,7 @@ class Game:
         yield from self.mines(include_dead)
         yield from self.aoe_effects(include_dead)
         yield from self.artifact_chests(include_dead)
+        yield from self.bombs(include_dead)
         if with_player:
             yield self.player
 
@@ -190,6 +193,9 @@ class Game:
         yield from (
             ent for ent in self.e_artifact_chests if include_dead or ent.is_alive()
         )
+
+    def bombs(self, include_dead: bool = False) -> Generator[Bomb, None, None]:
+        yield from (ent for ent in self.e_bombs if include_dead or ent.is_alive())
 
     def lines(self, include_dead: bool = False) -> Generator[Line, None, None]:
         yield from (ln for ln in self.e_lines if include_dead or ln.is_alive())
@@ -723,6 +729,23 @@ class Game:
                 self.player_get_damage(line.kwargs.get("damage", 0.0))
                 self.reason_of_death = "impact line damage"
                 line.applied_manager.check_applied(self.player)
+        for bomb in self.bombs():
+            bomb.defusing_last_frame = bomb.intersects(self.player)
+            if bomb.is_defused():
+                bomb.kill()
+                for _ in range(6):
+                    self.add_entity(
+                        EnergyOrb(
+                            pos=bomb.get_pos()
+                            + random_unit_vector() * random.uniform(20.0, 300.0),
+                            energy=80.0,
+                            lifetime=4.0,
+                            num_extra_bullets=random.randint(0, 2),
+                        )
+                    )
+                self.feedback_buffer.append(
+                    Feedback("defused!", 3.5, color=Color("pink"))
+                )
 
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks
@@ -991,6 +1014,8 @@ class Game:
             self.e_aoe_effects.append(entity)  # type: ignore
         elif ent_type == EntityType.ARTIFACT_CHEST:
             self.e_artifact_chests.append(entity)  # type: ignore
+        elif ent_type == EntityType.BOMB:
+            self.e_bombs.append(entity)  # type: ignore
         else:
             raise ValueError(f"Unknown entity type {ent_type}")
 

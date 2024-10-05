@@ -14,7 +14,7 @@ class EnergyOrb(Entity):  # TODO: change this to EntityLifetime
         pos: Vector2,
         energy: float,
         lifetime: float,
-        num_extra_bullets: int = False,
+        num_extra_bullets: int = 0,
         is_enemy_bonus_orb: bool = False,
     ) -> None:
         size = ENERGY_ORB_SIZE
