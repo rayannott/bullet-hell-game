@@ -759,7 +759,7 @@ class Game:
             bomb.defusing_last_frame = bomb.intersects(self.player)
             if bomb.is_defused():
                 bomb.kill()
-                for _ in range(6):
+                for _ in range(random.randint(5, 10)):
                     self.add_entity(
                         EnergyOrb(
                             pos=bomb.get_pos()
@@ -769,6 +769,7 @@ class Game:
                             is_enemy_bonus_orb=True,
                         )
                     )
+                self.player.get_stats().BOMBS_DEFUSED += 1
                 self.feedback_buffer.append(
                     Feedback("defused!", 3.5, color=Color("pink"))
                 )

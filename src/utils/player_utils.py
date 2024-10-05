@@ -21,6 +21,7 @@ class Stats:
     DASHED_THROUGH_ENEMIES: int = 0
     BONUS_ORBS_COLLECTED: int = 0
     BLOCKS_LIFTED: int = 0
+    BOMBS_DEFUSED: int = 0
 
     DAMAGE_TAKEN: float = 0.0
     DAMAGE_DEALT: float = 0.0
