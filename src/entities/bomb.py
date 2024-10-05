@@ -6,12 +6,19 @@ from src.entities.projectile import ExplosiveProjectile
 from src.entities.mine import Mine
 from src.utils.enums import EntityType
 from src.utils.utils import Timer, random_unit_vector
+from config import BOMB_DEFAULT_SIZE, BOMB_DEFAULT_LIFETIME
 
 from pygame import Vector2, Color
 
 
 class Bomb(Entity):
-    def __init__(self, pos: Vector2, player, size: float, lifetime: float):
+    def __init__(
+        self,
+        pos: Vector2,
+        player,
+        size: float = BOMB_DEFAULT_SIZE,
+        lifetime: float = BOMB_DEFAULT_LIFETIME,
+    ):
         super().__init__(
             pos=pos,
             type=EntityType.BOMB,

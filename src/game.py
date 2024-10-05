@@ -55,6 +55,9 @@ from config import (
     BM,
     PLAYER_SHOT_COST,
     OIL_SPILL_SPEED_MULTIPLIER,
+    BOMB_SPAWN_COOLDOWN_RANGE,
+    BOMB_DEFAULT_SIZE,
+    BOMB_DEFAULT_LIFETIME,
 )
 from front.sounds import play_sfx
 
@@ -124,6 +127,9 @@ class Game:
         )
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
+        self.spawn_bomb_timer = Timer(
+            max_time=random.uniform(*BOMB_SPAWN_COOLDOWN_RANGE)
+        )
 
         # misc:
         self.reason_of_death = ""
@@ -351,6 +357,20 @@ class Game:
             )
         )
 
+    def spawn_bomb(self):
+        size = (BOMB_DEFAULT_SIZE + random.uniform(-30.0, 30.0)) * (
+            1.0 - 0.1 * (self.settings.difficulty - 3)
+        )
+        lifetime = BOMB_DEFAULT_LIFETIME + random.uniform(-4.0, 6.0)
+        self.add_entity(
+            Bomb(
+                pos=self.get_random_screen_position_for_entity(entity_size=size),
+                player=self.player,
+                size=size,
+                lifetime=lifetime,
+            )
+        )
+
     def spawn_enemy(self, enemy_type: EnemyType):
         if enemy_type == EnemyType.BOSS:
             position = self.screen_rectangle.center
@@ -417,6 +437,12 @@ class Game:
             self.spawn_random_enemy()
             self.spawn_enemy_timer.reset(
                 with_max_time=self.current_spawn_enemy_cooldown
+            )
+        self.spawn_bomb_timer.tick(time_delta)
+        if not self.spawn_bomb_timer.running():
+            self.spawn_bomb()
+            self.spawn_bomb_timer.reset(
+                with_max_time=random.uniform(*BOMB_SPAWN_COOLDOWN_RANGE)
             )
 
     def update(self, time_delta: float) -> None:
@@ -740,7 +766,8 @@ class Game:
                             + random_unit_vector() * random.uniform(20.0, 300.0),
                             energy=80.0,
                             lifetime=4.0,
-                            num_extra_bullets=random.randint(0, 2),
+                            num_extra_bullets=random.randint(0, 1),
+                            is_enemy_bonus_orb=True,
                         )
                     )
                 self.feedback_buffer.append(
