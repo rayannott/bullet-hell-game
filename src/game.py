@@ -377,7 +377,7 @@ class Game:
         else:
             position = self.get_screen_position_for_enemy(
                 enemy_size=ENEMY_SIZE_MAP[enemy_type]
-            )
+            ) + random_unit_vector()
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
                 pos=position,
