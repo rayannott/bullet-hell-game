@@ -309,6 +309,15 @@ class RenderManager:
             color=RED if bomb.i_has_lifetime.timer.get_percent_full() > 2./3 else MAGENTA,
             width=7,
         )
+        p = bomb.get_pos() + Vector2(-math.sqrt(3)*0.5 * bomb.get_size(), 0.5 * bomb.get_size())
+        p_to_center = (bomb.get_pos() - p).normalize()
+        pygame.draw.line(
+            self.surface,
+            WHITE,
+            p + p_to_center * 5,
+            p - p_to_center * 5,
+            width=4,
+        )
 
     def draw_artifact_chest(self, art_chest: ArtifactChest):
         can_be_picked_up = art_chest.can_be_picked_up()
