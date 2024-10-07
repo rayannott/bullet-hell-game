@@ -27,7 +27,7 @@ class Bomb(Entity):
             can_spawn_entities=True,
             lifetime=lifetime,
         )
-        self.defuse_timer = Timer(max_time=0.4 * lifetime)
+        self.defuse_timer = Timer(max_time=1.0 / 3 * lifetime)
         self.defusing_last_frame = False
         self.player = player
 
@@ -63,13 +63,8 @@ class Bomb(Entity):
                 )
             )
         for _ in range(16):
-            pos = (
-                (self.pos + random_unit_vector() * random.uniform(20.0, 700.0))
-                if random.random() < 0.5
-                else (
-                    self.player.get_pos()
-                    + random_unit_vector() * random.uniform(0.0, 400.0)
-                )
+            pos = self.player.get_pos() + random_unit_vector() * random.uniform(
+                0.0, 400.0
             )
             self.i_can_spawn_entities.add(
                 Mine(

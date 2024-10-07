@@ -306,7 +306,7 @@ class RenderManager:
             bomb.get_pos(),
             bomb.i_has_lifetime.timer.get_slider(reverse=True),
             bomb.get_size() * 1.0,
-            color=MAGENTA,
+            color=RED if bomb.i_has_lifetime.timer.get_percent_full() > 2./3 else MAGENTA,
             width=7,
         )
 
