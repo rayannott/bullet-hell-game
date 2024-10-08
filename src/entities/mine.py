@@ -19,6 +19,7 @@ class Mine(Entity):
         pos: Vector2,
         damage: float = MINE_DEFAULT_DAMAGE,
         aoe_damage: float = MINE_DEFAULT_DAMAGE * 0.7,
+        lifetime: float = MINE_LIFETIME,
     ):
         super().__init__(
             pos=pos,
@@ -26,7 +27,7 @@ class Mine(Entity):
             size=MINE_SIZE,
             color=Color("#851828"),
             can_spawn_entities=True,
-            lifetime=MINE_LIFETIME,
+            lifetime=lifetime,
         )
         self.damage = damage
         self.activation_timer = Timer(max_time=MINE_ACTIVATION_TIME)

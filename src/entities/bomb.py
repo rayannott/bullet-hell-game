@@ -6,7 +6,7 @@ from src.entities.projectile import ExplosiveProjectile
 from src.entities.mine import Mine
 from src.utils.enums import EntityType
 from src.utils.utils import Timer, random_unit_vector
-from config import BOMB_DEFAULT_SIZE, BOMB_DEFAULT_LIFETIME
+from config import BOMB_DEFAULT_SIZE, BOMB_DEFAULT_LIFETIME, MINE_LIFETIME
 
 from pygame import Vector2, Color
 
@@ -69,6 +69,7 @@ class Bomb(Entity):
             self.i_can_spawn_entities.add(
                 Mine(
                     pos=pos,
+                    lifetime=MINE_LIFETIME + random.uniform(-2.0, 2.0),
                 )
             )
 
