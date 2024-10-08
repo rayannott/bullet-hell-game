@@ -7,7 +7,7 @@ from config.paths import SETTINGS_FILE
 @dataclass
 class Settings:
     sfx_volume: float = 0.3
-    music_volume: float = 0.1
+    music_volume: float = 0.15
     difficulty: int = 3  # from 1 to 5; 3 is normal
     framerate: int = 60
 

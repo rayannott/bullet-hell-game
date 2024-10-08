@@ -9,11 +9,12 @@ SFX_DIR = SOUNDS_DIR / "sfx"
 MUSIC_DIR = SOUNDS_DIR / "music"
 
 
-SOUND_EFFECTS = {
-    file.stem: mixer.Sound(file) for file in SFX_DIR.glob("*.wav")
-}
+SOUND_EFFECTS = {file.stem: mixer.Sound(file) for file in SFX_DIR.glob("*.wav")}
 
 BG_MUSIC_FILES = [file for file in MUSIC_DIR.glob("*.mp3")]
+
+
+VOLUME_NORMALIZATION_FACTOR = 0.4
 
 
 def play_sfx(name: str):
@@ -28,8 +29,8 @@ def play_bg_music():
 
 def set_sfx_volume(volume: float):
     for sound in SOUND_EFFECTS.values():
-        sound.set_volume(volume)
+        sound.set_volume(volume * VOLUME_NORMALIZATION_FACTOR)
 
 
 def set_bg_music_vol(volume: float):
-    mixer.music.set_volume(volume)
+    mixer.music.set_volume(volume * VOLUME_NORMALIZATION_FACTOR)
