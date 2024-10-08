@@ -168,13 +168,11 @@ class ArtifactChestGenerator:
         """
         Returns a list of ArtifactChests with the artifacts that player does not yet have.
         """
-        if player_level >= 11:
-            return self.get_n_uniqie_stat_boost_chests(3)
         to_spawn: list[ArtifactChest] = []
         # absent_stats = [k for k, v in self.inactive_artifacts_stats_boosts.items() if not v and self.should_include_stats_boost(k)]
         absent_active = [k for k, v in self.active_artifacts.items() if not v]
         random.shuffle(absent_active)
-        this_level_schedule = self.ARTIFACT_SCHEDULE[player_level]
+        this_level_schedule = self.ARTIFACT_SCHEDULE.get(player_level, 'AAA')
         num_stats_to_spawn, num_active_to_spawn = (
             this_level_schedule.count("S"),
             this_level_schedule.count("A"),
@@ -194,11 +192,12 @@ class ArtifactChestGenerator:
 
         skip = player_level - 2
         to_sample_from = []
-        for k, v in itertools.islice(
-            self.inactive_artifacts_stats_boosts.items(), skip, skip + 5
-        ):
-            if not v and self.should_include_stats_boost(k):
-                to_sample_from.append(k)
+        if player_level < 11:
+            for k, v in itertools.islice(
+                self.inactive_artifacts_stats_boosts.items(), skip, skip + 5
+            ):
+                if not v and self.should_include_stats_boost(k):
+                    to_sample_from.append(k)
         if len(to_sample_from) <= num_stats_to_spawn:
             stats_to_spawn = to_sample_from[:]
         else:
@@ -211,4 +210,5 @@ class ArtifactChestGenerator:
         )
         missing_num = 3 - len(to_spawn)
         to_spawn.extend(self.get_n_uniqie_stat_boost_chests(missing_num))
+        # TODO: fix spawning duplicate stat boosts
         return to_spawn

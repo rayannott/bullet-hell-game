@@ -11,6 +11,7 @@ from src.utils.enums import ArtifactType, EnemyType, ProjectileType
 from src.game import Game
 from src.entities.entity import Entity
 from src.entities.mine import Mine
+from src.entities.bomb import Bomb
 from src.entities.projectile import Projectile
 from src.utils.utils import Slider, Timer
 from front.utils import ColorGradient, Label, TextBox
@@ -225,6 +226,8 @@ class RenderManager:
             self.draw_artifact_chest(art_chest)
         for line in self.game.lines():
             pygame.draw.line(self.surface, line.color, line.p1, line.p2, width=2)
+        for magnet in self.game.bombs():
+            self.draw_bomb(magnet)
         self.ult_picker.render()
         self.dash_animation()
         self.draw_player()
@@ -281,6 +284,40 @@ class RenderManager:
     @staticmethod
     def soon_shooting_coef_function(x: float) -> float:
         return -5.625 * x**2 + 4.625 * x + 1
+
+    def draw_bomb(self, bomb: Bomb):
+        pygame.draw.circle(
+            self.surface,
+            bomb.get_color(),
+            bomb.get_pos(),
+            bomb.get_size(),
+            width=4,
+        )
+        draw_circular_status_bar(
+            self.surface,
+            bomb.get_pos(),
+            bomb.defuse_timer.get_slider(),
+            bomb.get_size() * 0.8,
+            color=WHITE,
+            width=3,
+        )
+        draw_circular_status_bar(
+            self.surface,
+            bomb.get_pos(),
+            bomb.i_has_lifetime.timer.get_slider(reverse=True),
+            bomb.get_size() * 1.0,
+            color=RED if bomb.i_has_lifetime.timer.get_percent_full() > 2./3 else MAGENTA,
+            width=7,
+        )
+        p = bomb.get_pos() + Vector2(-math.sqrt(3)*0.5 * bomb.get_size(), 0.5 * bomb.get_size())
+        p_to_center = (bomb.get_pos() - p).normalize()
+        pygame.draw.line(
+            self.surface,
+            WHITE,
+            p + p_to_center * 5,
+            p - p_to_center * 5,
+            width=4,
+        )
 
     def draw_artifact_chest(self, art_chest: ArtifactChest):
         can_be_picked_up = art_chest.can_be_picked_up()

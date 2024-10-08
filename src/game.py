@@ -16,6 +16,7 @@ from src.misc.line import Line, LineType
 from src.entities.mine import Mine
 from src.entities.oil_spill import OilSpill
 from src.entities.player import Player
+from src.entities.bomb import Bomb
 from src.utils.enums import (
     ArtifactType,
     EntityType,
@@ -25,7 +26,7 @@ from src.utils.enums import (
     AOEEffectEffectType,
 )
 from src.entities.projectile import Projectile
-from src.utils.utils import Timer, Feedback
+from src.utils.utils import Timer, Feedback, random_unit_vector
 from src.entities.energy_orb import EnergyOrb
 from src.utils.exceptions import (
     ArtifactMissing,
@@ -54,6 +55,9 @@ from config import (
     BM,
     PLAYER_SHOT_COST,
     OIL_SPILL_SPEED_MULTIPLIER,
+    BOMB_SPAWN_COOLDOWN_RANGE,
+    BOMB_DEFAULT_SIZE,
+    BOMB_DEFAULT_LIFETIME,
 )
 from front.sounds import play_sfx
 
@@ -111,6 +115,7 @@ class Game:
         self.e_mines: list[Mine] = []
         self.e_aoe_effects: list[AOEEffect] = []
         self.e_artifact_chests: list[ArtifactChest] = []
+        self.e_bombs: list[Bomb] = []
 
         self.e_lines: list[Line] = []
 
@@ -122,6 +127,9 @@ class Game:
         )
         self.current_spawn_enemy_cooldown = SPAWN_ENEMY_EVERY
         self.spawn_enemy_timer = Timer(max_time=self.current_spawn_enemy_cooldown)
+        self.spawn_bomb_timer = Timer(
+            max_time=random.uniform(*BOMB_SPAWN_COOLDOWN_RANGE)
+        )
 
         # misc:
         self.reason_of_death = ""
@@ -151,6 +159,7 @@ class Game:
         yield from self.mines(include_dead)
         yield from self.aoe_effects(include_dead)
         yield from self.artifact_chests(include_dead)
+        yield from self.bombs(include_dead)
         if with_player:
             yield self.player
 
@@ -190,6 +199,9 @@ class Game:
         yield from (
             ent for ent in self.e_artifact_chests if include_dead or ent.is_alive()
         )
+
+    def bombs(self, include_dead: bool = False) -> Generator[Bomb, None, None]:
+        yield from (ent for ent in self.e_bombs if include_dead or ent.is_alive())
 
     def lines(self, include_dead: bool = False) -> Generator[Line, None, None]:
         yield from (ln for ln in self.e_lines if include_dead or ln.is_alive())
@@ -345,13 +357,27 @@ class Game:
             )
         )
 
+    def spawn_bomb(self):
+        size = (BOMB_DEFAULT_SIZE + random.uniform(-30.0, 30.0)) * (
+            1.0 - 0.1 * (self.settings.difficulty - 3)
+        )
+        lifetime = BOMB_DEFAULT_LIFETIME + random.uniform(-4.0, 6.0)
+        self.add_entity(
+            Bomb(
+                pos=self.get_random_screen_position_for_entity(entity_size=size),
+                player=self.player,
+                size=size,
+                lifetime=lifetime,
+            )
+        )
+
     def spawn_enemy(self, enemy_type: EnemyType):
         if enemy_type == EnemyType.BOSS:
             position = self.screen_rectangle.center
         else:
             position = self.get_screen_position_for_enemy(
                 enemy_size=ENEMY_SIZE_MAP[enemy_type]
-            )
+            ) + random_unit_vector()
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
                 pos=position,
@@ -411,6 +437,12 @@ class Game:
             self.spawn_random_enemy()
             self.spawn_enemy_timer.reset(
                 with_max_time=self.current_spawn_enemy_cooldown
+            )
+        self.spawn_bomb_timer.tick(time_delta)
+        if not self.spawn_bomb_timer.running():
+            self.spawn_bomb()
+            self.spawn_bomb_timer.reset(
+                with_max_time=random.uniform(*BOMB_SPAWN_COOLDOWN_RANGE)
             )
 
     def update(self, time_delta: float) -> None:
@@ -723,6 +755,24 @@ class Game:
                 self.player_get_damage(line.kwargs.get("damage", 0.0))
                 self.reason_of_death = "impact line damage"
                 line.applied_manager.check_applied(self.player)
+        for bomb in self.bombs():
+            bomb.defusing_last_frame = bomb.intersects(self.player)
+            if bomb.is_defused():
+                bomb.kill()
+                for _ in range(random.randint(5, 10)):
+                    self.add_entity(
+                        EnergyOrb(
+                            pos=bomb.get_pos()
+                            + random_unit_vector() * random.uniform(20.0, 300.0),
+                            energy=80.0,
+                            lifetime=4.0,
+                            is_enemy_bonus_orb=True,
+                        )
+                    )
+                self.player.get_stats().BOMBS_DEFUSED += 1
+                self.feedback_buffer.append(
+                    Feedback("defused!", 3.5, color=Color("pink"))
+                )
 
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks
@@ -991,6 +1041,8 @@ class Game:
             self.e_aoe_effects.append(entity)  # type: ignore
         elif ent_type == EntityType.ARTIFACT_CHEST:
             self.e_artifact_chests.append(entity)  # type: ignore
+        elif ent_type == EntityType.BOMB:
+            self.e_bombs.append(entity)  # type: ignore
         else:
             raise ValueError(f"Unknown entity type {ent_type}")
 
