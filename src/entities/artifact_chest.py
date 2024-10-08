@@ -210,4 +210,5 @@ class ArtifactChestGenerator:
         )
         missing_num = 3 - len(to_spawn)
         to_spawn.extend(self.get_n_uniqie_stat_boost_chests(missing_num))
+        # TODO: fix spawning duplicate stat boosts
         return to_spawn
