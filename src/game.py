@@ -138,6 +138,8 @@ class Game:
         self.time_frozen = False
         self.enemy_types_killed_with_ricochet: set[EnemyType] = set()
 
+        self.ids_played_sound_effect: set[int] = set()
+
         # animation:
         self.animation_handler = AnimationHandler()
 
@@ -464,6 +466,7 @@ class Game:
         self.process_collisions()
         self.process_dash()
         self.register_new_achievements()
+        self.process_dead_entities_sfx()
         self.animation_handler.update(time_delta)
 
     def is_boss_alive(self) -> bool:
@@ -574,6 +577,15 @@ class Game:
                 entity.i_can_spawn_entities.clear()
         for ent in new_ent:
             self.add_entity(ent)
+    
+    def process_dead_entities_sfx(self) -> None:
+        for e in self.all_entities_iter(with_player=False, include_dead=True, with_projectiles=False):
+            if e.is_alive():
+                continue
+            if e.type in {EntityType.MINE, EntityType.BOMB}:
+                if e._id not in self.ids_played_sound_effect:
+                    play_sfx("explosion")
+                    self.ids_played_sound_effect.add(e._id)
 
     def reflect_projectiles_vel(self) -> None:
         """
@@ -773,6 +785,7 @@ class Game:
                 self.feedback_buffer.append(
                     Feedback("defused!", 3.5, color=Color("pink"))
                 )
+                play_sfx("bomb_defused")
 
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks
