@@ -27,7 +27,7 @@ class Bomb(Entity):
             can_spawn_entities=True,
             lifetime=lifetime,
         )
-        self.defuse_timer = Timer(max_time=1.0 / 3 * lifetime)
+        self.defuse_timer = Timer(max_time=0.25 * lifetime)
         self.defusing_last_frame = False
         self.player = player
 

@@ -363,7 +363,7 @@ class Game:
         size = (BOMB_DEFAULT_SIZE + random.uniform(-30.0, 30.0)) * (
             1.0 - 0.1 * (self.settings.difficulty - 3)
         )
-        lifetime = BOMB_DEFAULT_LIFETIME + random.uniform(-4.0, 6.0)
+        lifetime = BOMB_DEFAULT_LIFETIME + random.uniform(-6.0, 6.0)
         self.add_entity(
             Bomb(
                 pos=self.get_random_screen_position_for_entity(entity_size=size),
