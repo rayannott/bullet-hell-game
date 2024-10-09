@@ -948,7 +948,6 @@ class Game:
                     continue
                 aoe_effect.application_manager.check_applied(mine)
                 mine.kill()
-                print(f"mine {mine} killed by aoe effect {aoe_effect}")
 
     def deal_damage_to_enemy(
         self, enemy: Enemy, damage: float, get_damage_feedback: bool = True
