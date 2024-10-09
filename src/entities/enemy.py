@@ -43,6 +43,7 @@ from config import (
     BLOCKS_FOR_ENEMIES_EFFECT_SIZE,
     LIGHT_ORANGE_HEX,
     MINER_DETONATION_RADIUS,
+    MINE_LIFETIME,
 )
 
 
@@ -475,8 +476,9 @@ class MinerEnemy(Enemy):
                     Mine(
                         self.homing_target.pos
                         + random_unit_vector()
-                        * random.uniform(50.0, 200.0 + 30 * self._player_level),
-                        damage=MINE_DEFAULT_DAMAGE + 15.0 * self._player_level,
+                        * random.uniform(50.0, 400.0 + 30 * self._player_level),
+                        damage=MINE_DEFAULT_DAMAGE + 10.0 * self._player_level,
+                        lifetime=MINE_LIFETIME + random.uniform(-2.0, 2.0),
                     )
                 )
             self.i_can_spawn_entities.add(

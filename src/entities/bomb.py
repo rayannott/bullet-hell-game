@@ -64,7 +64,7 @@ class Bomb(Entity):
             )
         for _ in range(16):
             pos = self.player.get_pos() + random_unit_vector() * random.uniform(
-                0.0, 400.0
+                0.0, 800.0
             )
             self.i_can_spawn_entities.add(
                 Mine(

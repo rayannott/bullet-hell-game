@@ -847,13 +847,12 @@ class Game:
                     )
                     play_sfx("new_achievement")
         # enemy-enemy collisions
-        MULT = 0.1
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
             if enem1.intersects(enem2):
                 if enem1.intersects(enem2):
                     vec_between = enem2.get_pos() - enem1.get_pos()
-                    enem1.pos -= vec_between * MULT
-                    enem2.pos += vec_between * MULT
+                    enem1.pos -= vec_between * 0.1
+                    enem2.pos += vec_between * 0.1
         # enemy-mine collisions
         for mine in self.mines():
             if not mine.is_activated():
