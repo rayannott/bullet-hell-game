@@ -66,7 +66,7 @@ class Entity(ABC):
                 self.kill()
                 self.on_natural_death()
                 return
-        if self.homing_target is not None:
+        if self.speed > 0 and self.homing_target is not None:
             self.vel = (
                 self.homing_target.get_pos() - self.pos
             ).normalize() * self.turn_coefficient + self.vel * (
