@@ -83,10 +83,11 @@ def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, 
     return {
         EnemyType.BASIC: 230 - DIFF_MULTS[difficulty] * 10,
         EnemyType.FAST: (level - 1) * 10.0 * (difficulty > 2),
-        EnemyType.ARTILLERY: level * 10.0,
-        EnemyType.TANK: 10.0 + level * 5.0,
+        EnemyType.ARTILLERY: level * 8.0,
+        EnemyType.TANK: 30.0 + level * 7.0,
         EnemyType.MINER: 40.0 + level * 4.0,
         EnemyType.JESTER: 10.0 + level * 5.0,
+        EnemyType.GHOST: max(80.0, 100.0 - 6.0 * level),
         EnemyType.BOSS: 0.0,
     }
 
@@ -377,9 +378,12 @@ class Game:
         if enemy_type == EnemyType.BOSS:
             position = self.screen_rectangle.center
         else:
-            position = self.get_screen_position_for_enemy(
-                enemy_size=ENEMY_SIZE_MAP[enemy_type]
-            ) + random_unit_vector()
+            position = (
+                self.get_screen_position_for_enemy(
+                    enemy_size=ENEMY_SIZE_MAP[enemy_type]
+                )
+                + random_unit_vector()
+            )
         self.add_entity(
             ENEMY_TYPE_TO_CLASS[enemy_type](
                 pos=position,
@@ -577,9 +581,11 @@ class Game:
                 entity.i_can_spawn_entities.clear()
         for ent in new_ent:
             self.add_entity(ent)
-    
+
     def process_dead_entities_sfx(self) -> None:
-        for e in self.all_entities_iter(with_player=False, include_dead=True, with_projectiles=False):
+        for e in self.all_entities_iter(
+            with_player=False, include_dead=True, with_projectiles=False
+        ):
             if e.is_alive():
                 continue
             if e.type in {EntityType.MINE, EntityType.BOMB}:
@@ -700,6 +706,8 @@ class Game:
             if not enemy.intersects(self.player):
                 continue
             if self.time_frozen:
+                continue
+            if enemy.enemy_type == EnemyType.GHOST and enemy.inactive_timer.running(): # type: ignore
                 continue
             self.player_get_damage(
                 enemy.damage_on_collision,

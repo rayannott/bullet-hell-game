@@ -3,6 +3,7 @@ import random
 
 from pygame import Vector2, Color
 
+from config.back import TRAIL_MAX_LENGTH
 from front.sounds import play_sfx
 from src.entities.aoe_effect import AOEEffect, AOEEffectEffectType
 from src.entities.energy_orb import EnergyOrb
@@ -566,27 +567,35 @@ class GhostEnemy(Enemy):
         pos: Vector2,
         player: Player,
     ):
+        self.COLOR_ACTIVE = Color("#CFCFCF")
+        self.COLOR_INACTIVE = Color("#646464")
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.GHOST,
             player=player,
-            color=Color("#b3b3b3"),
+            color=self.COLOR_ACTIVE,
             speed=0.0,
-            health=ENEMY_DEFAULT_MAX_HEALTH,
-            shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.2,
-            reward=ENEMY_DEFAULT_REWARD * 1.5,
-            lifetime=ENEMY_DEFAULT_LIFETIME + 6.0 * (player.get_level() - 1),
-            damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 1.2,
+            health=ENEMY_DEFAULT_MAX_HEALTH // 2,
+            shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN,
+            reward=ENEMY_DEFAULT_REWARD * 2.0,
+            lifetime=ENEMY_DEFAULT_LIFETIME + 4.0 * (player.get_level() - 1),
+            damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 1.3,
         )
+        self.trail_index_to_sit_on = random.randint(0, TRAIL_MAX_LENGTH // 2)
         assert player.i_render_trail
         self.player_trail = player.i_render_trail.trail
-        self.pos = self.player_trail[0].copy()
-        self.inactive_timer = Timer(max_time=0.5)
+        self.update_pos_vel()
+        self.inactive_timer = Timer(max_time=1.0)
+
+    def update_pos_vel(self):
+        self.pos = self.player_trail[self.trail_index_to_sit_on].copy()
+        self.vel = self.player_trail[self.trail_index_to_sit_on+1] - self.player_trail[self.trail_index_to_sit_on]
 
     def update(self, time_delta: float):
         super().update(time_delta)
-        self.pos = self.player_trail[0].copy()
-        self.vel = self.player_trail[1] - self.player_trail[0]
+        self.update_pos_vel()
+        self.inactive_timer.tick(time_delta)
+        self.set_color(self.COLOR_INACTIVE if self.inactive_timer.running() else self.COLOR_ACTIVE)
 
 
 class BossEnemy(Enemy):
