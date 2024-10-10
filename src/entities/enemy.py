@@ -57,6 +57,7 @@ ENEMY_SIZE_MAP = {
     EnemyType.ARTILLERY: ENEMY_DEFAULT_SIZE * 2,
     EnemyType.MINER: ENEMY_DEFAULT_SIZE * 0.92,
     EnemyType.BOSS: ENEMY_DEFAULT_SIZE * 2.6,
+    EnemyType.GHOST: ENEMY_DEFAULT_SIZE * 1.3,
     EnemyType.JESTER: ENEMY_DEFAULT_SIZE * 1.5,
 }
 
@@ -106,7 +107,9 @@ class Enemy(Entity):
         self.num_bullets_caught = 0
 
         self.damage_on_collision = damage_on_collision
-        self.i_can_spawn_entities: CanSpawnEntitiesInterface  # to avoid typing errors (this is never None)
+        self.i_can_spawn_entities: (
+            CanSpawnEntitiesInterface  # to avoid typing errors (this is never None)
+        )
         self.shoots_player = True
         self.post_init()
 
@@ -555,6 +558,37 @@ class JesterEnemy(Enemy):
         )
 
 
+class GhostEnemy(Enemy):
+    """Follows player's trace."""
+
+    def __init__(
+        self,
+        pos: Vector2,
+        player: Player,
+    ):
+        super().__init__(
+            pos=pos,
+            enemy_type=EnemyType.GHOST,
+            player=player,
+            color=Color("#b3b3b3"),
+            speed=0.0,
+            health=ENEMY_DEFAULT_MAX_HEALTH,
+            shoot_cooldown=ENEMY_DEFAULT_SHOOT_COOLDOWN * 1.2,
+            reward=ENEMY_DEFAULT_REWARD * 1.5,
+            lifetime=ENEMY_DEFAULT_LIFETIME + 6.0 * (player.get_level() - 1),
+            damage_on_collision=ENEMY_DEFAULT_COLLISION_DAMAGE * 1.2,
+        )
+        assert player.i_render_trail
+        self.player_trail = player.i_render_trail.trail
+        self.pos = self.player_trail[0].copy()
+        self.inactive_timer = Timer(max_time=0.5)
+
+    def update(self, time_delta: float):
+        super().update(time_delta)
+        self.pos = self.player_trail[0].copy()
+        self.vel = self.player_trail[1] - self.player_trail[0]
+
+
 class BossEnemy(Enemy):
     """Moves fast, has high health, big size, low cooldown.
     Shoots normal and homing projectiles."""
@@ -678,5 +712,6 @@ ENEMY_TYPE_TO_CLASS = {
     EnemyType.TANK: TankEnemy,
     EnemyType.MINER: MinerEnemy,
     EnemyType.JESTER: JesterEnemy,
+    EnemyType.GHOST: GhostEnemy,
     EnemyType.BOSS: BossEnemy,
 }
