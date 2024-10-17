@@ -35,7 +35,7 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
 
         self.sfx_volume_slider = pygame_gui.elements.UIHorizontalSlider(
             pygame.Rect(0, 0, *SLIDERS_SIZE),
-            min(200 * self.settings.sfx_volume, 100),
+            100 * self.settings.sfx_volume,
             (0, 100),
             manager=manager,
             container=self,
@@ -55,7 +55,7 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
         rect_music_vol.topleft = self.sfx_volume_slider.relative_rect.bottomleft
         self.music_volume_slider = pygame_gui.elements.UIHorizontalSlider(
             rect_music_vol,
-            min(200 * self.settings.music_volume, 100),
+            100 * self.settings.music_volume,
             (0, 100),
             manager=manager,
             container=self,
@@ -134,14 +134,14 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
         if event.type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
             if event.ui_element == self.sfx_volume_slider:
                 self.settings.sfx_volume = (
-                    self.sfx_volume_slider.get_current_value() / 200
+                    self.sfx_volume_slider.get_current_value() / 100
                 )
                 self.sfx_volume_label.set_text(
                     f'sfx {self.paint_number(self.settings.sfx_volume, '{:.0%}', self.color_gradient(self.settings.sfx_volume))}'
                 )
             elif event.ui_element == self.music_volume_slider:
                 self.settings.music_volume = (
-                    self.music_volume_slider.get_current_value() / 200
+                    self.music_volume_slider.get_current_value() / 100
                 )
                 self.music_volume_label.set_text(
                     f'music {self.paint_number(self.settings.music_volume, '{:.0%}', self.color_gradient(self.settings.music_volume))}'
@@ -166,10 +166,10 @@ class SettingsWindow(pygame_gui.elements.UIWindow):
                 self.settings = Settings.create_default()
                 self.menu_screen.reload_settings()
                 self.sfx_volume_slider.set_current_value(
-                    min(200 * self.settings.sfx_volume, 100)
+                    100 * self.settings.sfx_volume
                 )
                 self.music_volume_slider.set_current_value(
-                    min(200 * self.settings.music_volume, 100)
+                    100 * self.settings.music_volume
                 )
                 self.difficulty_slider.set_current_value(self.settings.difficulty)
                 self.framerate_slider.set_current_value(self.settings.framerate)
