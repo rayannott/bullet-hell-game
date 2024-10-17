@@ -14,8 +14,9 @@ SFX_PACKS = {pack.stem: pack for pack in SFX_DIR.iterdir() if pack.is_dir()}
 def load_pack(pack_name: str):
     return {file.stem: mixer.Sound(file) for file in SFX_PACKS[pack_name].glob("*.wav")}
 
+_VANILLA_PACK = load_pack("vanilla")
 
-CHOSEN_PACK_NAME = "vanilla"
+CHOSEN_PACK_NAME = "custom"
 SOUND_EFFECTS = load_pack(CHOSEN_PACK_NAME)
 
 BG_MUSIC_FILES = [file for file in MUSIC_DIR.glob("*.mp3")]
@@ -25,7 +26,7 @@ VOLUME_NORMALIZATION_FACTOR = 0.4
 
 
 def play_sfx(name: str):
-    SOUND_EFFECTS[name].play()
+    SOUND_EFFECTS.get(name, _VANILLA_PACK[name]).play()
 
 
 def play_bg_music():
