@@ -8,8 +8,15 @@ mixer.init()
 SFX_DIR = SOUNDS_DIR / "sfx"
 MUSIC_DIR = SOUNDS_DIR / "music"
 
+SFX_PACKS = {pack.stem: pack for pack in SFX_DIR.iterdir() if pack.is_dir()}
 
-SOUND_EFFECTS = {file.stem: mixer.Sound(file) for file in SFX_DIR.glob("*.wav")}
+
+def load_pack(pack_name: str):
+    return {file.stem: mixer.Sound(file) for file in SFX_PACKS[pack_name].glob("*.wav")}
+
+
+CHOSEN_PACK_NAME = "vanilla"
+SOUND_EFFECTS = load_pack(CHOSEN_PACK_NAME)
 
 BG_MUSIC_FILES = [file for file in MUSIC_DIR.glob("*.mp3")]
 
