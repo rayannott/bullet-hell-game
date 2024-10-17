@@ -21,7 +21,7 @@ from src.misc.line import Line, LineType
 from src.entities.oil_spill import OilSpill
 from src.utils.player_utils import Achievements
 
-from src.utils.utils import Feedback, random_unit_vector
+from src.utils.utils import Feedback, random_unit_vector, Timer
 from src.game import Game
 
 from front.sounds import play_sfx
@@ -47,6 +47,11 @@ class GameScreen(Screen):
             text="paused", surface=surface, rect=rect, font=HUGE_FONT
         )
         self.victory_notification_shown = False
+
+        self.sfx_heartbeat_low_health_timer = Timer(3.0)
+        self.sfx_heartbeat_low_health_timer.turn_off()
+        self.sfx_bomb_ticking_timer = Timer(0.93)
+        self.sfx_bomb_ticking_timer.turn_off()
 
     def setup_game(self, surface: pygame.Surface, stats_panel_visibility: bool = True):
         play_sfx("start_game")
@@ -243,6 +248,33 @@ class GameScreen(Screen):
         self.game.set_last_fps(self.clock.get_fps())
         for notification in self.notifications:
             notification.update(time_delta)
+        self.process_sound_effects(time_delta)
+
+    def process_sound_effects(self, time_delta: float):
+        # heartbeat
+        if not self.game.player.is_alive():
+            return
+        if (hp := self.game.player.get_health().get_percent_full()) < 0.3:
+            self.sfx_heartbeat_low_health_timer.tick(
+                time_delta * (3 if hp < 0.1 else 1)
+            )
+            if not self.sfx_heartbeat_low_health_timer.running():
+                play_sfx("heartbeat")
+                self.sfx_heartbeat_low_health_timer.reset()
+
+        # bombs
+        for b in self.game.bombs():
+            self.sfx_bomb_ticking_timer.tick(time_delta)
+            if not self.sfx_bomb_ticking_timer.running():
+                play_sfx("bomb_ticking")
+                self.sfx_bomb_ticking_timer.reset()
+
+            if b.defusing_last_frame:
+                if b._id not in self.game.ids_played_sound_effect:
+                    play_sfx("bomb_defusing")
+                    self.game.ids_played_sound_effect.add(b._id)
+            elif b._id in self.game.ids_played_sound_effect:
+                self.game.ids_played_sound_effect.remove(b._id)
 
     def process_feedback_buffer(self):
         if len(self.game.feedback_buffer):

@@ -306,10 +306,10 @@ class RenderManager:
             bomb.get_pos(),
             bomb.i_has_lifetime.timer.get_slider(reverse=True),
             bomb.get_size() * 1.0,
-            color=RED if bomb.i_has_lifetime.timer.get_percent_full() > 2./3 else MAGENTA,
+            color=RED if bomb.i_has_lifetime.timer.get_percent_full() > 0.75 else MAGENTA,
             width=7,
         )
-        p = bomb.get_pos() + Vector2(-math.sqrt(3)*0.5 * bomb.get_size(), 0.5 * bomb.get_size())
+        p = bomb.get_pos() + Vector2(-bomb.get_size(), 0)
         p_to_center = (bomb.get_pos() - p).normalize()
         pygame.draw.line(
             self.surface,

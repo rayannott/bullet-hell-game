@@ -138,6 +138,8 @@ class Game:
         self.time_frozen = False
         self.enemy_types_killed_with_ricochet: set[EnemyType] = set()
 
+        self.ids_played_sound_effect: set[int] = set()
+
         # animation:
         self.animation_handler = AnimationHandler()
 
@@ -361,7 +363,7 @@ class Game:
         size = (BOMB_DEFAULT_SIZE + random.uniform(-30.0, 30.0)) * (
             1.0 - 0.1 * (self.settings.difficulty - 3)
         )
-        lifetime = BOMB_DEFAULT_LIFETIME + random.uniform(-4.0, 6.0)
+        lifetime = BOMB_DEFAULT_LIFETIME + random.uniform(-6.0, 6.0)
         self.add_entity(
             Bomb(
                 pos=self.get_random_screen_position_for_entity(entity_size=size),
@@ -464,6 +466,7 @@ class Game:
         self.process_collisions()
         self.process_dash()
         self.register_new_achievements()
+        self.process_dead_entities_sfx()
         self.animation_handler.update(time_delta)
 
     def is_boss_alive(self) -> bool:
@@ -574,6 +577,15 @@ class Game:
                 entity.i_can_spawn_entities.clear()
         for ent in new_ent:
             self.add_entity(ent)
+    
+    def process_dead_entities_sfx(self) -> None:
+        for e in self.all_entities_iter(with_player=False, include_dead=True, with_projectiles=False):
+            if e.is_alive():
+                continue
+            if e.type in {EntityType.MINE, EntityType.BOMB}:
+                if e._id not in self.ids_played_sound_effect:
+                    play_sfx("explosion")
+                    self.ids_played_sound_effect.add(e._id)
 
     def reflect_projectiles_vel(self) -> None:
         """
@@ -773,6 +785,7 @@ class Game:
                 self.feedback_buffer.append(
                     Feedback("defused!", 3.5, color=Color("pink"))
                 )
+                play_sfx("bomb_defused")
 
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks
@@ -834,13 +847,12 @@ class Game:
                     )
                     play_sfx("new_achievement")
         # enemy-enemy collisions
-        MULT = 0.1
         for enem1, enem2 in itertools.combinations(self.enemies(), 2):
             if enem1.intersects(enem2):
                 if enem1.intersects(enem2):
                     vec_between = enem2.get_pos() - enem1.get_pos()
-                    enem1.pos -= vec_between * MULT
-                    enem2.pos += vec_between * MULT
+                    enem1.pos -= vec_between * 0.1
+                    enem2.pos += vec_between * 0.1
         # enemy-mine collisions
         for mine in self.mines():
             if not mine.is_activated():
@@ -935,7 +947,6 @@ class Game:
                     continue
                 aoe_effect.application_manager.check_applied(mine)
                 mine.kill()
-                print(f"mine {mine} killed by aoe effect {aoe_effect}")
 
     def deal_damage_to_enemy(
         self, enemy: Enemy, damage: float, get_damage_feedback: bool = True
