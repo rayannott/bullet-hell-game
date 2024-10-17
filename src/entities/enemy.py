@@ -21,6 +21,7 @@ from src.entities.projectile import (
 )
 from src.entities.oil_spill import OilSpill
 from src.misc.interfaces import CanSpawnEntitiesInterface
+from config.settings import settings
 from config import (
     ENEMY_DEFAULT_SPEED,
     ENEMY_DEFAULT_SIZE,
@@ -117,7 +118,7 @@ class Enemy(Entity):
     def post_init(self):
         """Called after the constructor.
         This is used to adjust values according to the difficulty."""
-        difficulty = self.homing_target.settings.difficulty
+        difficulty = settings.difficulty
         difficulty_mult = 1.0 + 0.1 * (difficulty - 3)  # from 0.8 to 1.2
         self.speed *= difficulty_mult
         self.damage *= difficulty_mult
@@ -264,7 +265,7 @@ class BasicEnemy(Enemy):
         pos: Vector2,
         player: Player,
     ):
-        self.difficulty = player.settings.difficulty
+        self.difficulty = settings.difficulty
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.BASIC,
@@ -334,7 +335,7 @@ class TankEnemy(Enemy):
         player: Player,
     ):
         self._player_level = player.get_level()
-        self._difficulty = player.settings.difficulty
+        self._difficulty = settings.difficulty
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.TANK,
@@ -349,7 +350,7 @@ class TankEnemy(Enemy):
             damage=ENEMY_DEFAULT_DAMAGE * (1.0 + 0.1 * self._player_level),
             turn_coefficient=0.42,
         )
-        self._spread = 1.0 + 0.03 * (self._player_level + player.settings.difficulty)
+        self._spread = 1.0 + 0.03 * (self._player_level + settings.difficulty)
         self.cooldown.set_percent_full(0.8)
 
     def shoot(self):
@@ -382,7 +383,7 @@ class ArtilleryEnemy(Enemy):
         player: Player,
     ):
         self._player_level = player.get_level()
-        self._difficulty = player.settings.difficulty
+        self._difficulty = settings.difficulty
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.ARTILLERY,
@@ -430,7 +431,7 @@ class MinerEnemy(Enemy):
         player: Player,
     ):
         self._player_level = player.get_level()
-        self._difficulty = player.settings.difficulty
+        self._difficulty = settings.difficulty
         super().__init__(
             pos=pos,
             enemy_type=EnemyType.MINER,
@@ -507,7 +508,7 @@ class JesterEnemy(Enemy):
         player: Player,
     ):
         _player_level = player.get_level()
-        self.difficulty = player.settings.difficulty
+        self.difficulty = settings.difficulty
         self._player_pos = player.get_pos()
         super().__init__(
             pos=pos,
@@ -608,7 +609,7 @@ class BossEnemy(Enemy):
         player: Player,
     ):
         self._player_level = player.get_level()
-        self.difficulty = player.settings.difficulty
+        self.difficulty = settings.difficulty
         self.difficulty_mult = 1.0 + 0.1 * (self.difficulty - 3)  # from 0.8 to 1.2
         self._player_pos = player.get_pos()
         super().__init__(

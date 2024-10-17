@@ -13,7 +13,7 @@ from front.sounds import set_sfx_volume, set_bg_music_vol, play_bg_music
 from front.stats_window import StatsWindow
 from front.utils import paint
 from config import MENU_BUTTONS_SIZE, NICER_GREEN_HEX
-from config.settings import Settings
+from config.settings import settings, reload
 from config.paths import ACHIEVEMENTS_FILE, SAVES_DIR, SAVES_FILE
 from src.utils.player_utils import Achievements
 
@@ -79,10 +79,10 @@ class MenuScreen(Screen):
         self.game_screen = None
 
     def reload_settings(self):
-        self.settings = Settings.load()
-        set_sfx_volume(self.settings.sfx_volume)
-        set_bg_music_vol(self.settings.music_volume)
-        if self.settings.music_volume > 0:
+        reload()
+        set_sfx_volume(settings.sfx_volume)
+        set_bg_music_vol(settings.music_volume)
+        if settings.music_volume > 0:
             play_bg_music()
 
     def process_ui_event(self, event: pygame.event.Event):
@@ -93,7 +93,7 @@ class MenuScreen(Screen):
                 self.console_window = ConsoleWindow(self.manager, self)
         elif event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.start_game_btn:
-                self.game_screen = GameScreen(self.surface, self.settings)
+                self.game_screen = GameScreen(self.surface)
                 fps_info = self.game_screen.run()
                 print(fps_info)
                 str_verdict = fps_info.verdict()

@@ -7,7 +7,7 @@ import itertools
 import pygame
 from pygame import Vector2, Color
 
-from config.settings import Settings
+from config.settings import settings
 from src.misc.artifacts import Artifact, InactiveArtifact, StatsBoost
 from src.entities.entity import Entity, DummyEntity
 from src.entities.corpse import Corpse
@@ -93,12 +93,11 @@ def get_enemy_type_prob_weights(level: int, difficulty: int) -> dict[EnemyType, 
 
 
 class Game:
-    def __init__(self, screen_rectangle: pygame.Rect, settings: Settings) -> None:
+    def __init__(self, screen_rectangle: pygame.Rect) -> None:
         self.level = 1
         self.time = 0.0
         self.paused = False
         self.screen_rectangle = screen_rectangle
-        self.settings = settings
 
         self.is_victory = False
 
@@ -106,7 +105,7 @@ class Game:
         self._last_fps: float = 0.0
 
         # entities:
-        self.player = Player(Vector2(*self.screen_rectangle.center), settings)
+        self.player = Player(Vector2(*self.screen_rectangle.center))
         self.e_dummies: list[DummyEntity] = []
         self.e_oil_spills: list[OilSpill] = []
         self.e_corpses: list[Corpse] = []
@@ -229,7 +228,7 @@ class Game:
             )
         )
         self.player.new_level()
-        self.current_spawn_enemy_cooldown *= 1.0 - 0.02 * self.settings.difficulty
+        self.current_spawn_enemy_cooldown *= 1.0 - 0.02 * settings.difficulty
 
         for ac in self.artifact_chests():
             ac.kill()
@@ -328,7 +327,7 @@ class Game:
                 )
             if (
                 not self.player.get_achievements().REACH_LEVEL_10_ON_DIFFICULTY_5
-                and self.settings.difficulty == 5
+                and settings.difficulty == 5
             ):
                 self.player.get_achievements().REACH_LEVEL_10_ON_DIFFICULTY_5 = True
                 self.feedback_buffer.append(
@@ -346,7 +345,7 @@ class Game:
             projectile.kill()
 
     def spawn_energy_orb(self):
-        difficulty_mult = 1 + 0.1 * (self.settings.difficulty - 1)
+        difficulty_mult = 1 + 0.1 * (settings.difficulty - 1)
         self.add_entity(
             EnergyOrb(
                 pos=self.get_random_screen_position_for_entity(
@@ -362,7 +361,7 @@ class Game:
 
     def spawn_bomb(self):
         size = (BOMB_DEFAULT_SIZE + random.uniform(-30.0, 30.0)) * (
-            1.0 - 0.1 * (self.settings.difficulty - 3)
+            1.0 - 0.1 * (settings.difficulty - 3)
         )
         lifetime = BOMB_DEFAULT_LIFETIME + random.uniform(-6.0, 6.0)
         self.add_entity(
@@ -394,7 +393,7 @@ class Game:
     def spawn_random_enemy(self):
         """Is called once every SPAWN_ENEMY_EVERY seconds."""
         type_weights = get_enemy_type_prob_weights(
-            level=self.level, difficulty=self.settings.difficulty
+            level=self.level, difficulty=settings.difficulty
         )
         if self.is_boss_alive():
             enemy_type = EnemyType.BASIC
@@ -1132,11 +1131,11 @@ class Game:
             + len(self.player.get_achievements().achievements_pretty()) * 20.0
             + len(list(self.player.artifacts_handler.iterate_active())) * 15.0
             + len(self.player.artifacts_handler.inactive_artifacts) * 8.0
-        ) * (1.0 + 0.1 * (self.settings.difficulty - 3))
+        ) * (1.0 + 0.1 * (settings.difficulty - 3))
 
         return {
             "level": self.level,
-            "difficulty": self.settings.difficulty,
+            "difficulty": settings.difficulty,
             "time": self.time,
             "stats": self.player.get_stats(),
             "achievements": self.player.get_achievements(),

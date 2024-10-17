@@ -32,11 +32,11 @@ from front.stats_panel import StatsPanel
 
 from config import GAME_OVER_WINDOW_SIZE, SAVE_GAMES_LONGER_THAN
 from config.paths import ACHIEVEMENTS_FILE, SAVES_FILE
-from config.settings import Settings
+from config.settings import settings
 
 
 class GameScreen(Screen):
-    def __init__(self, surface: pygame.Surface, settings: Settings):
+    def __init__(self, surface: pygame.Surface):
         super().__init__(surface, framerate=settings.framerate)
         self.settings = settings
         self.debug = False
@@ -56,7 +56,7 @@ class GameScreen(Screen):
     def setup_game(self, surface: pygame.Surface, stats_panel_visibility: bool = True):
         play_sfx("start_game")
         self.screen_rectangle = self.surface.get_rect()
-        self.game = Game(self.screen_rectangle, self.settings)
+        self.game = Game(self.screen_rectangle)
         self.game.animation_handler.set_surface(surface)
         self.stats_panel = StatsPanel(
             surface, self.manager, self.game, stats_panel_visibility

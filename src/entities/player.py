@@ -1,7 +1,7 @@
 import random
 
 from pygame import Vector2, Color
-from config.settings import Settings
+from config.settings import settings
 from front.sounds import play_sfx
 from src.misc.artifacts import ArtifactsHandler, Artifact
 from src.entities.artifact_chest import ArtifactChestGenerator
@@ -48,7 +48,7 @@ NICER_GREEN = Color(NICER_GREEN_HEX)
 
 
 class Player(Entity):
-    def __init__(self, pos: Vector2, settings: Settings):
+    def __init__(self, pos: Vector2):
         super().__init__(
             pos=pos,
             type=EntityType.PLAYER,
@@ -59,7 +59,6 @@ class Player(Entity):
         )
         self._id = 0
         self.level = 1
-        self.settings = settings
         self.gravity_point: Vector2 = pos
         self.health = Slider(PLAYER_DEFAULT_MAX_HEALTH)
         self.regeneration_rate = PLAYER_DEFAULT_REGEN_RATE
@@ -162,7 +161,7 @@ class Player(Entity):
         # other effects
         if self.effect_flags.OIL_SPILL:
             oil_spill_damage_per_sec = OIL_SPILL_DAMAGE_PER_SECOND * (
-                self.settings.difficulty > 3
+                settings.difficulty > 3
             )
             oil_spill_damage_dealt = -self.health.change(
                 -oil_spill_damage_per_sec * time_delta

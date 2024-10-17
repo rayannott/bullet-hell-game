@@ -64,3 +64,17 @@ class Settings:
                     "[SettingsError] Settings file corrupted. Creating settings file with default values."
                 )
                 return Settings.create_default()
+
+
+
+def reload():
+    global settings
+    settings = Settings.load()
+
+
+def set_default():
+    global settings
+    settings = Settings.create_default()
+
+
+settings = Settings.load()

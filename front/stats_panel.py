@@ -4,6 +4,7 @@ from pygame import Color, Vector2, freetype
 
 from src.game import Game
 from front.utils import ProgressBar, TextBox
+from config.settings import settings
 from config import (
     SM,
     BM,
@@ -69,7 +70,7 @@ class StatsPanel:
         self.energy_bar.update(time_delta)
         self.stats_textbox.set_lines(
             [
-                f'{"difficulty":<16} {self.game.settings.difficulty}',
+                f'{"difficulty":<16} {settings.difficulty}',
                 f'{"level":<16} {self.game.level}',
                 f'{"time":<16} {self.game.time:.2f}',
                 f'{"extra bullets":<16} {player.extra_bullets}/{player.max_extra_bullets}',
