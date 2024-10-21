@@ -14,7 +14,7 @@ from src.utils.exceptions import (
     OnCooldown,
     ShieldRunning,
     ArtifactMissing,
-    TimeStopRunning,
+    TimeSlowRunning,
 )
 from src.utils.utils import Timer, random_unit_vector
 from config import (
@@ -25,9 +25,9 @@ from config import (
     MINE_COOLDOWN,
     MINE_COST,
     MINE_DEFAULT_DAMAGE,
-    TIME_STOP_DEFAULT_DURATION,
-    TIME_STOP_COOLDOWN,
-    TIME_STOP_COST,
+    TIME_SLOW_DEFAULT_DURATION,
+    TIME_SLOW_COOLDOWN,
+    TIME_SLOW_COST,
     DASH_COOLDOWN,
     DASH_COST,
     SHRAPNEL_COOLDOWN,
@@ -47,7 +47,7 @@ class StatsBoost:
     bullet_shield_duration: float = 0.0
     mine_cooldown: float = 0.0
     add_max_extra_bullets: int = 0
-    time_stop_duration: float = 0.0
+    time_slow_duration: float = 0.0
     shrapnel_extra_shards: int = 0
     shrapnel_cooldown: float = 0.0
 
@@ -63,7 +63,7 @@ class StatsBoost:
             self.bullet_shield_duration,
             self.mine_cooldown,
             self.add_max_extra_bullets,
-            self.time_stop_duration,
+            self.time_slow_duration,
             self.shrapnel_extra_shards,
             self.shrapnel_cooldown,
         )
@@ -105,7 +105,7 @@ class StatsBoost:
             mine_cooldown=self.mine_cooldown + other.mine_cooldown,
             add_max_extra_bullets=self.add_max_extra_bullets
             + other.add_max_extra_bullets,
-            time_stop_duration=self.time_stop_duration + other.time_stop_duration,
+            time_slow_duration=self.time_slow_duration + other.time_slow_duration,
             shrapnel_extra_shards=self.shrapnel_extra_shards
             + other.shrapnel_extra_shards,
             shrapnel_cooldown=self.shrapnel_cooldown + other.shrapnel_cooldown,
@@ -304,16 +304,16 @@ class Dash(Artifact):
         return discriminant >= 0
 
 
-class TimeStop(Artifact):
+class TimeSlow(Artifact):
     def __init__(self, player):
         super().__init__(
-            artifact_type=ArtifactType.TIME_STOP,
+            artifact_type=ArtifactType.TIME_SLOW,
             player=player,
-            cooldown=TIME_STOP_COOLDOWN,
-            cost=TIME_STOP_COST,
+            cooldown=TIME_SLOW_COOLDOWN,
+            cost=TIME_SLOW_COST,
         )
         self.duration = (
-            TIME_STOP_DEFAULT_DURATION + self.total_stats_boost.time_stop_duration
+            TIME_SLOW_DEFAULT_DURATION + self.total_stats_boost.time_slow_duration
         )
         self.duration_timer = Timer(max_time=self.duration)
         self.duration_timer.turn_off()
@@ -321,28 +321,28 @@ class TimeStop(Artifact):
     def update(self, time_delta: float):
         super().update(time_delta)
         self.duration = (
-            TIME_STOP_DEFAULT_DURATION + self.total_stats_boost.time_stop_duration
+            TIME_SLOW_DEFAULT_DURATION + self.total_stats_boost.time_slow_duration
         )
         self.duration_timer.tick(time_delta)
 
     @staticmethod
     def get_artifact_type():
-        return ArtifactType.TIME_STOP
+        return ArtifactType.TIME_SLOW
 
     def get_short_string(self) -> str:
-        return "Time Stop"
+        return "Time Slow"
 
     def get_verbose_string(self) -> str:
-        return f"TimeStop({self.duration:.0f}dur)"
+        return f"TimeSlow({self.duration:.0f}dur)"
 
-    def time_stop(self):
+    def time_slow(self):
         if self.player.energy.get_value() < self.cost:
-            raise NotEnoughEnergy("not enough energy for time stop")
+            raise NotEnoughEnergy("not enough energy for time slow")
         if self.is_on():
-            raise TimeStopRunning("time stop already running")
+            raise TimeSlowRunning("time slow already running")
         if self.cooldown_timer.running():
             raise OnCooldown(
-                f"time stop on cooldown: {self.cooldown_timer.get_time_left():.1f}"
+                f"time slow on cooldown: {self.cooldown_timer.get_time_left():.1f}"
             )
         self.player.energy.change(-self.cost)
         self.duration_timer.reset(self.duration)
@@ -478,7 +478,7 @@ class ArtifactsHandler:
         self.bullet_shield: BulletShield | None = None
         self.mine_spawn: MineSpawn | None = None
         self.dash: Dash | None = None
-        self.time_stop: TimeStop | None = None
+        self.time_slow: TimeSlow | None = None
         self.shrapnel: Shrapnel | None = None
         self.rage: Rage | None = None
 
@@ -498,8 +498,8 @@ class ArtifactsHandler:
             yield self.mine_spawn
         if self.dash is not None:
             yield self.dash
-        if self.time_stop is not None:
-            yield self.time_stop
+        if self.time_slow is not None:
+            yield self.time_slow
         if self.shrapnel is not None:
             yield self.shrapnel
         if self.rage is not None:
@@ -514,8 +514,8 @@ class ArtifactsHandler:
             self.mine_spawn = artifact
         elif isinstance(artifact, Dash):
             self.dash = artifact
-        elif isinstance(artifact, TimeStop):
-            self.time_stop = artifact
+        elif isinstance(artifact, TimeSlow):
+            self.time_slow = artifact
         elif isinstance(artifact, Shrapnel):
             self.shrapnel = artifact
         elif isinstance(artifact, Rage):
@@ -532,8 +532,8 @@ class ArtifactsHandler:
             return self.mine_spawn is not None
         elif artifact_type == ArtifactType.DASH:
             return self.dash is not None
-        elif artifact_type == ArtifactType.TIME_STOP:
-            return self.time_stop is not None
+        elif artifact_type == ArtifactType.TIME_SLOW:
+            return self.time_slow is not None
         elif artifact_type == ArtifactType.SHRAPNEL:
             return self.shrapnel is not None
         elif artifact_type == ArtifactType.RAGE:
@@ -556,10 +556,10 @@ class ArtifactsHandler:
             raise ArtifactMissing("[?] dash is missing")
         return self.dash
 
-    def get_time_stop(self) -> TimeStop:
-        if self.time_stop is None:
-            raise ArtifactMissing("[?] time stop is missing")
-        return self.time_stop
+    def get_time_slow(self) -> TimeSlow:
+        if self.time_slow is None:
+            raise ArtifactMissing("[?] time slow is missing")
+        return self.time_slow
 
     def get_shrapnel(self) -> Shrapnel:
         if self.shrapnel is None:

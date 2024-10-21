@@ -509,13 +509,13 @@ class RenderManager:
             )
         # time stop:
         if (
-            player.artifacts_handler.is_present(ArtifactType.TIME_STOP)
-            and player.artifacts_handler.get_time_stop().is_on()
+            player.artifacts_handler.is_present(ArtifactType.TIME_SLOW)
+            and player.artifacts_handler.get_time_slow().is_on()
         ):
             draw_circular_status_bar(
                 self.surface,
                 player.get_pos(),
-                player.artifacts_handler.get_time_stop().duration_timer.get_slider(
+                player.artifacts_handler.get_time_slow().duration_timer.get_slider(
                     reverse=True
                 ),
                 player.get_size() + 15.0,

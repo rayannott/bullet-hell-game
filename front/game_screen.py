@@ -15,7 +15,7 @@ from src.entities.aoe_effect import AOEEffect
 from src.entities.artifact_chest import ArtifactChest
 from src.entities.mine import Mine
 from src.entities.bomb import Bomb
-from src.misc.artifacts import BulletShield, Dash, MineSpawn, Rage, TimeStop, Shrapnel
+from src.misc.artifacts import BulletShield, Dash, MineSpawn, Rage, TimeSlow, Shrapnel
 from src.utils.enums import ArtifactType, EnemyType, AOEEffectEffectType
 from src.misc.line import Line, LineType
 from src.entities.oil_spill import OilSpill
@@ -95,7 +95,7 @@ class GameScreen(Screen):
                 elif event.key == pygame.K_t:
                     self.game.add_entity(
                         ArtifactChest(
-                            Vector2(pygame.mouse.get_pos()), TimeStop(self.game.player)
+                            Vector2(pygame.mouse.get_pos()), TimeSlow(self.game.player)
                         )
                     )
                 elif event.key == pygame.K_x:
@@ -207,7 +207,7 @@ class GameScreen(Screen):
             elif event.key == pygame.K_d:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.DASH)
             elif event.key == pygame.K_t:
-                self.game.player_try_ultimate(artifact_type=ArtifactType.TIME_STOP)
+                self.game.player_try_ultimate(artifact_type=ArtifactType.TIME_SLOW)
             elif event.key == pygame.K_x:
                 self.game.player_try_ultimate(artifact_type=ArtifactType.SHRAPNEL)
             elif event.key == pygame.K_r:

@@ -34,7 +34,7 @@ from src.utils.exceptions import (
     NotEnoughEnergy,
     ShootingDirectionUndefined,
     ShieldRunning,
-    TimeStopRunning,
+    TimeSlowRunning,
 )
 from src.entities.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.entities.artifact_chest import ArtifactChest
@@ -456,8 +456,8 @@ class Game:
             return
         self.time += time_delta
         self.time_frozen = (
-            self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP)
-            and self.player.artifacts_handler.get_time_stop().is_on()
+            self.player.artifacts_handler.is_present(ArtifactType.TIME_SLOW)
+            and self.player.artifacts_handler.get_time_slow().is_on()
         )
         self.spawn_buffered_entities()
         for entity in self.all_entities_iter():
@@ -573,7 +573,7 @@ class Game:
             OnCooldown,
             NotEnoughEnergy,
             ShieldRunning,
-            TimeStopRunning,
+            TimeSlowRunning,
         ) as e:
             self.feedback_buffer.append(Feedback(str(e), 2.0, color=Color("red")))
             play_sfx("warning")

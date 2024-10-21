@@ -16,7 +16,7 @@ from src.misc.artifacts import (
     MineSpawn,
     InactiveArtifact,
     StatsBoost,
-    TimeStop,
+    TimeSlow,
     Shrapnel,
     Rage,
 )
@@ -89,7 +89,7 @@ class ArtifactChestGenerator:
             StatsBoost(mine_cooldown=3.0),
             StatsBoost(damage=20.0, cooldown=0.07),
             StatsBoost(shrapnel_cooldown=5.0),
-            StatsBoost(time_stop_duration=2.5),
+            StatsBoost(time_slow_duration=7.0),
             StatsBoost(bullet_shield_size=30.0),
             StatsBoost(size=3.0, regen=1.0),
             StatsBoost(cooldown=0.1),
@@ -119,8 +119,8 @@ class ArtifactChestGenerator:
         if sb.mine_cooldown:
             if not self.player.artifacts_handler.is_present(ArtifactType.MINE_SPAWN):
                 return False
-        if sb.time_stop_duration:
-            if not self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP):
+        if sb.time_slow_duration:
+            if not self.player.artifacts_handler.is_present(ArtifactType.TIME_SLOW):
                 return False
         if sb.shrapnel_extra_shards or sb.shrapnel_cooldown:
             if not self.player.artifacts_handler.is_present(ArtifactType.SHRAPNEL):
@@ -134,8 +134,8 @@ class ArtifactChestGenerator:
             return Dash(self.player)
         elif artifact_type == ArtifactType.MINE_SPAWN:
             return MineSpawn(self.player)
-        elif artifact_type == ArtifactType.TIME_STOP:
-            return TimeStop(self.player)
+        elif artifact_type == ArtifactType.TIME_SLOW:
+            return TimeSlow(self.player)
         elif artifact_type == ArtifactType.SHRAPNEL:
             return Shrapnel(self.player)
         elif artifact_type == ArtifactType.RAGE:
