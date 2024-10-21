@@ -695,8 +695,6 @@ class Game:
                 continue
             if not projectile.intersects(self.player):
                 continue
-            if self.time_frozen:
-                continue
             damage_dealt = self.player_get_damage(projectile.get_damage())
             if math.isclose(damage_dealt, self.player.health.max_value):
                 self.player.health.set_percent_full(0.01)
@@ -711,8 +709,6 @@ class Game:
             )
         for enemy in self.enemies():
             if not enemy.intersects(self.player):
-                continue
-            if self.time_frozen:
                 continue
             if enemy.enemy_type == EnemyType.GHOST and enemy.inactive_timer.running():  # type: ignore
                 continue

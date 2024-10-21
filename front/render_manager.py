@@ -379,7 +379,7 @@ class RenderManager:
                 enemy.get_pos() + block_vec - delta,
                 width=5,
             )
-        if self.game.time_frozen:
+        if self.game.time_frozen and enemy.enemy_type != EnemyType.GHOST:
             cross_vec = Vector2(enemy.get_size(), enemy.get_size()) * 1.7
             pygame.draw.line(
                 self.surface,
@@ -507,7 +507,7 @@ class RenderManager:
                 BULLET_SHIELD_SIZE + 5.0,
                 draw_full=True,
             )
-        # time stop:
+        # time slow:
         if (
             player.artifacts_handler.is_present(ArtifactType.TIME_SLOW)
             and player.artifacts_handler.get_time_slow().is_on()
@@ -526,7 +526,7 @@ class RenderManager:
         if projectile.projectile_type == ProjectileType.DEF_TRAJECTORY:
             for def_traj_pos in projectile.render_traj_points:  # type: ignore
                 pygame.draw.circle(self.surface, "#202020", def_traj_pos, 2)
-        if self.game.time_frozen:
+        if self.game.time_frozen and projectile.projectile_type != ProjectileType.PLAYER_BULLET:
             cross_vec = Vector2(projectile.get_size(), projectile.get_size()) * 2.0
             pygame.draw.line(
                 self.surface,
