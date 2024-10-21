@@ -34,7 +34,7 @@ from src.utils.exceptions import (
     NotEnoughEnergy,
     ShootingDirectionUndefined,
     ShieldRunning,
-    TimeStopRunning,
+    TimeSlowRunning,
 )
 from src.entities.enemy import ENEMY_SIZE_MAP, ENEMY_TYPE_TO_CLASS, Enemy
 from src.entities.artifact_chest import ArtifactChest
@@ -456,14 +456,22 @@ class Game:
             return
         self.time += time_delta
         self.time_frozen = (
-            self.player.artifacts_handler.is_present(ArtifactType.TIME_STOP)
-            and self.player.artifacts_handler.get_time_stop().is_on()
+            self.player.artifacts_handler.is_present(ArtifactType.TIME_SLOW)
+            and self.player.artifacts_handler.get_time_slow().is_on()
         )
         self.spawn_buffered_entities()
-        for entity in self.all_entities_iter(
-            with_enemies=not self.time_frozen, with_projectiles=not self.time_frozen
-        ):
-            entity.update(time_delta)
+        for entity in self.all_entities_iter():
+            if self.time_frozen and (
+                entity.type == EntityType.ENEMY
+                or (
+                    entity.type == EntityType.PROJECTILE
+                    and entity.projectile_type != ProjectileType.PLAYER_BULLET  # type: ignore
+                )
+            ):
+                mult = 0.1
+            else:
+                mult = 1.0
+            entity.update(time_delta * mult)
         for line in self.lines():
             line.update(time_delta)
         self.process_timers(time_delta)
@@ -565,7 +573,7 @@ class Game:
             OnCooldown,
             NotEnoughEnergy,
             ShieldRunning,
-            TimeStopRunning,
+            TimeSlowRunning,
         ) as e:
             self.feedback_buffer.append(Feedback(str(e), 2.0, color=Color("red")))
             play_sfx("warning")
@@ -623,9 +631,8 @@ class Game:
 
     def process_collisions(self) -> None:
         self.process_collisions_player()
-        if not self.time_frozen:
-            self.process_collisions_enemies()
-            self.process_other_collisions()
+        self.process_collisions_enemies()
+        self.process_other_collisions()
 
     def process_collisions_player(self) -> None:
         # player collides with anything:
@@ -688,8 +695,6 @@ class Game:
                 continue
             if not projectile.intersects(self.player):
                 continue
-            if self.time_frozen:
-                continue
             damage_dealt = self.player_get_damage(projectile.get_damage())
             if math.isclose(damage_dealt, self.player.health.max_value):
                 self.player.health.set_percent_full(0.01)
@@ -705,9 +710,7 @@ class Game:
         for enemy in self.enemies():
             if not enemy.intersects(self.player):
                 continue
-            if self.time_frozen:
-                continue
-            if enemy.enemy_type == EnemyType.GHOST and enemy.inactive_timer.running(): # type: ignore
+            if enemy.enemy_type == EnemyType.GHOST and enemy.inactive_timer.running():  # type: ignore
                 continue
             self.player_get_damage(
                 enemy.damage_on_collision,

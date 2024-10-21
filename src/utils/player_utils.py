@@ -17,7 +17,7 @@ class Stats:
     MINES_STEPPED_ON: int = 0
     MINES_PLANTED: int = 0
     DASHES_ACTIVATED: int = 0
-    TIME_STOPS_ACTIVATED: int = 0
+    TIME_SLOWS_ACTIVATED: int = 0
     DASHED_THROUGH_ENEMIES: int = 0
     BONUS_ORBS_COLLECTED: int = 0
     BLOCKS_LIFTED: int = 0

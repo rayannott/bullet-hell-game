@@ -14,7 +14,7 @@ class ShieldRunning(Exception):
     pass
 
 
-class TimeStopRunning(Exception):
+class TimeSlowRunning(Exception):
     pass
 
 
