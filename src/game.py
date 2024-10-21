@@ -460,10 +460,18 @@ class Game:
             and self.player.artifacts_handler.get_time_stop().is_on()
         )
         self.spawn_buffered_entities()
-        for entity in self.all_entities_iter(
-            with_enemies=not self.time_frozen, with_projectiles=not self.time_frozen
-        ):
-            entity.update(time_delta)
+        for entity in self.all_entities_iter():
+            if self.time_frozen and (
+                entity.type == EntityType.ENEMY
+                or (
+                    entity.type == EntityType.PROJECTILE
+                    and entity.projectile_type != ProjectileType.PLAYER_BULLET  # type: ignore
+                )
+            ):
+                mult = 0.1
+            else:
+                mult = 1.0
+            entity.update(time_delta * mult)
         for line in self.lines():
             line.update(time_delta)
         self.process_timers(time_delta)
@@ -623,9 +631,8 @@ class Game:
 
     def process_collisions(self) -> None:
         self.process_collisions_player()
-        if not self.time_frozen:
-            self.process_collisions_enemies()
-            self.process_other_collisions()
+        self.process_collisions_enemies()
+        self.process_other_collisions()
 
     def process_collisions_player(self) -> None:
         # player collides with anything:
@@ -707,7 +714,7 @@ class Game:
                 continue
             if self.time_frozen:
                 continue
-            if enemy.enemy_type == EnemyType.GHOST and enemy.inactive_timer.running(): # type: ignore
+            if enemy.enemy_type == EnemyType.GHOST and enemy.inactive_timer.running():  # type: ignore
                 continue
             self.player_get_damage(
                 enemy.damage_on_collision,
