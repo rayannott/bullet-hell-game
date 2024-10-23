@@ -92,11 +92,10 @@ class Achievements:
     SPEND_ONE_MINUTE_IN_OIL_SPILLS: bool = False  # TODO: add logic
     KILL_BOSS_WITH_RICOCHET: bool = False
     KILL_BOSS_WITHOUT_BULLETS: bool = False
-    KILL_BOSS_USING_EXACTLY_7_BULLETS: bool = False
     KILL_BOSS_WITHIN_ONE_SECOND: bool = False
     TRIGGER_BOSS_ALREADY_EXISTS: bool = False
     KILL_ALL_ENEMY_TYPES_WITH_RICOCHET: bool = False
-    HIT_ENEMY_WITH_BULLET_THAT_HAS_10_RICOCHETS: bool = False
+    HIT_ENEMY_WITH_BULLET_WITH_AT_LEAST_10_RICOCHETS: bool = False
 
     def update(self, other: "Achievements"):
         for k, v in other.__dict__.items():
