@@ -801,12 +801,11 @@ class Game:
     def process_collisions_enemies(self) -> None:
         # TODO: move the for enemy in enemies outside of individual collision checks
         # player bullets collide with enemies
-        player_bullets = [
+        for bullet in (
             el
             for el in self.projectiles()
             if el.projectile_type == ProjectileType.PLAYER_BULLET
-        ]
-        for bullet in player_bullets:
+        ):
             for enemy in self.enemies():
                 if not bullet.intersects(enemy):
                     continue
@@ -817,7 +816,12 @@ class Game:
                     self.player.get_stats().ACCURATE_SHOTS_RICOCHET += 1
                     self.feedback_buffer.append(
                         Feedback(
-                            "ricochet!",
+                            "ricochet!"
+                            + (
+                                f" ({bullet.ricochet_count}x)"
+                                if bullet.ricochet_count > 1
+                                else ""
+                            ),
                             2.0,
                             color=Color("pink"),
                             at_pos=enemy.get_pos(),
