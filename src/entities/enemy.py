@@ -134,7 +134,10 @@ class Enemy(Entity):
             if self.spread
             else 0.0
         )
-        return self.vel.rotate(rot_angle).normalize()
+        vel_rotated = self.vel.rotate(rot_angle)
+        if vel_rotated.magnitude_squared() < 0.01:
+            return random_unit_vector()
+        return vel_rotated.normalize()
 
     def shoot(self):
         self.shoot_normal()
