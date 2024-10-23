@@ -828,6 +828,18 @@ class Game:
                         )
                     )
                     self.enemy_types_killed_with_ricochet.add(enemy.enemy_type)
+
+                    if bullet.ricochet_count >= 10 and not self.player.get_achievements().HIT_ENEMY_WITH_BULLET_THAT_HAS_10_RICOCHETS:
+                        self.player.get_achievements().HIT_ENEMY_WITH_BULLET_THAT_HAS_10_RICOCHETS = True
+                        self.feedback_buffer.append(
+                            Feedback(
+                                "[A!] hit an enemy with a bullet that had 10 ricochets!",
+                                3.0,
+                                color=BLUE,
+                            )
+                        )
+                        play_sfx("new_achievement")
+
                     if (
                         self.enemy_types_killed_with_ricochet == set(EnemyType)
                         and not self.player.get_achievements().KILL_ALL_ENEMY_TYPES_WITH_RICOCHET
