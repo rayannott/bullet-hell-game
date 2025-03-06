@@ -82,7 +82,7 @@ class StatsWindow(pygame_gui.windows.UIMessageWindow):
             else ""
         )
         died_because_str = (
-            f"{paint('died because', PRETTY_MAGENTA)} {paint(info['reason_of_death'], NICER_RED)}"
+            f"{paint('died because', PRETTY_MAGENTA)} {paint(info['reason_of_death'], LIGHT_ORANGE)}"
             if info["reason_of_death"]
             else paint("did not die", PRETTY_MAGENTA)
         )
