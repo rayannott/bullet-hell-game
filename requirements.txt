@@ -1,2 +1,2 @@
-pygame-gui
+pygame-gui==0.6.10
 scipy
